@@ -1,4 +1,7 @@
 export async function getGroqCompletion(prompt: string) {
-  console.log('Sending request to Groq API...');
-  return { text: "Response from Groq" };
+  // Implementation here
+}
+export async function getGeminiCompletion(prompt: string) {
+  console.log('Falling back to Gemini...');
+  return { text: "Response from Gemini" };
 }
