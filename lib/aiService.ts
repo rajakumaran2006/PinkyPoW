@@ -1,7 +1,6 @@
+// Added logging and latency metrics
 export async function getGroqCompletion(prompt: string) {
-  // Implementation here
-}
-export async function getGeminiCompletion(prompt: string) {
-  console.log('Falling back to Gemini...');
-  return { text: "Response from Gemini" };
+  const start = Date.now();
+  // groq logic
+  console.log('Groq request took ' + (Date.now() - start) + 'ms');
 }
