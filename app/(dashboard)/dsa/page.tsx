@@ -1,1 +1,1 @@
-// Added db fetcher for DSA problems
+// Fixed resize event listener and overflow
