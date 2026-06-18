@@ -1,4 +1,1 @@
-export default function CommunicationPage() {
-  // media recorder initialization
-  return <div>Speech Coach</div>;
-}
+// audio data binary processing
