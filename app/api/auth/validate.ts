@@ -1,1 +1,1 @@
-// token schema validation
+// user session fallbacks
