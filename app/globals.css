@@ -1,0 +1,274 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #09090b;
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+  
+  /* PinkyPow Glassmorphic Theme Palette */
+  --color-pink-glow: transparent;
+  --color-purple-glow: transparent;
+  --color-indigo-glow: transparent;
+  --color-glass-bg: #ffffff;
+  --color-glass-border: #e4e4e7;
+  --color-glass-hover: #f4f4f5;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  
+  --color-glass-bg: var(--color-glass-bg);
+  --color-glass-border: var(--color-glass-border);
+  --color-glass-hover: var(--color-glass-hover);
+  --color-pink-glow: var(--color-pink-glow);
+  --color-purple-glow: var(--color-purple-glow);
+  --color-indigo-glow: var(--color-indigo-glow);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* Background ambient glows */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.ambient-glow-1 {
+  position: absolute;
+  top: -10%;
+  left: 20%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.08) 0%, rgba(236, 72, 153, 0) 70%);
+  filter: blur(80px);
+  animation: pulse-slow 12s infinite alternate;
+}
+
+.ambient-glow-2 {
+  position: absolute;
+  bottom: -10%;
+  right: 10%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0) 70%);
+  filter: blur(100px);
+  animation: pulse-slow 16s infinite alternate-reverse;
+}
+
+@keyframes pulse-slow {
+  0% {
+    transform: scale(1) translate(0px, 0px);
+  }
+  100% {
+    transform: scale(1.1) translate(20px, -20px);
+  }
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4f4f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e4e4e7;
+  border-radius: 9999px;
+  border: 2px solid #f4f4f5;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d4d4d8;
+}
+
+/* Glassmorphism custom classes */
+.glass-panel {
+  background: var(--color-glass-bg);
+  border: 1px solid var(--color-glass-border);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+.glass-panel-hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-hover:hover {
+  background: var(--color-glass-hover);
+  border-color: #d4d4d8;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+/* Pulsing placement glow */
+.pulse-glow {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  animation: pulse-glow-anim 3s infinite alternate;
+}
+
+@keyframes pulse-glow-anim {
+  0% {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  }
+}
+
+
+
+/* Warm theme styling matching the dashboard image */
+.warm-dashboard-bg {
+  background-color: #FAF6EA !important;
+  background-image: 
+    radial-gradient(at 90% 10%, rgba(254, 240, 138, 0.4) 0px, transparent 40%),
+    radial-gradient(at 10% 90%, rgba(254, 243, 199, 0.3) 0px, transparent 50%),
+    radial-gradient(at 80% 80%, rgba(253, 224, 71, 0.25) 0px, transparent 40%) !important;
+  background-attachment: fixed;
+}
+
+/* Striped background for progress pills */
+.progress-stripe {
+  background-image: linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.08) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.08) 50%,
+    rgba(0, 0, 0, 0.08) 75%,
+    transparent 75%,
+    transparent
+  ) !important;
+  background-size: 16px 16px !important;
+}
+
+.progress-stripe-light {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.4) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.4) 75%,
+    transparent 75%,
+    transparent
+  ) !important;
+  background-size: 16px 16px !important;
+}
+
+/* Warm borders and shadows */
+.warm-card {
+  background-color: #FFFFFF;
+  border: 1.5px solid #EFECE3 !important;
+  box-shadow: 0 4px 20px -2px rgba(180, 170, 140, 0.08), 0 2px 8px -1px rgba(180, 170, 140, 0.04) !important;
+  border-radius: 28px !important;
+}
+
+.warm-card-dark {
+  background-color: #21201D !important;
+  border: 1.5px solid #2D2C28 !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.25) !important;
+  border-radius: 28px !important;
+}
+
+/* Custom wave bar keyframes and animations */
+@keyframes wave-bar-anim {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(2.2);
+  }
+}
+
+.animate-wave-bar {
+  animation: wave-bar-anim 1s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* Scoped light theme overrides for dashboard layout only */
+.warm-dashboard-bg .glass-panel {
+  background-color: #ffffff;
+  border-color: #EFECE3;
+  box-shadow: 0 4px 20px -2px rgba(180, 170, 140, 0.06);
+}
+
+.warm-dashboard-bg .bg-white\/5 {
+  background-color: #FAF9F5;
+}
+
+.warm-dashboard-bg .bg-white\/8,
+.warm-dashboard-bg .bg-white\/10 {
+  background-color: #EFECE3;
+}
+
+.warm-dashboard-bg .border-white\/5 {
+  border-color: #ECE9DF;
+}
+
+.warm-dashboard-bg .border-white\/10 {
+  border-color: #EFECE3;
+}
+
+/* Preserve white text for dark components/buttons/badges in the dashboard layout */
+.warm-dashboard-bg .warm-card-dark,
+.warm-dashboard-bg .warm-card-dark *,
+.warm-dashboard-bg .bg-zinc-900,
+.warm-dashboard-bg .bg-zinc-900 *,
+.warm-dashboard-bg .bg-\[\#2C2B27\],
+.warm-dashboard-bg .bg-\[\#2C2B27\] *,
+.warm-dashboard-bg button.bg-zinc-900,
+.warm-dashboard-bg button.bg-black {
+  color: #ffffff !important;
+}
+
+/* Ensure progress bar stripes are visible inside the dashboard */
+.warm-dashboard-bg .progress-stripe {
+  opacity: 0.15;
+}
+
+/* Dashboard layout offset to accommodate fixed sidebar */
+.layout-content-offset {
+  padding-left: 0;
+  transition: padding-left 0.3s ease;
+}
+
+@media (min-width: 1024px) {
+  .layout-content-offset {
+    padding-left: var(--sidebar-desktop-width, 240px); /* Matches SIDEBAR_W */
+  }
+}
+
+/* Preserve white text inside the Profile Card against global warm-theme overrides */
+.warm-dashboard-bg .profile-card,
+.warm-dashboard-bg .profile-card * {
+  color: #ffffff !important;
+}
+
+
+
