@@ -69,46 +69,110 @@ async function fetchAndFilterInternships(techStack: string[], userLevel: string)
       return generateMockInternships(techStack, userLevel);
     }
 
-    const html = await response.text();
-    const $ = cheerio.load(html);
+    const content = await response.text();
     const parsedListings: InternshipListing[] = [];
 
-    $('table tbody tr').each((_, el) => {
-      const tds = $(el).find('td');
-      if (tds.length >= 5) {
-        const companyName = cleanText($(tds[0]).text());
-        const roleTitle = cleanText($(tds[1]).text());
-        const location = cleanText($(tds[2]).text());
+    if (content.includes('<table') || content.includes('<tr')) {
+      const $ = cheerio.load(content);
+      $('table tbody tr').each((_, el) => {
+        const tds = $(el).find('td');
+        if (tds.length >= 5) {
+          const companyName = cleanText($(tds[0]).text());
+          const roleTitle = cleanText($(tds[1]).text());
+          const location = cleanText($(tds[2]).text());
+          
+          let applyUrl = $(tds[3]).find('a').first().attr('href') || '';
+          if (!applyUrl) {
+            applyUrl = $(tds[1]).find('a').first().attr('href') || '';
+          }
+
+          // Handle relative URLs
+          if (applyUrl && applyUrl.startsWith('/')) {
+            applyUrl = `https://github.com${applyUrl}`;
+          }
+
+          const postedDateText = cleanText($(tds[4]).text());
+          const postedDate = postedDateText.endsWith('d') ? `${postedDateText} ago` : postedDateText;
+
+          if (companyName && roleTitle) {
+            const matchPercentage = calculateMatchPercentage(roleTitle, companyName, techStack);
+            parsedListings.push({
+              companyName,
+              roleTitle,
+              location: location || 'Remote',
+              applyUrl: applyUrl || 'https://github.com/SimplifyJobs/Summer2026-Internships',
+              postedDate,
+              matchPercentage,
+            });
+          }
+        }
+      });
+    } else {
+      // Parse using Markdown table parser
+      const lines = content.split('\n');
+      let lastCompany = '';
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('|') || !trimmed.endsWith('|')) continue;
         
-        let applyUrl = $(tds[3]).find('a').first().attr('href') || '';
-        if (!applyUrl) {
-          applyUrl = $(tds[1]).find('a').first().attr('href') || '';
+        // Split and filter out empty columns from leading/trailing pipes
+        const columns = trimmed.split('|').map(c => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+        if (columns.length < 4) continue;
+
+        // Skip headers
+        if (
+          columns[0].toLowerCase().includes('company') || 
+          columns[0].includes('---') || 
+          columns[1].toLowerCase().includes('role') || 
+          columns[1].includes('---')
+        ) {
+          continue;
         }
 
-        // Handle relative URLs
+        let companyRaw = columns[0];
+        const roleRaw = columns[1];
+        const locationRaw = columns[2] || '';
+        const applicationRaw = columns[3] || '';
+        const ageRaw = columns[4] || '';
+
+        // Check for sub-roles or nested listings
+        if (companyRaw === '↳' || companyRaw.includes('↳') || companyRaw.trim() === '') {
+          companyRaw = lastCompany;
+        } else {
+          companyRaw = extractTextFromMarkdown(companyRaw);
+          lastCompany = companyRaw;
+        }
+
+        const roleTitle = extractTextFromMarkdown(roleRaw);
+        const location = extractTextFromMarkdown(locationRaw);
+        const postedDate = extractTextFromMarkdown(ageRaw);
+        
+        let applyUrl = extractUrlFromMarkdown(applicationRaw);
+        if (!applyUrl) {
+          applyUrl = extractUrlFromMarkdown(roleRaw);
+        }
+
         if (applyUrl && applyUrl.startsWith('/')) {
           applyUrl = `https://github.com${applyUrl}`;
         }
 
-        const postedDateText = cleanText($(tds[4]).text());
-        const postedDate = postedDateText.endsWith('d') ? `${postedDateText} ago` : postedDateText;
-
-        if (companyName && roleTitle) {
-          const matchPercentage = calculateMatchPercentage(roleTitle, companyName, techStack);
+        if (companyRaw && roleTitle) {
+          const matchPercentage = calculateMatchPercentage(roleTitle, companyRaw, techStack);
           parsedListings.push({
-            companyName,
+            companyName: companyRaw,
             roleTitle,
             location: location || 'Remote',
             applyUrl: applyUrl || 'https://github.com/SimplifyJobs/Summer2026-Internships',
-            postedDate,
+            postedDate: postedDate ? (postedDate.endsWith('d') ? `${postedDate} ago` : postedDate) : 'Recently',
             matchPercentage,
           });
         }
       }
-    });
+    }
 
     if (parsedListings.length === 0) {
-      console.warn('No internships parsed from HTML tables. Using fallback mocks.');
+      console.warn('No internships parsed from HTML tables or markdown. Using fallback mocks.');
       return generateMockInternships(techStack, userLevel);
     }
 
@@ -126,6 +190,39 @@ async function fetchAndFilterInternships(techStack: string[], userLevel: string)
 function cleanText(text: string): string {
   if (!text) return '';
   return text.trim().replace(/\s+/g, ' ');
+}
+
+function extractTextFromMarkdown(md: string): string {
+  if (!md) return '';
+  let text = md;
+  // Remove HTML tags
+  text = text.replace(/<[^>]*>/g, '');
+  // Remove markdown bold/italic decorators
+  text = text.replace(/\*\*|\*/g, '');
+  // If it has markdown link: [Text](URL), extract Text
+  const linkRegex = /\[([^\]]+)\]\([^)]+\)/;
+  const match = text.match(linkRegex);
+  if (match) {
+    text = match[1];
+  }
+  return text.trim().replace(/\s+/g, ' ');
+}
+
+function extractUrlFromMarkdown(md: string): string {
+  if (!md) return '';
+  // Match link syntax [Text](URL)
+  const linkRegex = /\[[^\]]+\]\(([^)]+)\)/;
+  const match = md.match(linkRegex);
+  if (match) {
+    return match[1].trim();
+  }
+  // If cell itself is just a URL or contains a bare URL
+  const bareUrlRegex = /(https?:\/\/[^\s)]+)/;
+  const bareMatch = md.match(bareUrlRegex);
+  if (bareMatch) {
+    return bareMatch[1].trim();
+  }
+  return '';
 }
 
 function calculateMatchPercentage(roleTitle: string, companyName: string, techStack: string[]): number {

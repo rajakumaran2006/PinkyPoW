@@ -475,10 +475,8 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#FAF9F5] border border-[#ECE9DF] flex items-center justify-center text-[#2C2B27]">
-                      <Trophy className="w-4.5 h-4.5" />
-                    </div>
-                    <h3 className="font-extrabold text-[#1E1D1A] tracking-tight">Placement-Linked Hackathons</h3>
+
+                    <h3 className="font-extrabold uppercase text-[#1E1D1A] tracking-tight">Placement-Linked Hackathons</h3>
                   </div>
                   <span className="px-2.5 py-0.5 rounded-full bg-[#FAF4D8] border border-[#E8DFB3] text-[#7A6218] font-bold text-[10px] uppercase">
                     Hot Opportunities
@@ -524,10 +522,7 @@ export default function Dashboard() {
               <div className="flex flex-col h-full justify-between space-y-4">
                 <div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-9 h-9 rounded-full bg-[#FAF9F5] border border-[#ECE9DF] flex items-center justify-center text-[#2C2B27]">
-                      <Award className="w-4.5 h-4.5" />
-                    </div>
-                    <h3 className="font-extrabold text-[#1E1D1A] tracking-tight">AI Certification Roadmap</h3>
+                    <h3 className="font-extrabold text-[#1E1D1A] uppercase tracking-tight">AI Certification Roadmap</h3>
                   </div>
 
                   {/* Progress track item 1 */}
@@ -698,7 +693,7 @@ export default function Dashboard() {
           {/* Calibration */}
           <div className="warm-card p-8 space-y-5">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[#1E1D1A]">Calibration</h3>
+              <h3 className="text-sm font-bold uppercase text-[#1E1D1A]">Calibration</h3>
               <span className="text-2xl font-light text-[#1E1D1A] tracking-tight">18%</span>
             </div>
 
@@ -739,7 +734,7 @@ export default function Dashboard() {
           <div className="warm-card-dark p-8 text-white space-y-5 flex flex-col justify-between min-h-[380px]">
             <div className="space-y-5">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-white tracking-wide">Placement Task</h3>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wide">Placement Task</h3>
                 <span className="text-xl font-light text-zinc-300 tracking-tight">
                   {completedTasksCount}/{agendaItems.length}
                 </span>
