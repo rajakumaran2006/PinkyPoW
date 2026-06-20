@@ -169,6 +169,15 @@ export default function InternshipRadar() {
   const [hasFetched, setHasFetched] = useState(false);
   const [fetchedData, setFetchedData] = useState<Match[] | null>(null);
 
+  // Filters State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [workModeFilter, setWorkModeFilter] = useState("all");
+  const [regionFilter, setRegionFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [customAiQuery, setCustomAiQuery] = useState("");
+  const [aiFilteredIds, setAiFilteredIds] = useState<string[] | null>(null);
+  const [isAiFiltering, setIsAiFiltering] = useState(false);
+
   const companiesToScan = ["Stripe", "Vercel", "Supabase", "Linear", "Figma", "Google", "Meta", "Notion", "Github"];
 
   const handleFetchMatches = () => {
@@ -178,6 +187,14 @@ export default function InternshipRadar() {
     setMatches([]);
     setFetchedData(null);
     setCurrentSearchIndex(0);
+    
+    // Reset filters
+    setSearchQuery("");
+    setWorkModeFilter("all");
+    setRegionFilter("all");
+    setRoleFilter("all");
+    setCustomAiQuery("");
+    setAiFilteredIds(null);
 
     // Call the dynamic scraper API in the background
     fetch("/api/scrape/internships", {
@@ -328,6 +345,92 @@ export default function InternshipRadar() {
     setTrackerCards((prev) => prev.filter((card) => card.id !== cardId));
   };
 
+  // Custom AI Filter Handler
+  const handleAiFilter = async () => {
+    if (!customAiQuery.trim()) {
+      setAiFilteredIds(null);
+      return;
+    }
+    setIsAiFiltering(true);
+    try {
+      const res = await fetch("/api/ai/filter-internships", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          internships: matches,
+          query: customAiQuery
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.matchingIds) {
+        setAiFilteredIds(data.matchingIds);
+      } else {
+        setAiFilteredIds([]);
+      }
+    } catch (err) {
+      console.error("AI filter request failed:", err);
+      // fallback local search
+      const keywords = customAiQuery.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+      const matchingIds = matches.filter((item) => {
+        const itemText = `${item.company} ${item.role} ${item.location} ${(item.tags || []).join(' ')}`.toLowerCase();
+        return keywords.length === 0 || keywords.some((kw) => itemText.includes(kw));
+      }).map(item => item.id);
+      setAiFilteredIds(matchingIds);
+    } finally {
+      setIsAiFiltering(false);
+    }
+  };
+
+  const handleClearAiFilter = () => {
+    setCustomAiQuery("");
+    setAiFilteredIds(null);
+  };
+
+  // Computed Filtered Matches
+  const filteredMatches = matches.filter((match) => {
+    // 1. AI custom query filter if active
+    if (aiFilteredIds !== null && !aiFilteredIds.includes(match.id)) {
+      return false;
+    }
+
+    // 2. Work Mode Filter
+    const locLower = match.location.toLowerCase();
+    if (workModeFilter === "remote") {
+      if (!locLower.includes("remote") && !locLower.includes("global")) return false;
+    } else if (workModeFilter === "hybrid") {
+      if (!locLower.includes("hybrid")) return false;
+    } else if (workModeFilter === "office") {
+      if (locLower.includes("remote") || locLower.includes("global") || locLower.includes("hybrid")) return false;
+    }
+
+    // 3. Region Filter
+    if (regionFilter !== "all") {
+      if (regionFilter === "us" && !locLower.includes("us") && !locLower.includes("san francisco") && !locLower.includes("new york") && !locLower.includes("ca") && !locLower.includes("ny")) return false;
+      if (regionFilter === "uk" && !locLower.includes("uk") && !locLower.includes("london")) return false;
+      if (regionFilter === "global" && !locLower.includes("global")) return false;
+    }
+
+    // 4. Role Filter
+    if (roleFilter !== "all") {
+      const roleLower = match.role.toLowerCase();
+      if (roleFilter === "frontend" && !roleLower.includes("frontend") && !roleLower.includes("ux") && !roleLower.includes("ui")) return false;
+      if (roleFilter === "backend" && !roleLower.includes("backend")) return false;
+      if (roleFilter === "aiml" && !roleLower.includes("ai") && !roleLower.includes("ml") && !roleLower.includes("machine") && !roleLower.includes("neural")) return false;
+    }
+
+    // 5. General Search Query
+    if (searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase();
+      const companyMatch = match.company.toLowerCase().includes(query);
+      const roleMatch = match.role.toLowerCase().includes(query);
+      const locMatch = match.location.toLowerCase().includes(query);
+      const tagMatch = match.tags.some(t => t.toLowerCase().includes(query));
+      if (!companyMatch && !roleMatch && !locMatch && !tagMatch) return false;
+    }
+
+    return true;
+  });
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-[1360px] mx-auto pb-12 text-[#1E1D1A]">
       {/* Header section */}
@@ -432,16 +535,123 @@ export default function InternshipRadar() {
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-[#7C786E] uppercase tracking-widest flex items-center gap-2">
               <Plus className="w-4 h-4 text-[#2C2B27]" />
-              New Matches Found ({matches.length})
+              New Matches Found ({filteredMatches.length} / {matches.length})
             </h3>
             {matches.length === 0 && (
               <span className="text-xs text-[#7C786E]">All matches added to tracker. Fetch again to refresh.</span>
             )}
           </div>
 
-          {matches.length > 0 ? (
+          {/* FILTERS PANEL */}
+          {matches.length > 0 && (
+            <div className="warm-card p-6 bg-white space-y-6 border border-[#ECE9DF] rounded-2xl shadow-sm">
+              <div className="flex flex-col lg:flex-row gap-6 items-stretch justify-between">
+                {/* Left side: Standard filters */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 flex-1">
+                  {/* Search Input */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-[#7C786E] uppercase tracking-wider">Search Matches</label>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Company, role, tag..."
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] text-xs text-[#1E1D1A] placeholder-[#7C786E]/60 focus:outline-none focus:border-[#F5C451] transition-all"
+                    />
+                  </div>
+
+                  {/* Work Mode */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-[#7C786E] uppercase tracking-wider">Work Mode</label>
+                    <select
+                      value={workModeFilter}
+                      onChange={(e) => setWorkModeFilter(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] text-xs text-[#1E1D1A] focus:outline-none focus:border-[#F5C451] transition-all cursor-pointer"
+                    >
+                      <option value="all">All Modes</option>
+                      <option value="remote">Remote / Global</option>
+                      <option value="hybrid">Hybrid</option>
+                      <option value="office">Office / Offline</option>
+                    </select>
+                  </div>
+
+                  {/* Region */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-[#7C786E] uppercase tracking-wider">Region</label>
+                    <select
+                      value={regionFilter}
+                      onChange={(e) => setRegionFilter(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] text-xs text-[#1E1D1A] focus:outline-none focus:border-[#F5C451] transition-all cursor-pointer"
+                    >
+                      <option value="all">All Regions</option>
+                      <option value="us">United States (US)</option>
+                      <option value="uk">United Kingdom (UK)</option>
+                      <option value="global">Global Remote</option>
+                    </select>
+                  </div>
+
+                  {/* Role Domain */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-[#7C786E] uppercase tracking-wider">Role Domain</label>
+                    <select
+                      value={roleFilter}
+                      onChange={(e) => setRoleFilter(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] text-xs text-[#1E1D1A] focus:outline-none focus:border-[#F5C451] transition-all cursor-pointer"
+                    >
+                      <option value="all">All Roles</option>
+                      <option value="frontend">Frontend / UI / UX</option>
+                      <option value="backend">Backend</option>
+                      <option value="aiml">AI / ML / Python</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Right side / Custom AI filter */}
+                <div className="w-full lg:w-[380px] p-4 rounded-2xl bg-[#FAF9F5] border border-[#ECE9DF] space-y-2.5 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-extrabold text-[#7A6218] uppercase tracking-wider flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#F5C451]" />
+                        Custom AI Semantic Filter
+                      </span>
+                      {aiFilteredIds !== null && (
+                        <button
+                          onClick={handleClearAiFilter}
+                          className="text-[9px] font-bold text-[#7C786E] hover:text-rose-600 cursor-pointer"
+                        >
+                          Clear Filter
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={customAiQuery}
+                        onChange={(e) => setCustomAiQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAiFilter()}
+                        placeholder="e.g. Stripe roles in California with score > 90..."
+                        className="flex-1 px-3 py-2 rounded-xl bg-white border border-[#ECE9DF] text-xs text-[#1E1D1A] placeholder-[#7C786E]/50 focus:outline-none focus:border-[#F5C451]"
+                      />
+                      <button
+                        onClick={handleAiFilter}
+                        disabled={isAiFiltering}
+                        className="px-4 py-2 bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-extrabold text-xs rounded-xl transition-all flex items-center gap-1 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isAiFiltering ? "..." : "Filter"}
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-[#7C786E] leading-tight">
+                    Type your custom requirements (e.g., tech, score or region) and let the AI process it.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {filteredMatches.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {matches.map((match) => (
+              {filteredMatches.map((match) => (
                 <div
                   key={match.id}
                   className="warm-card p-5 hover:border-[#F5C451] transition-all duration-300 flex flex-col justify-between group relative overflow-hidden bg-white"
@@ -514,11 +724,11 @@ export default function InternshipRadar() {
             </div>
           ) : (
             hasFetched && (
-              <div className="warm-card p-8 text-center text-[#7C786E] bg-white">
+              <div className="warm-card p-8 text-center text-[#7C786E] bg-white rounded-2xl border border-[#ECE9DF] shadow-sm">
                 <Check className="w-8 h-8 text-emerald-600 mx-auto mb-2 animate-bounce" />
-                <p className="text-xs font-bold text-[#1E1D1A]">All matched roles added to board!</p>
+                <p className="text-xs font-bold text-[#1E1D1A]">No matches fit current filter criteria.</p>
                 <p className="text-[10px] text-[#7C786E] mt-1 max-w-xs mx-auto">
-                  Click 'Fetch AI Matches' again to run a new scanner loop on active ATS pipelines.
+                  Try adjusting your filters, clearing your custom AI search, or clicking 'Fetch AI Matches' again to refresh.
                 </p>
               </div>
             )
@@ -596,7 +806,7 @@ export default function InternshipRadar() {
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-1">
                               {card.applyUrl && (
                                 <a
                                   href={card.applyUrl}

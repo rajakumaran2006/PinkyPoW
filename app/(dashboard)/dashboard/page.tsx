@@ -21,7 +21,8 @@ import {
   ArrowUpRight,
   Check,
   MoreHorizontal,
-  Laptop
+  Laptop,
+  Flame
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -177,37 +178,38 @@ export default function Dashboard() {
         </div>
 
         {/* Top-Right Statistics Counters (78 Employee, 56 Hirings style) */}
-        <div className="flex items-center gap-8 md:gap-12 shrink-0">
+        {/* Top-Right Statistics Counters */}
+        <div className="grid grid-cols-3 md:flex md:items-center gap-3 sm:gap-6 md:gap-8 xl:gap-12 shrink-0 w-full md:w-auto">
           {/* Score Counter */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#FAF9F5] border border-[#EFECE3] flex items-center justify-center text-[#7C786E]">
-              <Trophy className="w-5 h-5 text-[#F5C451]" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FAF9F5] border border-[#EFECE3] flex items-center justify-center text-[#7C786E] shrink-0">
+              <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-[#F5C451]" />
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-light text-[#1E1D1A] tracking-tight">{score}</div>
-              <div className="text-[10px] uppercase font-bold tracking-wider text-[#7C786E] mt-0.5">Placement Score</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-[#1E1D1A] tracking-tight">{score}</div>
+              <div className="text-[8px] sm:text-[10px] uppercase font-bold tracking-wider text-[#7C786E] mt-0.5">Placement Score</div>
             </div>
           </div>
 
           {/* Percentile Counter */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#FAF9F5] border border-[#EFECE3] flex items-center justify-center text-[#7C786E]">
-              <TrendingUp className="w-5 h-5 text-[#2C2B27]" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FAF9F5] border border-[#EFECE3] flex items-center justify-center text-[#7C786E] shrink-0">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-[#2C2B27]" />
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-light text-[#1E1D1A] tracking-tight">18%</div>
-              <div className="text-[10px] uppercase font-bold tracking-wider text-[#7C786E] mt-0.5">Percentile Rank</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-[#1E1D1A] tracking-tight">18%</div>
+              <div className="text-[8px] sm:text-[10px] uppercase font-bold tracking-wider text-[#7C786E] mt-0.5">Percentile Rank</div>
             </div>
           </div>
 
-          {/* Projects/Apps Counter */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#FAF9F5] border border-[#EFECE3] flex items-center justify-center text-[#7C786E]">
-              <Briefcase className="w-5 h-5 text-[#2C2B27]" />
+          {/* Active Streak Counter */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FAF4D8] border border-[#E8DFB3] flex items-center justify-center text-[#7A6218] shrink-0">
+              <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 fill-orange-500 animate-pulse" />
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-light text-[#1E1D1A] tracking-tight">3</div>
-              <div className="text-[10px] uppercase font-bold tracking-wider text-[#7C786E] mt-0.5">Active Pipelines</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-[#1E1D1A] tracking-tight">12</div>
+              <div className="text-[8px] sm:text-[10px] uppercase font-bold tracking-wider text-[#7C786E] mt-0.5">Active Streak</div>
             </div>
           </div>
         </div>
