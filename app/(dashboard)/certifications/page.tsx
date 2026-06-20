@@ -27,6 +27,7 @@ interface Certification {
   link: string;
   isAiValidated: boolean;
   category: "Cloud" | "AI" | "Frontend" | "Backend" | "General";
+  cloudinaryImageUrl?: string;
 }
 
 interface RecommendedCert {
@@ -46,6 +47,7 @@ export default function Certifications() {
   const [myCerts, setMyCerts] = useState<Certification[]>([]);
   const [streakPoints, setStreakPoints] = useState(820);
   const [loading, setLoading] = useState(true);
+  const [selectedCert, setSelectedCert] = useState<Certification | null>(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,6 +56,18 @@ export default function Certifications() {
   const [newCertDate, setNewCertDate] = useState("");
   const [newCertLink, setNewCertLink] = useState("");
   const [newCertCategory, setNewCertCategory] = useState<Certification["category"]>("Cloud");
+  const [certFile, setCertFile] = useState<File | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+
+  // Edit State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editIssuer, setEditIssuer] = useState("");
+  const [editDate, setEditDate] = useState("");
+  const [editLink, setEditLink] = useState("");
+  const [editCategory, setEditCategory] = useState<Certification["category"]>("Cloud");
+  const [editFile, setEditFile] = useState<File | null>(null);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   // Discovery Filter State
   const [searchQuery, setSearchQuery] = useState("");
@@ -65,6 +79,11 @@ export default function Certifications() {
   const [scanLogs, setScanLogs] = useState<string[]>([]);
   const [showRecommendations, setShowRecommendations] = useState(true);
   const [recommendedCerts, setRecommendedCerts] = useState<RecommendedCert[]>([]);
+
+  // AI Filter State
+  const [customAiQuery, setCustomAiQuery] = useState("");
+  const [aiFilteredIds, setAiFilteredIds] = useState<string[] | null>(null);
+  const [isAiFiltering, setIsAiFiltering] = useState(false);
 
   // Fetch certifications from MongoDB
   const fetchCertifications = async () => {
@@ -91,6 +110,27 @@ export default function Certifications() {
     e.preventDefault();
     if (!newCertTitle || !newCertProvider) return;
 
+    let uploadedUrl = "";
+    if (certFile) {
+      setIsUploadingFile(true);
+      try {
+        const formData = new FormData();
+        formData.append("file", certFile);
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.success) {
+          uploadedUrl = uploadData.url;
+        }
+      } catch (err) {
+        console.error("Error uploading certificate image:", err);
+      } finally {
+        setIsUploadingFile(false);
+      }
+    }
+
     try {
       const res = await fetch("/api/ai/certifications", {
         method: "POST",
@@ -102,7 +142,8 @@ export default function Certifications() {
           date: newCertDate || "June 2026",
           link: newCertLink || "#",
           category: newCertCategory,
-          isAiValidated: true
+          isAiValidated: true,
+          cloudinaryImageUrl: uploadedUrl
         })
       });
       const data = await res.json();
@@ -116,6 +157,7 @@ export default function Certifications() {
         setNewCertDate("");
         setNewCertLink("");
         setNewCertCategory("Cloud");
+        setCertFile(null);
         setIsModalOpen(false);
       }
     } catch (err) {
@@ -167,11 +209,80 @@ export default function Certifications() {
     }
   };
 
+  const startEditing = (cert: Certification) => {
+    setEditTitle(cert.title);
+    setEditIssuer(cert.issuer);
+    setEditDate(cert.date || "");
+    setEditLink(cert.link || "");
+    setEditCategory(cert.category || "Cloud");
+    setEditFile(null);
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCert || !selectedCert._id) return;
+    setIsSavingEdit(true);
+
+    let uploadedUrl = selectedCert.cloudinaryImageUrl || "";
+    if (editFile) {
+      try {
+        const formData = new FormData();
+        formData.append("file", editFile);
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.success) {
+          uploadedUrl = uploadData.url;
+        }
+      } catch (err) {
+        console.error("Error uploading certificate image:", err);
+      }
+    }
+
+    try {
+      const res = await fetch("/api/ai/certifications", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          certId: selectedCert._id,
+          title: editTitle,
+          issuer: editIssuer,
+          date: editDate,
+          link: editLink,
+          category: editCategory,
+          cloudinaryImageUrl: uploadedUrl
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMyCerts(data.certificates);
+        const updatedCert = data.certificates.find((c: any) => c._id === selectedCert._id);
+        if (updatedCert) {
+          setSelectedCert(updatedCert);
+        }
+        setIsEditing(false);
+      }
+    } catch (err) {
+      console.error("Error updating cert:", err);
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
   // Web Scan Trigger
   const startWebScan = async () => {
     setIsScanning(true);
     setScanProgress(0);
     setScanLogs([]);
+
+    // Clear filters
+    setSearchQuery("");
+    setActiveCategory("All");
+    setCustomAiQuery("");
+    setAiFilteredIds(null);
 
     const steps = [
       { text: "Initializing search query parameters...", delay: 200 },
@@ -213,9 +324,56 @@ export default function Certifications() {
     }
   };
 
+  // Custom AI Filter Handler
+  const handleAiFilter = async () => {
+    if (!customAiQuery.trim()) {
+      setAiFilteredIds(null);
+      return;
+    }
+    setIsAiFiltering(true);
+    try {
+      const res = await fetch("/api/ai/filter-certifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          certifications: recommendedCerts,
+          query: customAiQuery
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.matchingIds) {
+        setAiFilteredIds(data.matchingIds);
+      } else {
+        setAiFilteredIds([]);
+      }
+    } catch (err) {
+      console.error("AI filter request failed:", err);
+      // fallback local search
+      const keywords = customAiQuery.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+      const matchingIds = recommendedCerts.filter((item) => {
+        const skillsText = (item.skills || []).join(' ');
+        const itemText = `${item.title} ${item.provider} ${item.category} ${skillsText}`.toLowerCase();
+        return keywords.length === 0 || keywords.some((kw) => itemText.includes(kw));
+      }).map(item => item.id);
+      setAiFilteredIds(matchingIds);
+    } finally {
+      setIsAiFiltering(false);
+    }
+  };
+
+  const handleClearAiFilter = () => {
+    setCustomAiQuery("");
+    setAiFilteredIds(null);
+  };
+
   // Filter & Search Logic
   const filteredRecommendations = useMemo(() => {
     return recommendedCerts.filter((cert) => {
+      // AI custom query filter if active
+      if (aiFilteredIds !== null && !aiFilteredIds.includes(cert.id)) {
+        return false;
+      }
+
       const matchSearch =
         cert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         cert.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -225,7 +383,7 @@ export default function Certifications() {
 
       return matchSearch && matchCategory;
     });
-  }, [recommendedCerts, searchQuery, activeCategory]);
+  }, [recommendedCerts, searchQuery, activeCategory, aiFilteredIds]);
 
   if (loading) {
     return (
@@ -294,7 +452,8 @@ export default function Certifications() {
           {myCerts.map((cert) => (
             <div
               key={cert._id}
-              className="warm-card rounded-2xl p-6 flex flex-col justify-between border border-[#EFECE3] hover:border-[#F5C451] transition-all duration-300 relative overflow-hidden group bg-white"
+              onClick={() => setSelectedCert(cert)}
+              className="warm-card rounded-2xl p-6 flex flex-col justify-between border border-[#EFECE3] hover:border-[#F5C451] transition-all duration-300 relative overflow-hidden group bg-white cursor-pointer"
             >
               {/* Subtle top ambient color gradient */}
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#F5C451] via-[#7A6218] to-[#2C2B27] opacity-60" />
@@ -322,7 +481,10 @@ export default function Certifications() {
                     )}
 
                     <button
-                      onClick={() => handleDeleteCert(cert._id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCert(cert._id);
+                      }}
                       className="p-1 rounded text-[#7C786E] hover:text-red-650 hover:bg-[#FAF9F5] transition-colors cursor-pointer border border-transparent hover:border-[#ECE9DF]"
                       title="Delete Certificate"
                     >
@@ -350,6 +512,7 @@ export default function Certifications() {
                     href={cert.link}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
                     className="p-1.5 rounded bg-[#FAF9F5] hover:bg-white border border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] transition-colors shadow-sm"
                     title="Verify Credential URL"
                   >
@@ -470,6 +633,46 @@ export default function Certifications() {
                     {cat}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Custom AI Semantic Filter */}
+            <div className="warm-card p-6 bg-white border border-[#ECE9DF] rounded-2xl shadow-sm space-y-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <span className="text-xs font-extrabold text-[#7A6218] uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-[#F5C451]" />
+                    Custom AI Semantic Filter
+                  </span>
+                  <p className="text-xs text-[#7C786E]">
+                    Type your custom requirements (e.g. "Cloud certifications from AWS with duration &lt; 10 hours") and let AI filter accordingly.
+                  </p>
+                </div>
+                {aiFilteredIds !== null && (
+                  <button
+                    onClick={handleClearAiFilter}
+                    className="text-xs font-bold text-rose-600 hover:text-rose-700 cursor-pointer"
+                  >
+                    Clear Filter
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={customAiQuery}
+                  onChange={(e) => setCustomAiQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAiFilter()}
+                  placeholder="e.g. AI certifications with skills including Python..."
+                  className="flex-1 px-4 py-3 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] text-xs text-[#1E1D1A] placeholder-[#7C786E]/50 focus:outline-none focus:border-[#F5C451]"
+                />
+                <button
+                  onClick={handleAiFilter}
+                  disabled={isAiFiltering}
+                  className="px-6 py-3 bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-extrabold text-xs rounded-xl transition-all flex items-center gap-1 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isAiFiltering ? "Filtering..." : "Filter with AI"}
+                </button>
               </div>
             </div>
 
@@ -667,25 +870,265 @@ export default function Certifications() {
                 />
               </div>
 
+              <div className="space-y-1.5">
+                <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                  Certificate Photo / Copy (Optional)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setCertFile(e.target.files[0]);
+                    }
+                  }}
+                  className="w-full px-4 py-2 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none text-xs text-[#1E1D1A] transition-colors shadow-sm"
+                />
+              </div>
+
               <div className="pt-4 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5] text-xs font-bold transition-all cursor-pointer shadow-sm"
+                  disabled={isUploadingFile}
+                  className="px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5] text-xs font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2.5 rounded-xl bg-[#2C2B27] text-white hover:bg-[#1E1D1A] text-xs font-bold transition-all cursor-pointer shadow-sm"
+                  disabled={isUploadingFile}
+                  className="px-4 py-2.5 rounded-xl bg-[#2C2B27] text-white hover:bg-[#1E1D1A] text-xs font-bold transition-all cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  Add Certificate
+                  {isUploadingFile ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Uploading Image...</span>
+                    </>
+                  ) : (
+                    "Add Certificate"
+                  )}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* --- CERTIFICATE DETAILS MODAL --- */}
+      {selectedCert && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={() => { setSelectedCert(null); setIsEditing(false); }}>
+          <div
+            className="w-full max-w-lg bg-[#FAF6EA] border border-[#ECE9DF] rounded-3xl p-6 space-y-6 shadow-2xl relative animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => { setSelectedCert(null); setIsEditing(false); }}
+              className="absolute right-4 top-4 p-1.5 rounded-full bg-[#FAF9F5] hover:bg-[#FAF6EA] border border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {isEditing ? (
+              <form onSubmit={handleSaveEdit} className="space-y-4">
+                <h3 className="text-lg font-bold text-[#1E1D1A]">Edit Certificate</h3>
+                
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Certificate Title
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Issuer / Provider
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editIssuer}
+                    onChange={(e) => setEditIssuer(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                      Completion Date
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. June 2026"
+                      value={editDate}
+                      onChange={(e) => setEditDate(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                      Category
+                    </label>
+                    <select
+                      value={editCategory}
+                      onChange={(e) => setEditCategory(e.target.value as Certification["category"])}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] transition-colors shadow-sm"
+                    >
+                      <option value="Cloud">Cloud</option>
+                      <option value="AI">AI & ML</option>
+                      <option value="Frontend">Frontend</option>
+                      <option value="Backend">Backend</option>
+                      <option value="General">General CS</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Credential Verification URL
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://..."
+                    value={editLink}
+                    onChange={(e) => setEditLink(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Update Photo / Copy
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setEditFile(e.target.files[0]);
+                      }
+                    }}
+                    className="w-full px-4 py-2 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none text-xs text-[#1E1D1A] transition-colors shadow-sm"
+                  />
+                </div>
+
+                <div className="pt-4 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(false)}
+                    disabled={isSavingEdit}
+                    className="px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5] text-xs font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingEdit}
+                    className="px-4 py-2.5 rounded-xl bg-[#2C2B27] text-white hover:bg-[#1E1D1A] text-xs font-bold transition-all cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    {isSavingEdit ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <>
+                {/* Header */}
+                <div>
+                  <span className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    {selectedCert.issuer}
+                  </span>
+                  <h3 className="text-xl font-bold text-[#1E1D1A] tracking-tight mt-1">
+                    {selectedCert.title}
+                  </h3>
+                </div>
+
+                {/* Details Grid */}
+                <div className="grid grid-cols-2 gap-4 text-xs border-y border-[#EFECE3] py-4">
+                  <div>
+                    <span className="block text-[#7C786E] uppercase font-bold text-[9px] tracking-wider">Completion Date</span>
+                    <span className="font-semibold text-[#1E1D1A] mt-1 block">{selectedCert.date || "Active"}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[#7C786E] uppercase font-bold text-[9px] tracking-wider">Category</span>
+                    <span className="px-2 py-0.5 rounded bg-[#FAF9F5] border border-[#ECE9DF] text-[#4E4B42] text-[10px] font-semibold mt-1 inline-block">
+                      {selectedCert.category || "General"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Certificate Image Copy */}
+                {selectedCert.cloudinaryImageUrl ? (
+                  <div className="space-y-2">
+                    <span className="block text-[#7C786E] uppercase font-bold text-[9px] tracking-wider">Certificate Copy</span>
+                    <div className="relative rounded-2xl overflow-hidden border border-[#ECE9DF] bg-white aspect-[4/3] flex items-center justify-center">
+                      <img
+                        src={selectedCert.cloudinaryImageUrl}
+                        alt={selectedCert.title}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-8 text-center border border-dashed border-[#ECE9DF] rounded-2xl bg-white/50 text-[#7C786E] space-y-3">
+                    <p className="text-xs">No certificate image uploaded for this credential.</p>
+                    <button
+                      onClick={() => startEditing(selectedCert)}
+                      className="px-4 py-2 rounded-xl bg-white border border-[#ECE9DF] text-[#1E1D1A] hover:bg-[#FAF9F5] text-xs font-semibold transition-all cursor-pointer shadow-sm animate-pulse"
+                    >
+                      Upload Photo Now
+                    </button>
+                  </div>
+                )}
+
+                <div className="pt-2 flex items-center justify-between gap-3">
+                  {selectedCert.link && selectedCert.link !== "#" && (
+                    <a
+                      href={selectedCert.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="py-2.5 px-4 rounded-xl bg-white border border-[#ECE9DF] hover:bg-[#FAF9F5] text-[#1E1D1A] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                    >
+                      <span>Verify Credential</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  <div className="flex items-center gap-3 ml-auto">
+                    <button
+                      onClick={() => startEditing(selectedCert)}
+                      className="px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] text-[#1E1D1A] hover:bg-[#FAF9F5] text-xs font-bold transition-all cursor-pointer shadow-sm"
+                    >
+                      Edit Details
+                    </button>
+                    <button
+                      onClick={() => { setSelectedCert(null); setIsEditing(false); }}
+                      className="px-6 py-2.5 rounded-xl bg-[#2C2B27] text-white hover:bg-[#1E1D1A] text-xs font-bold transition-all cursor-pointer shadow-sm"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

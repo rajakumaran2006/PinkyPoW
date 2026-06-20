@@ -101,6 +101,42 @@ const ALL_MOCK_MATCHES: Match[] = [
   }
 ];
 
+const ALL_MOCK_FULLTIME_MATCHES: Match[] = [
+  {
+    id: "match-ft-stripe",
+    company: "Stripe",
+    role: "Software Engineer (New Grad)",
+    location: "San Francisco, CA (Hybrid)",
+    matchScore: 94,
+    tags: ["Node.js", "Redis", "REST APIs"],
+    logoText: "S",
+    logoBg: "bg-gradient-to-tr from-indigo-500 to-purple-600",
+    applyUrl: "https://stripe.com/jobs"
+  },
+  {
+    id: "match-ft-vercel",
+    company: "Vercel",
+    role: "Frontend Developer (Next.js)",
+    location: "Remote (Global)",
+    matchScore: 89,
+    tags: ["React 19", "Tailwind CSS", "Next.js"],
+    logoText: "V",
+    logoBg: "bg-gradient-to-tr from-zinc-800 to-zinc-950 border border-white/10",
+    applyUrl: "https://vercel.com/careers"
+  },
+  {
+    id: "match-ft-supabase",
+    company: "Supabase",
+    role: "Full Stack Developer",
+    location: "Remote (Global)",
+    matchScore: 91,
+    tags: ["PostgreSQL", "TypeScript", "Next.js"],
+    logoText: "S",
+    logoBg: "bg-gradient-to-tr from-emerald-500 to-teal-600",
+    applyUrl: "https://supabase.com/careers"
+  }
+];
+
 const INITIAL_TRACKER_CARDS: TrackerCard[] = [
   {
     id: "track-notion",
@@ -165,9 +201,12 @@ export default function InternshipRadar() {
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [trackerCards, setTrackerCards] = useState<TrackerCard[]>(INITIAL_TRACKER_CARDS);
+  const [trackerCards, setTrackerCards] = useState<TrackerCard[]>([]);
   const [hasFetched, setHasFetched] = useState(false);
   const [fetchedData, setFetchedData] = useState<Match[] | null>(null);
+
+  // Tabs State
+  const [activeTab, setActiveTab] = useState<"internship" | "fulltime">("internship");
 
   // Filters State
   const [searchQuery, setSearchQuery] = useState("");
@@ -177,6 +216,90 @@ export default function InternshipRadar() {
   const [customAiQuery, setCustomAiQuery] = useState("");
   const [aiFilteredIds, setAiFilteredIds] = useState<string[] | null>(null);
   const [isAiFiltering, setIsAiFiltering] = useState(false);
+
+  useEffect(() => {
+    setMatches([]);
+    setHasFetched(false);
+    setFetchedData(null);
+    setFormType(activeTab);
+  }, [activeTab]);
+
+  // Custom Manual Addition Form State
+  const [username, setUsername] = useState<string>("Najla1208");
+  const [formCompany, setFormCompany] = useState("");
+  const [formRole, setFormRole] = useState("");
+  const [formLocation, setFormLocation] = useState("");
+  const [formApplyLink, setFormApplyLink] = useState("");
+  const [formMatchPercentage, setFormMatchPercentage] = useState(100);
+  const [formStatus, setFormStatus] = useState<"Saved" | "Applied" | "Interviewing" | "Decided">("Saved");
+  const [formStartDate, setFormStartDate] = useState("");
+  const [formEndDate, setFormEndDate] = useState("");
+  const [formDescription, setFormDescription] = useState("");
+  const [formType, setFormType] = useState<"internship" | "fulltime">("internship");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("currentUser");
+      if (stored) {
+        try {
+          const user = JSON.parse(stored);
+          if (user && user.username) {
+            setUsername(user.username);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchInternships = async () => {
+      try {
+        const res = await fetch(`/api/internships?username=${username}&type=${activeTab}`);
+        const data = await res.json();
+        if (data.success && data.internships) {
+          const mapped: TrackerCard[] = data.internships.map((item: any) => {
+            const logoColors = [
+              "bg-gradient-to-tr from-indigo-500 to-purple-600",
+              "bg-gradient-to-tr from-emerald-500 to-teal-600",
+              "bg-gradient-to-tr from-orange-500 via-rose-500 to-purple-500",
+              "bg-gradient-to-tr from-zinc-800 to-zinc-950 border border-white/10",
+              "bg-gradient-to-tr from-blue-500 to-indigo-600",
+              "bg-gradient-to-tr from-red-600 to-red-800",
+              "bg-gradient-to-tr from-zinc-600 to-zinc-800"
+            ];
+            
+            let columnId: "saved" | "applied" | "interviewing" | "rejected_offer" = "saved";
+            const s = item.status.toLowerCase();
+            if (s === "applied") columnId = "applied";
+            else if (s === "interviewing") columnId = "interviewing";
+            else if (s === "offer" || s === "decided") columnId = "rejected_offer";
+            
+            const firstChar = item.company ? item.company.charAt(0).toUpperCase() : "I";
+            const colorHash = item.company ? item.company.charCodeAt(0) % logoColors.length : 0;
+
+            return {
+              id: item._id,
+              company: item.company,
+              role: item.role,
+              location: item.location || "Remote",
+              matchScore: item.matchPercentage || 85,
+              column: columnId,
+              tags: item.description ? [item.description.substring(0, 15)] : ["React", "TypeScript"],
+              logoText: firstChar,
+              logoBg: logoColors[colorHash],
+              applyUrl: item.applyLink || ""
+            };
+          });
+          setTrackerCards(mapped);
+        }
+      } catch (err) {
+        console.error("Error loading internships:", err);
+      }
+    };
+    fetchInternships();
+  }, [username, activeTab]);
 
   const companiesToScan = ["Stripe", "Vercel", "Supabase", "Linear", "Figma", "Google", "Meta", "Notion", "Github"];
 
@@ -196,13 +319,35 @@ export default function InternshipRadar() {
     setCustomAiQuery("");
     setAiFilteredIds(null);
 
+    let userTechStack = ["React", "TypeScript", "Node.js", "Python", "Next.js", "AI", "ML"];
+    let userCountry = "";
+    let userState = "";
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("currentUser");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.techStack && parsed.techStack.length > 0) {
+            userTechStack = parsed.techStack;
+          }
+          userCountry = parsed.collegeCountry || "";
+          userState = parsed.collegeState || "";
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
     // Call the dynamic scraper API in the background
     fetch("/api/scrape/internships", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        techStack: ["React", "TypeScript", "Node.js", "Python", "Next.js", "AI", "ML"],
-        userLevel: "Entry"
+        techStack: userTechStack,
+        userLevel: "Entry",
+        type: activeTab,
+        collegeCountry: userCountry,
+        collegeState: userState
       })
     })
       .then((res) => res.json())
@@ -236,12 +381,12 @@ export default function InternshipRadar() {
           }));
           setFetchedData(mapped);
         } else {
-          setFetchedData(ALL_MOCK_MATCHES);
+          setFetchedData(activeTab === "fulltime" ? ALL_MOCK_FULLTIME_MATCHES : ALL_MOCK_MATCHES);
         }
       })
       .catch((err) => {
         console.error("Scraper fetch error:", err);
-        setFetchedData(ALL_MOCK_MATCHES);
+        setFetchedData(activeTab === "fulltime" ? ALL_MOCK_FULLTIME_MATCHES : ALL_MOCK_MATCHES);
       });
   };
 
@@ -249,7 +394,16 @@ export default function InternshipRadar() {
   useEffect(() => {
     if (!isFetching) return;
 
-    const logMessages = [
+    const logMessages = activeTab === "fulltime" ? [
+      "Initializing PinkyPow scraper nodes...",
+      "Calibrating neural match vectors to placement profile score [820]...",
+      "Scraping global Greenhouse portals...",
+      "Scraping Lever & Workday ATS databases...",
+      "Scanning new grad & entry-level job positions...",
+      "Applying semantic analysis to job roles...",
+      "Calibrating match confidence intervals...",
+      "Scrape complete! Synced high-match full-time jobs."
+    ] : [
       "Initializing PinkyPow scraper nodes...",
       "Calibrating neural match vectors to placement profile score [820]...",
       "Scraping global Greenhouse portals...",
@@ -271,7 +425,7 @@ export default function InternshipRadar() {
           clearInterval(interval);
           setTimeout(() => {
             setIsFetching(false);
-            setMatches(fetchedData || ALL_MOCK_MATCHES);
+            setMatches(fetchedData || (activeTab === "fulltime" ? ALL_MOCK_FULLTIME_MATCHES : ALL_MOCK_MATCHES));
             setHasFetched(true);
           }, 600);
           return 100;
@@ -294,30 +448,49 @@ export default function InternshipRadar() {
   }, [isFetching, fetchProgress, fetchedData]);
 
   // Add Match to Tracker
-  const handleAddToTracker = (match: Match) => {
+  const handleAddToTracker = async (match: Match) => {
     // Check if already in tracker
     if (trackerCards.some((c) => c.company === match.company && c.role === match.role)) return;
 
-    const newCard: TrackerCard = {
-      id: `track-${Date.now()}`,
-      company: match.company,
-      role: match.role,
-      location: match.location,
-      matchScore: match.matchScore,
-      column: "saved",
-      tags: match.tags,
-      logoText: match.logoText,
-      logoBg: match.logoBg,
-      applyUrl: match.applyUrl
-    };
-
-    setTrackerCards((prev) => [newCard, ...prev]);
-    // Remove from active match grid to avoid duplication
-    setMatches((prev) => prev.filter((m) => m.id !== match.id));
+    try {
+      const res = await fetch("/api/internships", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username,
+          company: match.company,
+          role: match.role,
+          status: "Saved",
+          location: match.location,
+          applyLink: match.applyUrl,
+          matchPercentage: match.matchScore,
+          type: activeTab
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.internship) {
+        const newCard: TrackerCard = {
+          id: data.internship._id,
+          company: match.company,
+          role: match.role,
+          location: match.location,
+          matchScore: match.matchScore,
+          column: "saved",
+          tags: match.tags,
+          logoText: match.logoText,
+          logoBg: match.logoBg,
+          applyUrl: match.applyUrl
+        };
+        setTrackerCards((prev) => [newCard, ...prev]);
+        setMatches((prev) => prev.filter((m) => m.id !== match.id));
+      }
+    } catch (err) {
+      console.error("Error adding to tracker:", err);
+    }
   };
 
   // Move Tracker Card Column
-  const handleMoveCard = (cardId: string, direction: "left" | "right") => {
+  const handleMoveCard = async (cardId: string, direction: "left" | "right") => {
     const columnsOrder: ("saved" | "applied" | "interviewing" | "rejected_offer")[] = [
       "saved",
       "applied",
@@ -325,24 +498,132 @@ export default function InternshipRadar() {
       "rejected_offer"
     ];
 
-    setTrackerCards((prev) =>
-      prev.map((card) => {
-        if (card.id !== cardId) return card;
-        const currentIndex = columnsOrder.indexOf(card.column);
-        let nextIndex = currentIndex;
-        if (direction === "left" && currentIndex > 0) {
-          nextIndex = currentIndex - 1;
-        } else if (direction === "right" && currentIndex < columnsOrder.length - 1) {
-          nextIndex = currentIndex + 1;
-        }
-        return { ...card, column: columnsOrder[nextIndex] };
-      })
-    );
+    const card = trackerCards.find((c) => c.id === cardId);
+    if (!card) return;
+
+    const currentIndex = columnsOrder.indexOf(card.column);
+    let nextIndex = currentIndex;
+    if (direction === "left" && currentIndex > 0) {
+      nextIndex = currentIndex - 1;
+    } else if (direction === "right" && currentIndex < columnsOrder.length - 1) {
+      nextIndex = currentIndex + 1;
+    }
+
+    if (nextIndex === currentIndex) return;
+    const nextColumn = columnsOrder[nextIndex];
+
+    let dbStatus: "Saved" | "Applied" | "Interviewing" | "Decided" = "Saved";
+    if (nextColumn === "applied") dbStatus = "Applied";
+    else if (nextColumn === "interviewing") dbStatus = "Interviewing";
+    else if (nextColumn === "rejected_offer") dbStatus = "Decided";
+
+    try {
+      const res = await fetch("/api/internships", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: cardId,
+          status: dbStatus
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTrackerCards((prev) =>
+          prev.map((c) => (c.id === cardId ? { ...c, column: nextColumn } : c))
+        );
+      }
+    } catch (err) {
+      console.error("Error updating card column:", err);
+    }
   };
 
   // Remove Card
-  const handleRemoveCard = (cardId: string) => {
-    setTrackerCards((prev) => prev.filter((card) => card.id !== cardId));
+  const handleRemoveCard = async (cardId: string) => {
+    try {
+      const res = await fetch(`/api/internships?id=${cardId}`, {
+        method: "DELETE"
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTrackerCards((prev) => prev.filter((card) => card.id !== cardId));
+      }
+    } catch (err) {
+      console.error("Error deleting card:", err);
+    }
+  };
+
+  // Add custom manual internship
+  const handleSubmitCustomInternship = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formCompany || !formRole) return;
+
+    try {
+      const res = await fetch("/api/internships", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username,
+          company: formCompany,
+          role: formRole,
+          status: formStatus,
+          location: formLocation || "Remote",
+          applyLink: formApplyLink,
+          matchPercentage: formMatchPercentage,
+          startDate: formStartDate,
+          endDate: formEndDate,
+          description: formDescription,
+          type: formType
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.internship) {
+        const logoColors = [
+          "bg-gradient-to-tr from-indigo-500 to-purple-600",
+          "bg-gradient-to-tr from-emerald-500 to-teal-600",
+          "bg-gradient-to-tr from-orange-500 via-rose-500 to-purple-500",
+          "bg-gradient-to-tr from-zinc-800 to-zinc-950 border border-white/10",
+          "bg-gradient-to-tr from-blue-500 to-indigo-600",
+          "bg-gradient-to-tr from-red-600 to-red-800",
+          "bg-gradient-to-tr from-zinc-600 to-zinc-800"
+        ];
+        
+        let columnId: "saved" | "applied" | "interviewing" | "rejected_offer" = "saved";
+        if (formStatus === "Applied") columnId = "applied";
+        else if (formStatus === "Interviewing") columnId = "interviewing";
+        else if (formStatus === "Decided") columnId = "rejected_offer";
+
+        const firstChar = formCompany.charAt(0).toUpperCase();
+        const colorHash = formCompany.charCodeAt(0) % logoColors.length;
+
+        const newCard: TrackerCard = {
+          id: data.internship._id,
+          company: formCompany,
+          role: formRole,
+          location: formLocation || "Remote",
+          matchScore: formMatchPercentage,
+          column: columnId,
+          tags: formDescription ? [formDescription.substring(0, 15)] : ["Manual"],
+          logoText: firstChar,
+          logoBg: logoColors[colorHash],
+          applyUrl: formApplyLink
+        };
+
+        setTrackerCards((prev) => [newCard, ...prev]);
+        // Reset form
+        setFormCompany("");
+        setFormRole("");
+        setFormLocation("");
+        setFormApplyLink("");
+        setFormMatchPercentage(100);
+        setFormStatus("Saved");
+        setFormStartDate("");
+        setFormEndDate("");
+        setFormDescription("");
+        setFormType("internship");
+      }
+    } catch (err) {
+      console.error("Error submitting manual internship:", err);
+    }
   };
 
   // Custom AI Filter Handler
@@ -437,7 +718,7 @@ export default function InternshipRadar() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-2 border-b border-[#EFECE3]">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-4xl font-normal text-[#1E1D1A] tracking-tight">Internship Radar</h1>
+            <h1 className="text-4xl font-normal text-[#1E1D1A] tracking-tight">Jobs & Internships Radar</h1>
           </div>
           <p className="text-[#7C786E] text-sm mt-2.5 max-w-xl">
             PinkyPow scans global tech portals in real-time, matching requirements directly to your profile placement score.
@@ -454,6 +735,30 @@ export default function InternshipRadar() {
         </div>
       </div>
 
+      {/* Tabs Switcher */}
+      <div className="flex border-b border-[#EFECE3] gap-6 mb-4">
+        <button
+          onClick={() => setActiveTab("internship")}
+          className={`pb-3 font-bold text-sm tracking-wider uppercase transition-all duration-300 relative cursor-pointer ${
+            activeTab === "internship"
+              ? "text-[#1E1D1A] border-b-2 border-[#2C2B27]"
+              : "text-[#7C786E] hover:text-[#1E1D1A]"
+          }`}
+        >
+          Internship Openings
+        </button>
+        <button
+          onClick={() => setActiveTab("fulltime")}
+          className={`pb-3 font-bold text-sm tracking-wider uppercase transition-all duration-300 relative cursor-pointer ${
+            activeTab === "fulltime"
+              ? "text-[#1E1D1A] border-b-2 border-[#2C2B27]"
+              : "text-[#7C786E] hover:text-[#1E1D1A]"
+          }`}
+        >
+          Full-Time Offers
+        </button>
+      </div>
+
       {/* Scraper / Fetch Dashboard */}
       <div className="warm-card p-8 relative overflow-hidden bg-white">
         {/* Glow decoration */}
@@ -463,10 +768,10 @@ export default function InternshipRadar() {
           <div className="space-y-1.5 text-center md:text-left">
             <h2 className="text-lg font-bold text-[#1E1D1A] tracking-tight flex items-center justify-center md:justify-start gap-2">
               <Sparkles className="w-5 h-5 text-[#F5C451]" />
-              Real-time AI Match Fetcher
+              Real-time AI {activeTab === "fulltime" ? "Job" : "Internship"} Fetcher
             </h2>
             <p className="text-xs text-[#7C786E] max-w-md">
-              Trigger a live scan across Vercel, Stripe, Linear, Notion, Supabase, Google and 30+ other corporate sites.
+              Trigger a live scan across Vercel, Stripe, Linear, Notion, Supabase, Google and 30+ other corporate sites for {activeTab === "fulltime" ? "full-time job offers" : "internships"}.
             </p>
           </div>
 
@@ -878,6 +1183,170 @@ export default function InternshipRadar() {
             );
           })}
         </div>
+      </div>
+
+      {/* Manual Add Internship Form */}
+      <div className="warm-card p-8 bg-white border border-[#ECE9DF] rounded-3xl shadow-sm space-y-6">
+        <div className="border-b border-[#EFECE3] pb-3">
+          <h3 className="text-lg font-bold text-[#1E1D1A] flex items-center gap-2">
+            <Plus className="w-5 h-5 text-[#7A6218]" />
+            Register Completed or External Internship
+          </h3>
+          <p className="text-xs text-[#7C786E] mt-1">
+            Keep track of internships completed outside our website to document them on your timeline and compile them into your resume.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmitCustomInternship} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Company Name *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Notion"
+                value={formCompany}
+                onChange={(e) => setFormCompany(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Role Title *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Software Engineer Intern"
+                value={formRole}
+                onChange={(e) => setFormRole(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Location
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. San Francisco, CA (Hybrid)"
+                value={formLocation}
+                onChange={(e) => setFormLocation(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Apply Link / Website
+              </label>
+              <input
+                type="url"
+                placeholder="e.g. https://notion.so"
+                value={formApplyLink}
+                onChange={(e) => setFormApplyLink(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Match Score (%)
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                placeholder="e.g. 95"
+                value={formMatchPercentage}
+                onChange={(e) => setFormMatchPercentage(Number(e.target.value))}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Application Stage
+              </label>
+              <select
+                value={formStatus}
+                onChange={(e: any) => setFormStatus(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] transition-colors shadow-sm"
+              >
+                <option value="Saved">Saved</option>
+                <option value="Applied">Applied</option>
+                <option value="Interviewing">Interviewing</option>
+                <option value="Decided">Decided / Offer</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Start Date
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. June 2026"
+                value={formStartDate}
+                onChange={(e) => setFormStartDate(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                End Date (or 'Present')
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. August 2026"
+                value={formEndDate}
+                onChange={(e) => setFormEndDate(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Opportunity Type
+              </label>
+              <select
+                value={formType}
+                onChange={(e: any) => setFormType(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] transition-colors shadow-sm"
+              >
+                <option value="internship">Internship</option>
+                <option value="fulltime">Full-Time Job</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+              Internship Description / Core Achievements
+            </label>
+            <textarea
+              rows={3}
+              placeholder="Describe what you built or accomplished. Highlight any major performance gains or scaling achievements (e.g. Optimized GraphQL queries reducing latencies by 30%)."
+              value={formDescription}
+              onChange={(e) => setFormDescription(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors resize-none shadow-sm"
+            />
+          </div>
+
+          <div className="pt-2 flex justify-end">
+            <button
+              type="submit"
+              className="px-6 py-3 rounded-xl bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-extrabold text-xs tracking-wider transition-all cursor-pointer shadow-md"
+            >
+              Add to Tracker
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

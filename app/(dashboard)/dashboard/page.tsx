@@ -30,6 +30,33 @@ export default function Dashboard() {
   const [isRecording, setIsRecording] = useState(false);
   const [commTimer, setCommTimer] = useState(300); // 5 mins
   const [expandedAccordion, setExpandedAccordion] = useState("resume");
+  const [currentUser, setCurrentUser] = useState<{ name: string; placementScore: number; clerkId: string } | null>(null);
+  const [dbScore, setDbScore] = useState<number | null>(null);
+
+  // Load session and fetch dashboard summary
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const session = localStorage.getItem("currentUser");
+      if (session) {
+        try {
+          const parsed = JSON.parse(session);
+          setCurrentUser(parsed);
+          if (parsed.clerkId) {
+            fetch(`/api/dashboard/summary?clerkId=${parsed.clerkId}`)
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  setDbScore(data.placementScore);
+                }
+              })
+              .catch(err => console.error(err));
+          }
+        } catch (e) {
+          console.error("Failed to parse user session in Dashboard:", e);
+        }
+      }
+    }
+  }, []);
 
   // State-driven agenda checklist to allow interactive toggles
   const [agendaItems, setAgendaItems] = useState([
@@ -50,7 +77,11 @@ export default function Dashboard() {
 
   // Animate Placement Score on load
   useEffect(() => {
-    const targetScore = 820;
+    const targetScore = dbScore !== null ? dbScore : (currentUser ? currentUser.placementScore : 820);
+    if (targetScore === 0) {
+      setScore(0);
+      return;
+    }
     const duration = 1500; // ms
     const stepTime = 15;
     const steps = duration / stepTime;
@@ -68,7 +99,7 @@ export default function Dashboard() {
     }, stepTime);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [dbScore, currentUser]);
 
   // Communication timer effect
   useEffect(() => {
@@ -143,7 +174,7 @@ export default function Dashboard() {
         <div className="space-y-4">
           {/* Welcome Title */}
           <h1 className="text-4xl md:text-5xl font-normal text-[#1E1D1A] tracking-tight">
-            Welcome in, Raja <span className="inline-block animate-wave origin-[70%_70%] text-3xl md:text-4xl">👋</span>
+            Welcome in, {currentUser ? currentUser.name : "Raja"} <span className="inline-block animate-wave origin-[70%_70%] text-3xl md:text-4xl">👋</span>
           </h1>
           
           {/* Progress bar pills (similar to Interviews 15%, Hired 15%, etc.) */}
@@ -581,7 +612,7 @@ export default function Dashboard() {
 
             {/* Profile info details */}
             <div className="absolute bottom-5 left-5 text-white space-y-0.5">
-              <h2 className="text-xl font-bold tracking-tight text-white">Raja Kumaran</h2>
+              <h2 className="text-xl font-bold tracking-tight text-white">{currentUser ? currentUser.name : "Raja Kumaran"}</h2>
               <p className="text-xs text-zinc-300 font-medium">Software Engineer Track</p>
             </div>
           </div>

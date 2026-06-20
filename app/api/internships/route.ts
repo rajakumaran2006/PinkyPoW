@@ -96,6 +96,51 @@ export async function GET(req: Request) {
 
       await Internship.insertMany(defaultCards);
       userInternships = await Internship.find({ userId, type: typeFilter }).sort({ createdAt: -1 });
+    } else if (userInternships.length === 0 && typeFilter === 'fulltime') {
+      const defaultCards = [
+        {
+          userId,
+          company: 'Stripe',
+          role: 'Software Engineer (New Grad)',
+          location: 'San Francisco, CA (Hybrid)',
+          matchPercentage: 94,
+          status: 'Saved',
+          applyLink: 'https://stripe.com/jobs',
+          type: 'fulltime',
+          startDate: '',
+          endDate: '',
+          description: ''
+        },
+        {
+          userId,
+          company: 'Google',
+          role: 'Associate Software Engineer',
+          location: 'Mountain View, CA (Office)',
+          matchPercentage: 90,
+          status: 'Applied',
+          applyLink: 'https://careers.google.com',
+          type: 'fulltime',
+          startDate: '',
+          endDate: '',
+          description: ''
+        },
+        {
+          userId,
+          company: 'Vercel',
+          role: 'Frontend Engineer (Next.js)',
+          location: 'Remote (US)',
+          matchPercentage: 89,
+          status: 'Interviewing',
+          applyLink: 'https://vercel.com/careers',
+          type: 'fulltime',
+          startDate: '',
+          endDate: '',
+          description: ''
+        }
+      ];
+
+      await Internship.insertMany(defaultCards);
+      userInternships = await Internship.find({ userId, type: typeFilter }).sort({ createdAt: -1 });
     }
 
     return NextResponse.json({

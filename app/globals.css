@@ -270,5 +270,298 @@ body {
   color: #ffffff !important;
 }
 
+/* ==========================================
+   WARM THEME CONTRAST & READABILITY OVERRIDES
+   ========================================== */
+
+/* Overrides to ensure maximum readability on the warm dashboard background */
+.warm-dashboard-bg {
+  color: #1e1b18 !important; /* Highly readable dark brown/charcoal body text */
+}
+
+/* Force all headings, labels and bold text inside the warm layout to render in high-contrast dark tones */
+.warm-dashboard-bg h1,
+.warm-dashboard-bg h2,
+.warm-dashboard-bg h3,
+.warm-dashboard-bg h4,
+.warm-dashboard-bg h5,
+.warm-dashboard-bg h6,
+.warm-dashboard-bg .text-white,
+.warm-dashboard-bg .text-zinc-50,
+.warm-dashboard-bg .text-zinc-100 {
+  color: #1e1b18 !important;
+}
+
+/* Fix text-zinc-650 which is not a real Tailwind class - treat like zinc-600 */
+.warm-dashboard-bg .text-zinc-650 {
+  color: #4a453e !important;
+}
+
+/* Upgrade light gray subtext or status descriptions to a highly readable medium-dark gray/brown */
+.warm-dashboard-bg .text-zinc-300,
+.warm-dashboard-bg .text-zinc-400,
+.warm-dashboard-bg .text-zinc-500,
+.warm-dashboard-bg .text-zinc-600,
+.warm-dashboard-bg .text-gray-300,
+.warm-dashboard-bg .text-gray-400,
+.warm-dashboard-bg .text-gray-500,
+.warm-dashboard-bg .text-gray-600 {
+  color: #4a453e !important;
+}
+
+/* Make sure text typed inside input and select fields is dark and legible */
+.warm-dashboard-bg input,
+.warm-dashboard-bg select,
+.warm-dashboard-bg textarea {
+  color: #1e1b18 !important;
+}
+
+/* Ensure placeholder text remains visible but subtle */
+.warm-dashboard-bg input::placeholder {
+  color: #78716c !important;
+}
+
+/* Increase contrast for colorful indicators/badges on the warm light theme */
+.warm-dashboard-bg .text-pink-400,
+.warm-dashboard-bg .text-pink-500 {
+  color: #be185d !important; /* Darker pink for readability */
+}
+
+.warm-dashboard-bg .text-purple-400,
+.warm-dashboard-bg .text-purple-500 {
+  color: #6b21a8 !important; /* Darker purple */
+}
+
+.warm-dashboard-bg .text-sky-400,
+.warm-dashboard-bg .text-sky-500 {
+  color: #0369a1 !important; /* Darker blue */
+}
+
+.warm-dashboard-bg .text-emerald-300,
+.warm-dashboard-bg .text-emerald-400,
+.warm-dashboard-bg .text-emerald-500 {
+  color: #047857 !important; /* Darker green */
+}
+
+.warm-dashboard-bg .text-red-400,
+.warm-dashboard-bg .text-red-500 {
+  color: #b91c1c !important; /* Darker red */
+}
+
+.warm-dashboard-bg .text-amber-400,
+.warm-dashboard-bg .text-amber-500 {
+  color: #b45309 !important; /* Darker yellow/amber */
+}
+
+/* Ensure yellow-500 text (difficulty badges) reads dark enough */
+.warm-dashboard-bg .text-yellow-500 {
+  color: #854d0e !important;
+}
+
+/* Ensure rose text reads dark enough */
+.warm-dashboard-bg .text-rose-500 {
+  color: #9f1239 !important;
+}
+
+/* Ensure orange text reads dark enough */
+.warm-dashboard-bg .text-orange-400,
+.warm-dashboard-bg .text-orange-500 {
+  color: #c2410c !important;
+}
+
+/* Convert all SVG icons in tags to matching darker colors to match text */
+.warm-dashboard-bg svg.text-pink-400,
+.warm-dashboard-bg svg.text-pink-500 {
+  color: #be185d !important;
+}
+.warm-dashboard-bg svg.text-purple-400,
+.warm-dashboard-bg svg.text-purple-500 {
+  color: #6b21a8 !important;
+}
+.warm-dashboard-bg svg.text-sky-400,
+.warm-dashboard-bg svg.text-sky-500 {
+  color: #0369a1 !important;
+}
+.warm-dashboard-bg svg.text-emerald-400,
+.warm-dashboard-bg svg.text-emerald-500 {
+  color: #047857 !important;
+}
+.warm-dashboard-bg svg.text-red-400,
+.warm-dashboard-bg svg.text-red-500 {
+  color: #b91c1c !important;
+}
+.warm-dashboard-bg svg.text-amber-400,
+.warm-dashboard-bg svg.text-amber-500 {
+  color: #b45309 !important;
+}
+.warm-dashboard-bg svg.text-orange-400,
+.warm-dashboard-bg svg.text-orange-500 {
+  color: #c2410c !important;
+}
+
+/* Maintain white text on dark cards, solid buttons, dark badges, and gradient backgrounds */
+.warm-dashboard-bg .warm-card-dark,
+.warm-dashboard-bg .warm-card-dark *,
+.warm-dashboard-bg .bg-zinc-900,
+.warm-dashboard-bg .bg-zinc-900 *,
+.warm-dashboard-bg .bg-\[\#2C2B27\],
+.warm-dashboard-bg .bg-\[\#2C2B27\] *,
+.warm-dashboard-bg .bg-zinc-950,
+.warm-dashboard-bg .bg-zinc-950 *,
+.warm-dashboard-bg .bg-zinc-800,
+.warm-dashboard-bg .bg-zinc-800 *,
+.warm-dashboard-bg button.bg-zinc-900,
+.warm-dashboard-bg button.bg-black,
+.warm-dashboard-bg button.bg-zinc-900 *,
+.warm-dashboard-bg button.bg-black *,
+.warm-dashboard-bg .bg-gradient-to-r:not(.glass-panel),
+.warm-dashboard-bg .bg-gradient-to-r:not(.glass-panel) *,
+.warm-dashboard-bg .bg-gradient-to-tr:not(.glass-panel),
+.warm-dashboard-bg .bg-gradient-to-tr:not(.glass-panel) *,
+.warm-dashboard-bg .bg-gradient-to-br:not(.glass-panel),
+.warm-dashboard-bg .bg-gradient-to-br:not(.glass-panel) *,
+.warm-dashboard-bg .bg-pink-500,
+.warm-dashboard-bg .bg-pink-500 *,
+.warm-dashboard-bg .bg-purple-600,
+.warm-dashboard-bg .bg-purple-600 *,
+.warm-dashboard-bg .bg-indigo-600,
+.warm-dashboard-bg .bg-indigo-600 *,
+.warm-dashboard-bg .bg-indigo-500,
+.warm-dashboard-bg .bg-indigo-500 *,
+.warm-dashboard-bg .bg-blue-600,
+.warm-dashboard-bg .bg-blue-600 *,
+.warm-dashboard-bg .bg-blue-500,
+.warm-dashboard-bg .bg-blue-500 *,
+.warm-dashboard-bg .bg-red-600,
+.warm-dashboard-bg .bg-red-600 *,
+.warm-dashboard-bg .bg-red-500,
+.warm-dashboard-bg .bg-red-500 *,
+.warm-dashboard-bg .bg-emerald-500,
+.warm-dashboard-bg .bg-emerald-500 *,
+.warm-dashboard-bg .profile-card,
+.warm-dashboard-bg .profile-card *,
+.warm-dashboard-bg .bg-black\/40,
+.warm-dashboard-bg .bg-black\/40 *,
+.warm-dashboard-bg .bg-black\/45,
+.warm-dashboard-bg .bg-black\/45 *,
+.warm-dashboard-bg .bg-black\/60,
+.warm-dashboard-bg .bg-black\/60 *,
+.warm-dashboard-bg .bg-black\/70,
+.warm-dashboard-bg .bg-black\/70 *,
+.warm-dashboard-bg .bg-black\/80,
+.warm-dashboard-bg .bg-black\/80 *,
+.warm-dashboard-bg div[style*="rgba(9,9,11"],
+.warm-dashboard-bg div[style*="rgba(9,9,11"] *,
+.warm-dashboard-bg .fixed.inset-0.bg-black\/70 *,
+.warm-dashboard-bg .fixed.inset-0.bg-black\/80 * {
+  color: #ffffff !important;
+}
+
+/* Fix: ensure stroke colors for SVG circles (Communication Coach score rings) */
+.warm-dashboard-bg .stroke-pink-500 {
+  stroke: #be185d !important;
+}
+.warm-dashboard-bg .stroke-purple-500 {
+  stroke: #6b21a8 !important;
+}
+.warm-dashboard-bg .stroke-emerald-400 {
+  stroke: #047857 !important;
+}
+
+/* Fix: certification "AI Validated" badge — emerald badge colors on warm bg */
+.warm-dashboard-bg .bg-emerald-500\/10,
+.warm-dashboard-bg .bg-emerald-500\/20 {
+  background-color: rgba(4, 120, 87, 0.1);
+}
+.warm-dashboard-bg .border-emerald-400\/30,
+.warm-dashboard-bg .border-emerald-500\/20 {
+  border-color: rgba(4, 120, 87, 0.3);
+}
+
+/* Fix: hackathon card bg-[#2C2B27] Track/Tracked buttons must retain white text */
+.warm-dashboard-bg .bg-\[\#2C2B27\] {
+  background-color: #2C2B27;
+}
+
+/* Fix: bg-[#1E1D1A] dark elements preserve white */
+.warm-dashboard-bg .bg-\[\#1E1D1A\],
+.warm-dashboard-bg .bg-\[\#1E1D1A\] * {
+  color: #ffffff !important;
+}
+
+/* Fix: hackathon card colorful gradient banners — must stay white text on colored backgrounds */
+.warm-dashboard-bg .bg-gradient-to-r.from-pink-500,
+.warm-dashboard-bg .bg-gradient-to-r.from-pink-500 *,
+.warm-dashboard-bg .bg-gradient-to-r.from-purple-600,
+.warm-dashboard-bg .bg-gradient-to-r.from-purple-600 *,
+.warm-dashboard-bg .bg-gradient-to-r.from-rose-500,
+.warm-dashboard-bg .bg-gradient-to-r.from-rose-500 *,
+.warm-dashboard-bg .bg-gradient-to-r.from-blue-600,
+.warm-dashboard-bg .bg-gradient-to-r.from-blue-600 *,
+.warm-dashboard-bg .bg-gradient-to-r.from-teal-400,
+.warm-dashboard-bg .bg-gradient-to-r.from-teal-400 *,
+.warm-dashboard-bg .bg-gradient-to-r.from-violet-600,
+.warm-dashboard-bg .bg-gradient-to-r.from-violet-600 *,
+.warm-dashboard-bg .bg-gradient-to-r.from-green-500,
+.warm-dashboard-bg .bg-gradient-to-r.from-green-500 * {
+  color: #ffffff !important;
+}
+
+
+/* Fix: Communication Coach glass-panel sections that contain dark waveform area */
+.warm-dashboard-bg .fixed.inset-0.bg-black\/70,
+.warm-dashboard-bg .fixed.inset-0.bg-black\/70 *,
+.warm-dashboard-bg .fixed.inset-0.bg-black\/80,
+.warm-dashboard-bg .fixed.inset-0.bg-black\/80 * {
+  color: #ffffff !important;
+}
+
+/* Fix: Any white text on the score ring labels (from-pink-500 gradient areas) */
+.warm-dashboard-bg .bg-gradient-to-tr.from-pink-500,
+.warm-dashboard-bg .bg-gradient-to-tr.from-pink-500 * {
+  color: #ffffff !important;
+}
+
+/* Fix: locked state overlay in DSA "Tomorrow's Challenges" - bg-black/60 with backdrop-blur */
+.warm-dashboard-bg .absolute.inset-0.bg-black\/60 {
+  color: #ffffff !important;
+}
+.warm-dashboard-bg .absolute.inset-0.bg-black\/60 * {
+  color: #ffffff !important;
+}
+
+/* Fix: ensure code editor textarea text color is pink and legible against the dark background in the solve modal */
+.warm-dashboard-bg .fixed.inset-0.bg-black\/80 textarea {
+  color: #f9a8d4 !important;
+}
+
+/* Custom terminal/console panels (e.g. AI scan progress in certifications) */
+.console-panel {
+  background-color: rgba(9, 9, 11, 0.75);
+  backdrop-filter: blur(8px);
+}
+.warm-dashboard-bg .console-panel {
+  background-color: #121214 !important;
+  border-color: rgba(236, 72, 153, 0.25) !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3) !important;
+}
+.warm-dashboard-bg .console-panel * {
+  color: revert !important;
+}
+.warm-dashboard-bg .console-panel .text-zinc-300 {
+  color: #d4d4d8 !important;
+}
+.warm-dashboard-bg .console-panel .text-zinc-400 {
+  color: #a1a1aa !important;
+}
+.warm-dashboard-bg .console-panel .text-zinc-500 {
+  color: #71717a !important;
+}
+.warm-dashboard-bg .console-panel .text-pink-500 {
+  color: #ec4899 !important;
+}
+.warm-dashboard-bg .console-panel .text-pink-500\/70 {
+  color: rgba(236, 72, 153, 0.7) !important;
+}
 
 

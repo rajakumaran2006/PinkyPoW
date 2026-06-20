@@ -4,17 +4,38 @@ import React from "react";
 import { Mail, Target, RefreshCcw, ShieldCheck } from "lucide-react";
 
 export default function Profile() {
+  const [user, setUser] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("currentUser");
+      if (stored) {
+        try {
+          setUser(JSON.parse(stored));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, []);
+
   const profileInfo = {
-    name: "Raja Kumaran",
-    email: "raja@pinkypow.dev",
-    role: "Placement Candidate (Class of 2027)",
-    score: 820,
+    name: user?.name || "Raja Kumaran",
+    email: user?.email || "raja@pinkypow.dev",
+    role: user 
+      ? `${user.course || "Placement Candidate"} (${user.yearOfStudy || "Class of 2027"})` 
+      : "Placement Candidate (Class of 2027)",
+    college: user?.college || "College of Engineering",
+    collegeLocation: user?.collegeLocation 
+      ? [user.collegeLocation, user.collegeState, user.collegeCountry].filter(Boolean).join(", ")
+      : "Chennai, India",
+    score: user?.placementScore || 820,
     solvedCount: 142,
     speechRecordings: 24,
     linkedAccounts: [
-      { platform: "LeetCode", username: "rajakumaran_dev", status: "Synced", syncTime: "1 hour ago" },
-      { platform: "CodeChef", username: "rajakumaran2006", status: "Synced", syncTime: "12 hours ago" },
-      { platform: "HackerRank", username: "raja_poW", status: "Synced", syncTime: "1 day ago" }
+      { platform: "LeetCode", username: user?.platformUsernames?.leetcode || "rajakumaran_dev", status: "Synced", syncTime: "1 hour ago" },
+      { platform: "CodeChef", username: user?.platformUsernames?.codechef || "rajakumaran2006", status: "Synced", syncTime: "12 hours ago" },
+      { platform: "HackerRank", username: user?.platformUsernames?.hackerrank || "raja_poW", status: "Synced", syncTime: "1 day ago" }
     ]
   };
 
@@ -35,11 +56,12 @@ export default function Profile() {
           <div className="flex flex-col items-center text-center">
             {/* Avatar */}
             <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#7A6218] to-[#2C2B27] flex items-center justify-center font-black text-white text-3xl shadow-lg shadow-[#7A6218]/10 mb-4">
-              RK
+              {profileInfo.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
             </div>
             
             <h2 className="text-xl font-extrabold text-[#1E1D1A] tracking-tight">{profileInfo.name}</h2>
             <p className="text-xs text-[#7A6218] font-semibold mt-1">{profileInfo.role}</p>
+            <p className="text-[11px] text-[#7C786E] font-medium mt-1">{profileInfo.college} | {profileInfo.collegeLocation}</p>
             
             <div className="flex items-center gap-1.5 mt-3 text-xs text-[#7C786E]">
               <Mail className="w-3.5 h-3.5 text-[#7C786E]" />
@@ -91,7 +113,7 @@ export default function Profile() {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-[#1E1D1A]">{account.platform}</h4>
-                    <p className="text-xs text-[#7C786E] mt-0.5">Username: {account.username}</p>
+                    <p className="text-xs text-[#7C786E] mt-0.5">Username: {account.username || "Not Linked"}</p>
                   </div>
                 </div>
 

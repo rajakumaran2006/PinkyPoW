@@ -37,6 +37,7 @@ interface HackathonEvent {
   timelineState: "team_formation" | "registration" | "submission" | "judging";
   deadline: string;
   url: string;
+  fitScore?: number;
 }
 
 export default function HackathonRadar() {
@@ -161,8 +162,11 @@ export default function HackathonRadar() {
   // Active filters and tracking states
   const [filter, setFilter] = useState<"All" | "Near Me" | "Online" | "Matched">("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [trackedIds, setTrackedIds] = useState<string[]>(["hack-1", "hack-2", "hack-4"]);
-  const [activeTrackerId, setActiveTrackerId] = useState<string>("hack-1");
+  const [dbHackathons, setDbHackathons] = useState<any[]>([]);
+  const [activeTrackerId, setActiveTrackerId] = useState<string>("");
+  const [customAiQuery, setCustomAiQuery] = useState("");
+  const [aiFilteredIds, setAiFilteredIds] = useState<string[] | null>(null);
+  const [isAiFiltering, setIsAiFiltering] = useState(false);
 
   // AI Matches fetcher states
   const [isFetching, setIsFetching] = useState(false);
@@ -173,7 +177,48 @@ export default function HackathonRadar() {
   const [hasFetched, setHasFetched] = useState(false);
   const [fetchedData, setFetchedData] = useState<HackathonEvent[] | null>(null);
 
+  // Manual Form States
+  const [formTitle, setFormTitle] = useState("");
+  const [formHosts, setFormHosts] = useState("");
+  const [formDate, setFormDate] = useState("");
+  const [formLocation, setFormLocation] = useState("");
+  const [formIsOnline, setFormIsOnline] = useState(false);
+  const [formPrizePool, setFormPrizePool] = useState("");
+  const [formCategory, setFormCategory] = useState("");
+  const [formDescription, setFormDescription] = useState("");
+  const [formSkills, setFormSkills] = useState("");
+  const [formStatus, setFormStatus] = useState<"Saved" | "Applied" | "Participated" | "Shortlisted" | "Won">("Saved");
+  const [formApplyLink, setFormApplyLink] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
   const companiesToScan = ["Devpost API Node", "MLH Seasons Node", "Devfolio Portals", "HackerEarth Scraper", "GitHub Seeds"];
+
+  // Fetch hackathons from db
+  const fetchHackathons = async (username: string) => {
+    try {
+      const res = await fetch(`/api/hackathons?username=${username}`);
+      const data = await res.json();
+      if (data.success && data.hackathons) {
+        setDbHackathons(data.hackathons);
+      }
+    } catch (err) {
+      console.error("Error fetching hackathons:", err);
+    }
+  };
+
+  useEffect(() => {
+    const session = localStorage.getItem("currentUser");
+    if (session) {
+      try {
+        const user = JSON.parse(session);
+        setCurrentUser(user);
+        fetchHackathons(user.username);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
 
   const handleFetchMatches = () => {
     setIsFetching(true);
@@ -182,12 +227,25 @@ export default function HackathonRadar() {
     setFetchedData(null);
     setCurrentSearchIndex(0);
 
+    let userTechStack = ["React", "TypeScript", "Node.js", "Python", "Next.js", "AI", "ML"];
+    let userCountry = "";
+    let userState = "";
+    if (currentUser) {
+      if (currentUser.techStack && currentUser.techStack.length > 0) {
+        userTechStack = currentUser.techStack;
+      }
+      userCountry = currentUser.collegeCountry || "";
+      userState = currentUser.collegeState || "";
+    }
+
     fetch("/api/scrape/hackathons", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        techStack: ["React", "TypeScript", "Node.js", "Python", "Next.js", "AI", "ML"],
-        search: searchQuery
+        techStack: userTechStack,
+        search: searchQuery,
+        collegeCountry: userCountry,
+        collegeState: userState
       })
     })
       .then((res) => res.json())
@@ -218,7 +276,8 @@ export default function HackathonRadar() {
             participants: h.participants || Math.floor(Math.random() * 200) + 100,
             timelineState: idx % 4 === 0 ? "team_formation" : idx % 4 === 1 ? "registration" : idx % 4 === 2 ? "submission" : "judging",
             deadline: h.deadline,
-            url: h.url
+            url: h.url,
+            fitScore: h.fitScore
           }));
           setFetchedData(mapped);
         } else {
@@ -280,9 +339,55 @@ export default function HackathonRadar() {
     return () => clearInterval(interval);
   }, [isFetching, fetchProgress, fetchedData]);
 
+  // Custom AI Filter Handler
+  const handleAiFilter = async () => {
+    if (!customAiQuery.trim()) {
+      setAiFilteredIds(null);
+      return;
+    }
+    setIsAiFiltering(true);
+    try {
+      const res = await fetch("/api/ai/filter-hackathons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          hackathons,
+          query: customAiQuery
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.matchingIds) {
+        setAiFilteredIds(data.matchingIds);
+      } else {
+        setAiFilteredIds([]);
+      }
+    } catch (err) {
+      console.error("AI filter request failed:", err);
+      // fallback local search
+      const keywords = customAiQuery.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+      const matchingIds = hackathons.filter((item) => {
+        const itemText = `${item.title} ${item.hosts} ${item.category} ${item.description} ${(item.skills || []).join(' ')}`.toLowerCase();
+        return keywords.length === 0 || keywords.some((kw) => itemText.includes(kw));
+      }).map(item => item.id);
+      setAiFilteredIds(matchingIds);
+    } finally {
+      setIsAiFiltering(false);
+    }
+  };
+
+  const handleClearAiFilter = () => {
+    setCustomAiQuery("");
+    setAiFilteredIds(null);
+  };
+
   // Filtering Logic
   const filteredHackathons = useMemo(() => {
     return hackathons.filter((event) => {
+      // AI custom query filter if active
+      if (aiFilteredIds !== null && !aiFilteredIds.includes(event.id)) {
+        return false;
+      }
+
       // Filter tab check
       if (filter === "Near Me" && !event.isNearMe) return false;
       if (filter === "Online" && !event.isOnline) return false;
@@ -300,39 +405,221 @@ export default function HackathonRadar() {
       }
       return true;
     });
-  }, [filter, searchQuery, hackathons]);
+  }, [filter, searchQuery, hackathons, aiFilteredIds]);
+  // Tracked Hackathons titles for check
+  const trackedIds = useMemo(() => {
+    return dbHackathons.map((h) => h.title);
+  }, [dbHackathons]);
 
-  // Tracked Hackathons details
-  const trackedHackathons = useMemo(() => {
-    return hackathons.filter((h) => trackedIds.includes(h.id));
-  }, [trackedIds, hackathons]);
+  // Tracked active Hackathons (status is Saved or Applied)
+  const activeTrackedHackathons = useMemo(() => {
+    return dbHackathons.filter((h) => h.status === "Saved" || h.status === "Applied");
+  }, [dbHackathons]);
+
+  // Filter tracked hackathons by current search query & active tabs
+  const filteredTrackedHackathons = useMemo(() => {
+    return activeTrackedHackathons.filter((event) => {
+      // Find matching item in the full hackathons list (both initial and scraped ones)
+      const matchingScraped = hackathons.find((h) => h.title.toLowerCase() === event.title.toLowerCase());
+      const isOnline = event.isOnline ?? matchingScraped?.isOnline ?? false;
+      
+      const userCountry = currentUser?.collegeCountry || "";
+      const userState = currentUser?.collegeState || "";
+      const isNearMe = matchingScraped 
+        ? matchingScraped.isNearMe 
+        : (!isOnline && event.location && (userCountry || userState) 
+            ? (event.location.toLowerCase().includes(userCountry.toLowerCase()) || event.location.toLowerCase().includes(userState.toLowerCase())) 
+            : false);
+      
+      let userTechStack = ["React", "TypeScript", "Node.js", "Python", "Next.js", "AI", "ML"];
+      if (currentUser?.techStack && currentUser.techStack.length > 0) {
+        userTechStack = currentUser.techStack;
+      }
+      const isMatched = matchingScraped 
+        ? matchingScraped.isMatched 
+        : (event.skills && event.skills.some((s: string) => userTechStack.some((uts: string) => uts.toLowerCase() === s.toLowerCase())));
+
+      // AI custom query filter if active
+      if (aiFilteredIds !== null) {
+        if (matchingScraped && !aiFilteredIds.includes(matchingScraped.id)) {
+          return false;
+        }
+        if (!matchingScraped) {
+          const keywords = customAiQuery.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+          const itemText = `${event.title} ${event.hosts} ${event.category} ${event.description} ${(event.skills || []).join(' ')}`.toLowerCase();
+          if (keywords.length > 0 && !keywords.some((kw) => itemText.includes(kw))) {
+            return false;
+          }
+        }
+      }
+
+      // Filter tab check
+      if (filter === "Near Me" && !isNearMe) return false;
+      if (filter === "Online" && !isOnline) return false;
+      if (filter === "Matched" && !isMatched) return false;
+
+      // Search query check
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const matchesQuery = 
+          event.title.toLowerCase().includes(query) ||
+          (event.category && event.category.toLowerCase().includes(query)) ||
+          (event.hosts && event.hosts.toLowerCase().includes(query)) ||
+          (event.skills && event.skills.some((s: string) => s.toLowerCase().includes(query)));
+        if (!matchesQuery) return false;
+      }
+
+      return true;
+    });
+  }, [activeTrackedHackathons, filter, searchQuery, aiFilteredIds, hackathons, currentUser]);
+
+  // History/Participated Hackathons (status is Participated, Shortlisted, or Won)
+  const participatedHackathons = useMemo(() => {
+    return dbHackathons.filter((h) => h.status === "Participated" || h.status === "Shortlisted" || h.status === "Won");
+  }, [dbHackathons]);
 
   // Active tracked hackathon details for timeline view
   const activeTrackedEvent = useMemo(() => {
-    return trackedHackathons.find((h) => h.id === activeTrackerId) || trackedHackathons[0] || null;
-  }, [trackedHackathons, activeTrackerId]);
+    return filteredTrackedHackathons.find((h) => h._id === activeTrackerId) || filteredTrackedHackathons[0] || null;
+  }, [filteredTrackedHackathons, activeTrackerId]);
 
-  // Toggle tracker addition
-  const handleToggleTrack = (id: string) => {
-    setTrackedIds((prev) => {
-      const isTracked = prev.includes(id);
-      let updated: string[];
-      if (isTracked) {
-        updated = prev.filter((item) => item !== id);
-      } else {
-        updated = [...prev, id];
-      }
-      // If we removed the active tracker item, reset the active tracker pointer
-      if (isTracked && activeTrackerId === id) {
-        if (updated.length > 0) {
-          setActiveTrackerId(updated[0]);
+  // Toggle tracker addition (via DB POST/DELETE)
+  const handleToggleTrack = async (event: any) => {
+    // Check if event is from scraper (using title) or database (already has _id)
+    const titleToCheck = event.title;
+    const existing = dbHackathons.find((h) => h.title === titleToCheck);
+    if (existing) {
+      try {
+        const res = await fetch(`/api/hackathons?id=${existing._id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.success) {
+          setDbHackathons((prev) => prev.filter((item) => item._id !== existing._id));
+          if (activeTrackerId === existing._id) {
+            const remaining = dbHackathons.filter((item) => item._id !== existing._id && (item.status === "Saved" || item.status === "Applied"));
+            if (remaining.length > 0) {
+              setActiveTrackerId(remaining[0]._id);
+            } else {
+              setActiveTrackerId("");
+            }
+          }
         }
-      } else if (!isTracked && prev.length === 0) {
-        setActiveTrackerId(id);
+      } catch (err) {
+        console.error("Error deleting tracked hackathon:", err);
       }
-      return updated;
-    });
+    } else {
+      const session = localStorage.getItem("currentUser");
+      if (!session) return;
+      try {
+        const user = JSON.parse(session);
+        const res = await fetch("/api/hackathons", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: user.username,
+            title: event.title,
+            hosts: event.hosts,
+            date: event.date,
+            location: event.location,
+            isOnline: event.isOnline,
+            prizePool: event.prizePool,
+            category: event.category,
+            description: event.description,
+            skills: event.skills,
+            status: "Saved",
+            applyLink: event.url
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.hackathon) {
+          setDbHackathons((prev) => [data.hackathon, ...prev]);
+          if (!activeTrackerId) {
+            setActiveTrackerId(data.hackathon._id);
+          }
+        }
+      } catch (err) {
+        console.error("Error adding to tracker:", err);
+      }
+    }
   };
+
+  // Update Hackathon Status/Rounds in Database
+  const handleUpdateStatus = async (hackathonId: string, newStatus: string, shortlistedRounds?: number) => {
+    try {
+      const res = await fetch("/api/hackathons", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: hackathonId,
+          status: newStatus,
+          shortlistedRounds: shortlistedRounds ?? 0
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.hackathon) {
+        setDbHackathons((prev) =>
+          prev.map((h) => (h._id === hackathonId ? data.hackathon : h))
+        );
+      }
+    } catch (err) {
+      console.error("Error updating hackathon status:", err);
+    }
+  };;
+
+  // Submit custom manual hackathon
+  const handleSubmitCustomHackathon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formTitle.trim() || !formHosts.trim()) return;
+
+    setIsSubmitting(true);
+    const session = localStorage.getItem("currentUser");
+    if (!session) {
+      setIsSubmitting(false);
+      return;
+    }
+    try {
+      const user = JSON.parse(session);
+      const res = await fetch("/api/hackathons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: user.username,
+          title: formTitle.trim(),
+          hosts: formHosts.trim(),
+          date: formDate.trim() || "TBD",
+          location: formLocation.trim() || (formIsOnline ? "Online" : "Unknown"),
+          isOnline: formIsOnline,
+          prizePool: formPrizePool.trim(),
+          category: formCategory.trim() || "General",
+          description: formDescription.trim(),
+          skills: formSkills.split(",").map(s => s.trim()).filter(s => s.length > 0),
+          status: formStatus,
+          applyLink: formApplyLink.trim()
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.hackathon) {
+        // Clear form fields
+        setFormTitle("");
+        setFormHosts("");
+        setFormDate("");
+        setFormLocation("");
+        setFormIsOnline(false);
+        setFormPrizePool("");
+        setFormCategory("");
+        setFormDescription("");
+        setFormSkills("");
+        setFormStatus("Saved");
+        setFormApplyLink("");
+        
+        // Refresh tracked hackathons list
+        await fetchHackathons(user.username);
+      }
+    } catch (err) {
+      console.error("Error adding custom hackathon:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };;
 
   // Helper for generating custom dates / subtexts for tracker steps
   const getTimelineSteps = (event: HackathonEvent) => {
@@ -507,6 +794,46 @@ export default function HackathonRadar() {
         </div>
       </div>
 
+      {/* Custom AI Semantic Filter */}
+      <div className="warm-card p-6 bg-white border border-[#ECE9DF] rounded-2xl shadow-sm space-y-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="text-xs font-extrabold text-[#7A6218] uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-[#F5C451]" />
+              Custom AI Semantic Filter
+            </span>
+            <p className="text-xs text-[#7C786E]">
+              Type your custom requirements (e.g. "Generative AI hackathons in SF with &gt; 50k prize pool") and let AI filter accordingly.
+            </p>
+          </div>
+          {aiFilteredIds !== null && (
+            <button
+              onClick={handleClearAiFilter}
+              className="text-xs font-bold text-rose-600 hover:text-rose-700 cursor-pointer"
+            >
+              Clear Filter
+            </button>
+          )}
+        </div>
+        <div className="flex gap-3">
+          <input
+            type="text"
+            value={customAiQuery}
+            onChange={(e) => setCustomAiQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAiFilter()}
+            placeholder="e.g. AI hackathons with prize pool &gt; 50,000..."
+            className="flex-1 px-4 py-3 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] text-xs text-[#1E1D1A] placeholder-[#7C786E]/50 focus:outline-none focus:border-[#F5C451]"
+          />
+          <button
+            onClick={handleAiFilter}
+            disabled={isAiFiltering}
+            className="px-6 py-3 bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-extrabold text-xs rounded-xl transition-all flex items-center gap-1 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isAiFiltering ? "Filtering..." : "Filter with AI"}
+          </button>
+        </div>
+      </div>
+
       {/* Discovery Grid */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -527,7 +854,7 @@ export default function HackathonRadar() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredHackathons.map((event) => {
-              const isTracked = trackedIds.includes(event.id);
+              const isTracked = trackedIds.includes(event.title);
               return (
                 <div
                   key={event.id}
@@ -543,7 +870,11 @@ export default function HackathonRadar() {
                         {event.category}
                       </span>
                       
-                      {event.isMatched && (
+                      {event.fitScore !== undefined ? (
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/25 backdrop-blur-sm border border-amber-400/20 text-[10px] text-amber-200 font-bold uppercase tracking-wider flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5 text-[#F5C451]" /> {event.fitScore}% Match
+                        </span>
+                      ) : event.isMatched && (
                         <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/25 backdrop-blur-sm border border-emerald-400/20 text-[10px] text-emerald-200 font-bold uppercase tracking-wider flex items-center gap-1">
                           <Check className="w-3.5 h-3.5" /> Skill Match
                         </span>
@@ -611,7 +942,7 @@ export default function HackathonRadar() {
                     {/* Action buttons */}
                     <div className="pt-2 flex items-center gap-2">
                       <button
-                        onClick={() => handleToggleTrack(event.id)}
+                        onClick={() => handleToggleTrack(event)}
                         className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 shadow-sm ${
                           isTracked
                             ? "bg-[#E5E2D6] text-[#7C786E] border border-[#ECE9DF] shadow-inner"
@@ -661,7 +992,7 @@ export default function HackathonRadar() {
           </p>
         </div>
 
-        {trackedHackathons.length === 0 ? (
+        {activeTrackedHackathons.length === 0 ? (
           <div className="warm-card p-10 text-center text-[#7C786E] bg-white">
             <Clock className="w-10 h-10 text-[#7C786E] opacity-40 mx-auto mb-2" />
             <h3 className="font-bold text-[#1E1D1A] text-sm">No tracked hackathons yet</h3>
@@ -673,51 +1004,57 @@ export default function HackathonRadar() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Sidebar selection of tracked events */}
             <div className="lg:col-span-4 space-y-2">
-              <span className="block text-[9px] text-[#7C786E] font-bold uppercase tracking-wider px-2 mb-2">Tracked Events ({trackedHackathons.length})</span>
+              <span className="block text-[9px] text-[#7C786E] font-bold uppercase tracking-wider px-2 mb-2">Tracked Events ({filteredTrackedHackathons.length})</span>
               <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
-                {trackedHackathons.map((h) => {
-                  const isActive = h.id === activeTrackerId;
-                  return (
-                    <div
-                      key={h.id}
-                      onClick={() => setActiveTrackerId(h.id)}
-                      className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-between shadow-sm ${
-                        isActive
-                          ? "bg-[#FAF9F5] border-[#F5C451] text-[#1E1D1A]"
-                          : "bg-white border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5]"
-                      }`}
-                    >
-                      <div className="min-w-0 pr-2">
-                        <span className="block text-[9px] text-[#7C786E] uppercase font-semibold">{h.hosts}</span>
-                        <h4 className="font-bold text-[#1E1D1A] text-sm truncate mt-0.5">{h.title}</h4>
-                        <div className="flex items-center gap-1.5 mt-1 text-[10px] text-[#7C786E] font-medium">
-                          <span className={`w-1.5 h-1.5 rounded-full ${
-                            h.timelineState === "team_formation" ? "bg-amber-500 animate-pulse" :
-                            h.timelineState === "registration" ? "bg-blue-500 animate-pulse" :
-                            h.timelineState === "submission" ? "bg-purple-500 animate-pulse" : "bg-emerald-500"
-                          }`} />
-                          <span className="capitalize">{h.timelineState.replace("_", " ")}</span>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleTrack(h.id);
-                        }}
-                        className="p-2 text-[#7C786E] hover:text-rose-600 transition-colors"
-                        title="Stop Tracking"
+                {filteredTrackedHackathons.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-[#7C786E] bg-white border border-[#ECE9DF] rounded-2xl">
+                    No tracked hackathons match the active filter.
+                  </div>
+                ) : (
+                  filteredTrackedHackathons.map((h) => {
+                    const isActive = h._id === activeTrackerId;
+                    return (
+                      <div
+                        key={h._id}
+                        onClick={() => setActiveTrackerId(h._id)}
+                        className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-between shadow-sm ${
+                          isActive
+                            ? "bg-[#FAF9F5] border-[#F5C451] text-[#1E1D1A]"
+                            : "bg-white border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5]"
+                        }`}
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  );
-                })}
+                        <div className="min-w-0 pr-2">
+                          <span className="block text-[9px] text-[#7C786E] uppercase font-semibold">{h.hosts}</span>
+                          <h4 className="font-bold text-[#1E1D1A] text-sm truncate mt-0.5">{h.title}</h4>
+                          <div className="flex items-center gap-1.5 mt-1 text-[10px] text-[#7C786E] font-medium">
+                            <span className={`w-1.5 h-1.5 rounded-full ${
+                              h.timelineState === "team_formation" ? "bg-amber-500 animate-pulse" :
+                              h.timelineState === "registration" ? "bg-blue-500 animate-pulse" :
+                              h.timelineState === "submission" ? "bg-purple-500 animate-pulse" : "bg-emerald-500"
+                            }`} />
+                            <span className="capitalize">{h.timelineState ? h.timelineState.replace("_", " ") : "Saved"}</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleTrack(h);
+                          }}
+                          className="p-2 text-[#7C786E] hover:text-rose-600 transition-colors"
+                          title="Stop Tracking"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
 
             {/* Active event timeline dashboard */}
-            {activeTrackedEvent && (
+            {activeTrackedEvent ? (
               <div className="lg:col-span-8 warm-card p-6 md:p-8 space-y-6 bg-white">
                 {/* Event header inside tracker */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EFECE3] pb-6">
@@ -734,11 +1071,52 @@ export default function HackathonRadar() {
                   <div className="flex items-center gap-3">
                     <span className="px-3 py-1 rounded-full bg-[#FAF9F5] border border-[#ECE9DF] text-[10px] text-[#4E4B42] font-semibold uppercase flex items-center gap-1.5">
                       <Users className="w-3.5 h-3.5 text-[#7A6218]" />
-                      {activeTrackedEvent.participants} Teams
+                      {activeTrackedEvent.participants || 0} Teams
                     </span>
-                    <button className="py-1.5 px-4 rounded-xl bg-[#2C2B27] text-white hover:bg-[#1E1D1A] font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer">
+                    <a
+                      href={activeTrackedEvent.url || activeTrackedEvent.applyLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="py-1.5 px-4 rounded-xl bg-[#2C2B27] text-white hover:bg-[#1E1D1A] font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer"
+                    >
                       <span>View Brief</span>
                       <ArrowRight className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+
+                {/* Status Update Actions */}
+                <div className="bg-[#FAF9F5] border border-[#ECE9DF] p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                  <div className="space-y-0.5">
+                    <span className="text-[9px] text-[#7C786E] font-bold uppercase tracking-wider block">Update Application Progress</span>
+                    <span className="text-xs text-[#1E1D1A] font-semibold">Current: <span className="text-[#7A6218]">{activeTrackedEvent.status}</span></span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {activeTrackedEvent.status === "Saved" && (
+                      <button
+                        onClick={() => handleUpdateStatus(activeTrackedEvent._id, "Applied")}
+                        className="px-3 py-1.5 rounded-xl bg-[#FAF9F5] hover:bg-[#FAF4D8] border border-[#ECE9DF] hover:border-[#F5C451] text-xs font-bold text-[#1E1D1A] transition-all cursor-pointer"
+                      >
+                        Mark Applied
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleUpdateStatus(activeTrackedEvent._id, "Participated")}
+                      className="px-3 py-1.5 rounded-xl bg-[#FAF9F5] hover:bg-amber-50 border border-[#ECE9DF] hover:border-[#F5C451] text-xs font-bold text-[#7A6218] transition-all cursor-pointer"
+                    >
+                      Participated
+                    </button>
+                    <button
+                      onClick={() => handleUpdateStatus(activeTrackedEvent._id, "Shortlisted", 1)}
+                      className="px-3 py-1.5 rounded-xl bg-[#FAF9F5] hover:bg-blue-50 border border-[#ECE9DF] hover:border-blue-300 text-xs font-bold text-blue-700 transition-all cursor-pointer"
+                    >
+                      Shortlisted
+                    </button>
+                    <button
+                      onClick={() => handleUpdateStatus(activeTrackedEvent._id, "Won")}
+                      className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#F5C451] hover:brightness-105 text-white text-xs font-black transition-all cursor-pointer shadow-sm"
+                    >
+                      🏆 Won Hackathon
                     </button>
                   </div>
                 </div>
@@ -798,9 +1176,297 @@ export default function HackathonRadar() {
                   ))}
                 </div>
               </div>
+            ) : (
+              <div className="lg:col-span-8 warm-card p-10 text-center text-[#7C786E] bg-white flex flex-col items-center justify-center min-h-[300px]">
+                <Clock className="w-10 h-10 text-[#7C786E] opacity-40 mb-2 animate-pulse" />
+                <h3 className="font-bold text-[#1E1D1A] text-sm">No match for current filter</h3>
+                <p className="text-xs text-[#7C786E] max-w-sm mt-1 mx-auto">
+                  Try choosing another filter tab or clearing your search to see your tracked milestones.
+                </p>
+              </div>
             )}
           </div>
         )}
+      </div>
+
+      {/* Participated Hackathon History Section */}
+      <div className="border-t border-[#EFECE3] pt-10 space-y-6">
+        <div>
+          <h2 className="text-2xl font-extrabold text-[#1E1D1A] tracking-tight flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-[#F5C451]" />
+            Participated Hackathon History
+          </h2>
+          <p className="text-[#7C786E] text-xs mt-1">
+            Review and manage the status of your past hackathons. Updates here directly feed into your AI-generated resume builder.
+          </p>
+        </div>
+
+        {participatedHackathons.length === 0 ? (
+          <div className="warm-card p-10 text-center text-[#7C786E] bg-white">
+            <Trophy className="w-10 h-10 text-[#7C786E] opacity-40 mx-auto mb-2" />
+            <h3 className="font-bold text-[#1E1D1A] text-sm">No history records yet</h3>
+            <p className="text-xs text-[#7C786E] max-w-sm mx-auto mt-1">
+              Mark an active hackathon as Participated, Shortlisted, or Won, or register one manually using the form below.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {participatedHackathons.map((h) => (
+              <div
+                key={h._id}
+                className="warm-card bg-white p-5 border border-[#ECE9DF] hover:border-[#F5C451] transition-all duration-300 rounded-2xl shadow-sm flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex justify-between items-start">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider ${
+                      h.status === "Won" ? "bg-amber-100 text-amber-800 border border-amber-200" :
+                      h.status === "Shortlisted" ? "bg-blue-100 text-blue-800 border border-blue-200" :
+                      "bg-zinc-100 text-zinc-800 border border-zinc-200"
+                    }`}>
+                      {h.status === "Won" ? "🏆 Winner" : h.status === "Shortlisted" ? `Shortlisted` : "Participated"}
+                    </span>
+                    <button
+                      onClick={() => handleToggleTrack(h)}
+                      className="text-[#7C786E] hover:text-rose-600 transition-colors p-1"
+                      title="Delete Record"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <h3 className="font-bold text-[#1E1D1A] text-base mt-3 leading-snug">{h.title}</h3>
+                  <p className="text-xs text-[#7C786E] mt-1">Hosted by {h.hosts || "Unknown Host"}</p>
+                  <p className="text-[11px] text-[#7C786E] mt-1 flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {h.date || "TBD"}
+                  </p>
+                  
+                  {h.description && (
+                    <p className="text-[11px] text-[#7C786E] mt-2 line-clamp-2 italic leading-relaxed">
+                      "{h.description}"
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-[#EFECE3] space-y-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] text-[#7C786E] font-bold uppercase tracking-wider block">Achievement Status</label>
+                    <select
+                      value={h.status}
+                      onChange={(e) => handleUpdateStatus(h._id, e.target.value, h.shortlistedRounds)}
+                      className="w-full px-3 py-2 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] text-xs text-[#1E1D1A] focus:outline-none focus:border-[#F5C451]"
+                    >
+                      <option value="Participated">Just Participated</option>
+                      <option value="Shortlisted">Shortlisted</option>
+                      <option value="Won">Won / Winner</option>
+                    </select>
+                  </div>
+
+                  {h.status === "Shortlisted" && (
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-[#7C786E] font-bold uppercase tracking-wider block">Shortlisted Rounds reached</label>
+                      <div className="flex gap-1.5">
+                        {[1, 2, 3, 4].map((r) => (
+                          <button
+                            key={r}
+                            onClick={() => handleUpdateStatus(h._id, "Shortlisted", r)}
+                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all border ${
+                              (h.shortlistedRounds || 0) === r
+                                ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                                : "bg-[#FAF9F5] border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A]"
+                            }`}
+                          >
+                            R{r}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Manual Add Hackathon Form */}
+      <div className="warm-card p-8 bg-white border border-[#ECE9DF] rounded-3xl shadow-sm space-y-6">
+        <div className="border-b border-[#EFECE3] pb-3">
+          <h3 className="text-lg font-bold text-[#1E1D1A] flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-[#F5C451]" />
+            Register Completed or External Hackathon
+          </h3>
+          <p className="text-xs text-[#7C786E] mt-1">
+            Keep track of hackathons you participated in, won, applied to, or saved to include in your profile and ATS resume.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmitCustomHackathon} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Hackathon Title *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. CalHacks 13.0"
+                value={formTitle}
+                onChange={(e) => setFormTitle(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Host / Organizer *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. UC Berkeley"
+                value={formHosts}
+                onChange={(e) => setFormHosts(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Date / Duration
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. June 25 - 27, 2026"
+                value={formDate}
+                onChange={(e) => setFormDate(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Location
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. San Francisco, CA"
+                value={formLocation}
+                disabled={formIsOnline}
+                onChange={(e) => setFormLocation(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm disabled:opacity-50"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Prize Pool
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. $100,000"
+                value={formPrizePool}
+                onChange={(e) => setFormPrizePool(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Category
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Generative AI & Web3"
+                value={formCategory}
+                onChange={(e) => setFormCategory(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Technologies / Skills (comma separated)
+              </label>
+              <input
+                type="text"
+                placeholder="React, Next.js, Python, Solidity"
+                value={formSkills}
+                onChange={(e) => setFormSkills(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Application Link
+              </label>
+              <input
+                type="url"
+                placeholder="https://calhacks.io"
+                value={formApplyLink}
+                onChange={(e) => setFormApplyLink(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                Participation Status
+              </label>
+              <select
+                value={formStatus}
+                onChange={(e: any) => setFormStatus(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] transition-colors shadow-sm cursor-pointer"
+              >
+                <option value="Saved">Saved</option>
+                <option value="Applied">Applied</option>
+                <option value="Participated">Participated</option>
+                <option value="Shortlisted">Shortlisted</option>
+                <option value="Won">Won / Winner</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
+            <label className="flex items-center gap-2 text-xs text-[#7C786E] cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={formIsOnline}
+                onChange={(e) => {
+                  setFormIsOnline(e.target.checked);
+                  if (e.target.checked) setFormLocation("Online");
+                  else setFormLocation("");
+                }}
+                className="rounded border-[#ECE9DF] text-[#F5C451] focus:ring-[#F5C451] w-4 h-4"
+              />
+              <span>This is an Online / Virtual Hackathon</span>
+            </label>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+              Hackathon Description / Project Built
+            </label>
+            <textarea
+              rows={3}
+              placeholder="Describe the project you built, problem solved, and key tools used (e.g. Created a real-time ledger sync system using Redis and Next.js, winning the sponsor track prize)."
+              value={formDescription}
+              onChange={(e) => setFormDescription(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors resize-none shadow-sm"
+            />
+          </div>
+
+          <div className="pt-2 flex justify-end">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-6 py-3 rounded-xl bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-extrabold text-xs tracking-wider transition-all cursor-pointer shadow-md disabled:opacity-50"
+            >
+              {isSubmitting ? "Registering..." : "Register Hackathon"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

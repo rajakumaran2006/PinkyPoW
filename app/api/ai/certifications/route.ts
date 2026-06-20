@@ -120,7 +120,7 @@ Format your output strictly as a JSON object:
       });
 
     } else if (action === "add-cert") {
-      const { title, issuer, date, link, category, isAiValidated } = body;
+      const { title, issuer, date, link, category, isAiValidated, cloudinaryImageUrl } = body;
       if (!title || !issuer) {
         return NextResponse.json({ error: "Title and issuer are required" }, { status: 400 });
       }
@@ -131,7 +131,8 @@ Format your output strictly as a JSON object:
         date: date || "June 2026",
         link: link || "#",
         category: category || "General",
-        isAiValidated: isAiValidated || false
+        isAiValidated: isAiValidated || false,
+        cloudinaryImageUrl: cloudinaryImageUrl || ""
       });
       await portfolio.save();
 
@@ -193,3 +194,40 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: error.message || "Failed to delete certification" }, { status: 500 });
   }
 }
+
+// PUT: Update an existing certification
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const { clerkId, certId, title, issuer, date, link, category, cloudinaryImageUrl } = body;
+    
+    if (!certId) {
+      return NextResponse.json({ error: "Certification ID is required" }, { status: 400 });
+    }
+
+    const { portfolio } = await getOrCreatePortfolio(clerkId);
+    
+    const cert = portfolio.certificates.find((c: any) => c._id.toString() === certId);
+    if (!cert) {
+      return NextResponse.json({ error: "Certification not found" }, { status: 404 });
+    }
+
+    if (title !== undefined) cert.title = title;
+    if (issuer !== undefined) cert.issuer = issuer;
+    if (date !== undefined) cert.date = date;
+    if (link !== undefined) cert.link = link;
+    if (category !== undefined) cert.category = category;
+    if (cloudinaryImageUrl !== undefined) cert.cloudinaryImageUrl = cloudinaryImageUrl;
+
+    await portfolio.save();
+
+    return NextResponse.json({
+      success: true,
+      certificates: portfolio.certificates
+    });
+  } catch (error: any) {
+    console.error("PUT /api/ai/certifications error:", error);
+    return NextResponse.json({ error: error.message || "Failed to update certification" }, { status: 500 });
+  }
+}
+

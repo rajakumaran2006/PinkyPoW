@@ -47,6 +47,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
       success: true,
       placementScore: user.placementScore || 820,
+      dailyStreak: user.dailyStreak || 5,
       dsaProgress,
     });
   } catch (error: any) {
@@ -132,6 +133,7 @@ Ensure there is exactly one entry for each day from Day 1 to Day ${totalDays}. D
         success: true,
         message: "Personalized plan generated successfully.",
         dsaProgress,
+        dailyStreak: user.dailyStreak || 5,
       });
 
     } else if (action === "generate-problem") {
@@ -154,7 +156,25 @@ Ensure there is exactly one entry for each day from Day 1 to Day ${totalDays}. D
           success: true,
           problems: existingDayProblems.problems,
           dsaProgress,
+          dailyStreak: user.dailyStreak || 5,
         });
+      }
+
+      // Extract all previously solved problems from dailyProblems to analyze pattern
+      const solvedHistory: any[] = [];
+      if (dsaProgress.dailyProblems) {
+        for (const dayProb of dsaProgress.dailyProblems) {
+          for (const prob of dayProb.problems) {
+            if (prob.completed) {
+              solvedHistory.push({
+                day: dayProb.dayNumber,
+                title: prob.title,
+                category: prob.category,
+                difficulty: prob.difficulty
+              });
+            }
+          }
+        }
       }
 
       // Read instructions from disk, fallback to default instructions if reading fails
@@ -171,7 +191,9 @@ Provide a unique problem that fits the topic and level. Return a JSON object wit
       const userPrompt = `Generate exactly ${dsaProgress.problemsPerDay || 2} problem(s) for Day ${targetDay}:
 - Day Focus Topic: ${dayPlan.topic}
 - Skill Level: ${dsaProgress.level || "Intermediate"}
-- Previously Completed Problems to AVOID: ${JSON.stringify(dsaProgress.completedProblems || [])}`;
+- User Interests: ${JSON.stringify(user.interests || [])}
+- Previously Completed Problems to AVOID: ${JSON.stringify(dsaProgress.completedProblems || [])}
+- Solved Problems History (from previous Days 1 to ${targetDay - 1}): ${JSON.stringify(solvedHistory)}`;
 
       const generatedResult = await generateJSON(instructionsPrompt, userPrompt);
       const generatedProblems = (generatedResult.problems || []).map((prob: any, idx: number) => ({
@@ -205,6 +227,71 @@ Provide a unique problem that fits the topic and level. Return a JSON object wit
         success: true,
         problems: generatedProblems,
         dsaProgress,
+        dailyStreak: user.dailyStreak || 5,
+      });
+
+    } else if (action === "toggle-problem") {
+      const { problemId, completed } = body;
+      if (!problemId) {
+        return NextResponse.json(
+          { error: "Problem ID is required to toggle completion status." },
+          { status: 400 }
+        );
+      }
+
+      let matchedTitle = "";
+      let difficulty = "Medium";
+
+      if (dsaProgress.dailyProblems) {
+        for (const dayProb of dsaProgress.dailyProblems) {
+          const prob = dayProb.problems.find(p => p.id === problemId);
+          if (prob) {
+            prob.completed = completed;
+            prob.solvedAt = completed ? new Date() : undefined;
+            matchedTitle = prob.title;
+            difficulty = prob.difficulty;
+            break;
+          }
+        }
+      }
+
+      if (matchedTitle) {
+        if (completed) {
+          if (!dsaProgress.completedProblems.includes(matchedTitle)) {
+            dsaProgress.completedProblems.push(matchedTitle);
+          }
+          let scoreDelta = 30;
+          if (difficulty === "Easy") scoreDelta = 15;
+          else if (difficulty === "Hard") scoreDelta = 55;
+          user.placementScore = Math.min((user.placementScore || 0) + scoreDelta, 1000);
+        } else {
+          dsaProgress.completedProblems = dsaProgress.completedProblems.filter(t => t !== matchedTitle);
+          let scoreDelta = 30;
+          if (difficulty === "Easy") scoreDelta = 15;
+          else if (difficulty === "Hard") scoreDelta = 55;
+          user.placementScore = Math.max((user.placementScore || 0) - scoreDelta, 100);
+        }
+        
+        // Recalculate streak if today is fully completed or incomplete
+        const currentDayProbs = dsaProgress.dailyProblems?.find(dp => dp.dayNumber === dsaProgress.currentDayIndex);
+        const allCurrentDaySolved = currentDayProbs && currentDayProbs.problems.length > 0 && currentDayProbs.problems.every(p => p.completed);
+        if (allCurrentDaySolved) {
+          user.dailyStreak = (user.dailyStreak || 0) + 1;
+        } else if (!completed && user.dailyStreak > 0) {
+          // If uncompleting a problem, revert the streak increment
+          user.dailyStreak = Math.max(0, user.dailyStreak - 1);
+        }
+        await user.save();
+      }
+
+      await dsaProgress.save();
+
+      return NextResponse.json({
+        success: true,
+        message: "Problem status updated successfully.",
+        dsaProgress,
+        placementScore: user.placementScore,
+        dailyStreak: user.dailyStreak || 5,
       });
 
     } else if (action === "submit-solution") {
@@ -242,13 +329,17 @@ Provide a unique problem that fits the topic and level. Return a JSON object wit
         dsaProgress.completedProblems.push(matchedTitle);
       }
 
-      // Save user score updates
-      user.placementScore = Math.min((user.placementScore || 0) + scoreDelta, 1000);
-      await user.save();
-
       // Check if all problems for the current day index are completed
       const currentDayProbs = dsaProgress.dailyProblems?.find(dp => dp.dayNumber === dsaProgress.currentDayIndex);
       const allCurrentDaySolved = currentDayProbs && currentDayProbs.problems.length > 0 && currentDayProbs.problems.every(p => p.completed);
+
+      if (allCurrentDaySolved) {
+        user.dailyStreak = (user.dailyStreak || 0) + 1;
+      }
+
+      // Save user score updates
+      user.placementScore = Math.min((user.placementScore || 0) + scoreDelta, 1000);
+      await user.save();
 
       // We allow auto-advancing, but we will let the client handle when to explicitly advance or trigger it
       await dsaProgress.save();
@@ -258,6 +349,7 @@ Provide a unique problem that fits the topic and level. Return a JSON object wit
         message: "Solution accepted and saved successfully.",
         dsaProgress,
         placementScore: user.placementScore,
+        dailyStreak: user.dailyStreak || 5,
       });
 
     } else if (action === "advance-day") {
@@ -266,12 +358,15 @@ Provide a unique problem that fits the topic and level. Return a JSON object wit
       
       if (currentDay < totalDays) {
         dsaProgress.currentDayIndex = currentDay + 1;
+        user.dailyStreak = (user.dailyStreak || 0) + 1;
+        await user.save();
         await dsaProgress.save();
       }
 
       return NextResponse.json({
         success: true,
         dsaProgress,
+        dailyStreak: user.dailyStreak || 5,
       });
 
     } else if (action === "reset-plan") {
@@ -285,6 +380,7 @@ Provide a unique problem that fits the topic and level. Return a JSON object wit
         success: true,
         message: "DSA plan has been successfully reset.",
         dsaProgress,
+        dailyStreak: user.dailyStreak || 5,
       });
     }
 

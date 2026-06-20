@@ -72,24 +72,70 @@ export default function Projects() {
   const [compileProgress, setCompileProgress] = useState(0);
   const [compileLogs, setCompileLogs] = useState<string[]>([]);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [compiledLaTeX, setCompiledLaTeX] = useState("");
 
-  // Fetch projects on mount
-  const fetchProjects = async () => {
-    try {
-      const res = await fetch("/api/ai/projects");
-      const data = await res.json();
-      if (data.success) {
-        setProjects(data.projects);
-      }
-    } catch (err) {
-      console.error("Error loading projects:", err);
-    } finally {
-      setLoading(false);
-    }
+  const [dbHackathons, setDbHackathons] = useState<any[]>([]);
+  const [dbInternships, setDbInternships] = useState<any[]>([]);
+
+  // Compiled Resume Data State
+  const [compiledUserData, setCompiledUserData] = useState<any>(null);
+  const [compiledInternships, setCompiledInternships] = useState<any[]>([]);
+  const [compiledHackathons, setCompiledHackathons] = useState<any[]>([]);
+  const [compiledCerts, setCompiledCerts] = useState<any[]>([]);
+  const [compiledDsaCount, setCompiledDsaCount] = useState(0);
+  const [compiledDsaStreak, setCompiledDsaStreak] = useState(5);
+  const [downloadNotification, setDownloadNotification] = useState<{ show: boolean; message: string; type: "success" | "info" } | null>(null);
+
+  const triggerToast = (message: string, type: "success" | "info" = "success") => {
+    setDownloadNotification({ show: true, message, type });
+    setTimeout(() => {
+      setDownloadNotification(null);
+    }, 4000);
   };
 
+  // Fetch projects, internships, and hackathons on mount
   useEffect(() => {
-    fetchProjects();
+    const session = localStorage.getItem("currentUser");
+    let username = "Najla1208";
+    if (session) {
+      try {
+        const user = JSON.parse(session);
+        if (user && user.username) username = user.username;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    const loadAllData = async () => {
+      try {
+        // Fetch projects
+        const projRes = await fetch("/api/ai/projects");
+        const projData = await projRes.json();
+        if (projData.success) {
+          setProjects(projData.projects);
+        }
+
+        // Fetch internships
+        const internRes = await fetch(`/api/internships?username=${username}&type=internship`);
+        const internData = await internRes.json();
+        if (internData.success && internData.internships) {
+          setDbInternships(internData.internships);
+        }
+
+        // Fetch hackathons
+        const hackRes = await fetch(`/api/hackathons?username=${username}`);
+        const hackData = await hackRes.json();
+        if (hackData.success && hackData.hackathons) {
+          setDbHackathons(hackData.hackathons);
+        }
+      } catch (err) {
+        console.error("Error loading resume datasources:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAllData();
   }, []);
 
   // Handle Form Submission for Manual Add Project
@@ -272,7 +318,7 @@ export default function Projects() {
   };
 
   // Run Compilation Simulation
-  const startResumeCompilation = () => {
+  const startResumeCompilation = async () => {
     setIsCompiling(true);
     setCompileProgress(0);
     setCompileLogs([]);
@@ -286,6 +332,211 @@ export default function Projects() {
       { text: "Rendering final compiled ATS-compliant PDF document...", delay: 3200 },
       { text: "Compilation successful! Ready for download.", delay: 3800 }
     ];
+
+    let activeUsername = "Najla1208";
+    let activeName = "Raja Kumaran";
+    let activeEmail = "raja@pinkypow.dev";
+    let activeCollege = "College of Engineering";
+    let activeCourse = "B.Tech Information Technology";
+    let activeYear = "2026";
+    let activeInterests = ["Full-Stack Development", "AI Agents", "Systems Programming"];
+    let activeGPA = "8.5/10";
+    let activeClerkId = "guest_clerk_id";
+
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("currentUser");
+      if (stored) {
+        try {
+          const user = JSON.parse(stored);
+          if (user) {
+            if (user.username) activeUsername = user.username;
+            if (user.name) activeName = user.name;
+            if (user.email) activeEmail = user.email;
+            if (user.college) activeCollege = user.college;
+            if (user.course) activeCourse = user.course;
+            if (user.yearOfStudy) activeYear = user.yearOfStudy;
+            if (user.interests) activeInterests = Array.isArray(user.interests) ? user.interests : [user.interests];
+            if (user.gpa) activeGPA = user.gpa;
+            if (user.clerkId) activeClerkId = user.clerkId;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    let fetchedInternships: any[] = [];
+    let fetchedCerts: any[] = [];
+    let fetchedHackathons: any[] = [];
+    let dsaCount = 0;
+    let dsaStreak = 5;
+
+    // Load dynamic DB values from custom profile route
+    try {
+      const profileRes = await fetch(`/api/users/profile?username=${activeUsername}`);
+      const profileData = await profileRes.json();
+      if (profileData.success && profileData.user) {
+        const dbUser = profileData.user;
+        activeName = dbUser.name || activeName;
+        activeEmail = dbUser.email || activeEmail;
+        activeCollege = dbUser.college || activeCollege;
+        activeCourse = dbUser.course || activeCourse;
+        activeYear = dbUser.yearOfStudy || activeYear;
+        activeInterests = Array.isArray(dbUser.interests) ? dbUser.interests : [dbUser.interests || ""];
+        activeGPA = dbUser.gpa || activeGPA;
+        activeClerkId = dbUser.clerkId || activeClerkId;
+        
+        if (profileData.internships) {
+          fetchedInternships = profileData.internships;
+        }
+        if (profileData.hackathons) {
+          fetchedHackathons = profileData.hackathons;
+        }
+        if (profileData.portfolio && profileData.portfolio.certificates) {
+          fetchedCerts = profileData.portfolio.certificates;
+        }
+        if (profileData.dsaProgress) {
+          dsaCount = profileData.dsaProgress.completedProblems?.length || 0;
+        }
+        dsaStreak = dbUser.dailyStreak || 5;
+
+        // Keep local reference for the downloader
+        setCompiledUserData(dbUser);
+        setCompiledInternships(includeInternships ? fetchedInternships : []);
+        setCompiledHackathons(includeHackathons ? fetchedHackathons : []);
+        setCompiledCerts(includeCerts ? fetchedCerts : []);
+        setCompiledDsaCount(dsaCount);
+        setCompiledDsaStreak(dsaStreak);
+      }
+    } catch (profileErr) {
+      console.error("Error loading real-time profile. Falling back to local data.", profileErr);
+      
+      // Fallback local refs
+      setCompiledUserData({
+        name: activeName,
+        email: activeEmail,
+        college: activeCollege,
+        course: activeCourse,
+        yearOfStudy: activeYear,
+        interests: activeInterests,
+        gpa: activeGPA,
+        clerkId: activeClerkId
+      });
+    }
+
+    // Build LaTeX CV using retrieved data
+    let latexSource = `\\documentclass[10pt,letterpaper]{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage[left=0.75in,top=0.6in,right=0.75in,bottom=0.6in]{geometry}
+\\usepackage{hyperref}
+\\usepackage{titlesec}
+\\usepackage{enumitem}
+
+\\pagestyle{empty}
+\\urlstyle{same}
+
+\\titleformat{\\section}{\\large\\bfseries}{}{0em}{}[\\titlerule]
+\\titlespacing{\\section}{0pt}{10pt}{5pt}
+
+\\begin{document}
+
+\\begin{center}
+    {\\LARGE \\bfseries ${activeName}} \\\\
+    \\vspace{2pt}
+    Email: \\href{mailto:${activeEmail}}{${activeEmail}} | Website: \\href{https://pinkypow.dev}{pinkypow.dev}
+\\end{center}
+
+\\section{Education}
+\\textbf{${activeCollege}} \\hfill ${activeYear} \\\\
+${activeCourse} \\hfill GPA: ${activeGPA}
+
+`;
+
+    // Internships / Experience
+    if (includeInternships && fetchedInternships.length > 0) {
+      latexSource += `\\section{Professional Experience}\n`;
+      fetchedInternships.forEach((item) => {
+        const dateRange = item.startDate ? `${item.startDate} -- ${item.endDate || "Present"}` : "June 2026";
+        latexSource += `\\textbf{${item.company}} \\hfill ${dateRange} \\\\\n`;
+        latexSource += `\\textit{${item.role}} \\hfill ${item.location || "Remote"} \\\\\n`;
+        if (item.description) {
+          latexSource += `\\begin{itemize}[noitemsep,topsep=2pt]\n`;
+          latexSource += `    \\item ${item.description}\n`;
+          latexSource += `\\end{itemize}\n\\vspace{4pt}\n`;
+        } else {
+          latexSource += `\\begin{itemize}[noitemsep,topsep=2pt]\n`;
+          latexSource += `    \\item Managed project pipelines and collaborated on the development of React/Next.js frameworks.\n`;
+          latexSource += `\\end{itemize}\n\\vspace{4pt}\n`;
+        }
+      });
+    }
+
+    // Projects Section
+    if (includeProjects && projects.length > 0) {
+      latexSource += `\\section{Key Portfolio Projects}\n`;
+      projects.forEach((proj) => {
+        latexSource += `\\textbf{${proj.title}} \\hfill \\textit{${proj.techStack.join(", ")}} \\\\\n`;
+        latexSource += `\\begin{itemize}[noitemsep,topsep=2pt]\n`;
+        latexSource += `    \\item ${proj.description}\n`;
+        if (proj.phases) {
+          const completedTasks = proj.phases
+            .flatMap((p) => p.tasks)
+            .filter((t) => t.completed)
+            .map((t) => t.name)
+            .slice(0, 2);
+          if (completedTasks.length > 0) {
+            latexSource += `    \\item Architected and successfully completed: ${completedTasks.join(" and ")}.\n`;
+          }
+        }
+        latexSource += `\\end{itemize}\n\\vspace{4pt}\n`;
+      });
+    }
+
+    // Hackathons Section
+    if (includeHackathons && fetchedHackathons.length > 0) {
+      latexSource += `\\section{Hackathons \\& Achievements}\n`;
+      fetchedHackathons.forEach((hack) => {
+        const statusStr = hack.status ? ` (${hack.status})` : "";
+        latexSource += `\\textbf{${hack.title}}${statusStr} -- \\textit{${hack.hosts || "Organizer"}} \\hfill ${hack.date || "June 2026"} \\\\\n`;
+        if (hack.description || (hack.skills && hack.skills.length > 0)) {
+          latexSource += `\\begin{itemize}[noitemsep,topsep=2pt]\n`;
+          if (hack.description) {
+            latexSource += `    \\item ${hack.description}\n`;
+          }
+          if (hack.skills && hack.skills.length > 0) {
+            latexSource += `    \\item \\textbf{Skills used:} ${hack.skills.join(", ")}\n`;
+          }
+          latexSource += `\\end{itemize}\n\\vspace{4pt}\n`;
+        }
+      });
+    }
+
+    // Data Structures & Algorithms
+    latexSource += `\\section{Data Structures \\& Algorithms}\n`;
+    latexSource += `\\begin{itemize}[noitemsep,topsep=2pt]\n`;
+    latexSource += `    \\item Completed \\textbf{${dsaCount}} data structures and algorithms challenges on platforms like LeetCode and GeeksforGeeks.\n`;
+    latexSource += `    \\item Maintained a continuous problem-solving coding streak of \\textbf{${dsaStreak}} days.\n`;
+    latexSource += `\\end{itemize}\n\\vspace{4pt}\n`;
+
+    // Certifications Section
+    if (includeCerts && fetchedCerts.length > 0) {
+      latexSource += `\\section{Certifications & Credentials}\n`;
+      latexSource += `\\begin{itemize}[noitemsep,topsep=2pt]\n`;
+      fetchedCerts.forEach((cert) => {
+        const issuerStr = cert.issuer ? ` (${cert.issuer})` : "";
+        latexSource += `    \\item \\textbf{${cert.title || cert.name}}${issuerStr} -- Verified credential category: ${cert.category || "General"}.\n`;
+      });
+      latexSource += `\\end{itemize}\n\\vspace{4pt}\n`;
+    }
+
+    // Skills Section
+    latexSource += `\\section{Technical Skills}\n`;
+    latexSource += `\\textbf{Interests:} ${activeInterests.join(", ")} \\\\\n`;
+    latexSource += `\\textbf{Core Stack:} React, Next.js, Node.js, TypeScript, Python, MongoDB, SQL, Git\n`;
+
+    latexSource += `\\end{document}\n`;
+
+    setCompiledLaTeX(latexSource);
 
     steps.forEach((step, idx) => {
       setTimeout(() => {
@@ -746,7 +997,7 @@ export default function Projects() {
                   )}
                   <div>
                     <span className="block font-bold text-[#1E1D1A]">Internships Tracker Data</span>
-                    <span className="block text-[10px] text-[#7C786E]">1 active placement, 2 prior</span>
+                    <span className="block text-[10px] text-[#7C786E]">{dbInternships.length} registered internships</span>
                   </div>
                 </div>
 
@@ -762,7 +1013,7 @@ export default function Projects() {
                   )}
                   <div>
                     <span className="block font-bold text-[#1E1D1A]">Completed Hackathons</span>
-                    <span className="block text-[10px] text-[#7C786E]">3 verified victories</span>
+                    <span className="block text-[10px] text-[#7C786E]">{dbHackathons.length} registered hackathons</span>
                   </div>
                 </div>
 
@@ -885,7 +1136,8 @@ export default function Projects() {
             <div className="pt-2 grid grid-cols-2 gap-3 text-xs font-bold">
               <button
                 onClick={() => {
-                  alert("LaTeX Source copied to clipboard!");
+                  navigator.clipboard.writeText(compiledLaTeX);
+                  triggerToast("LaTeX Source copied to clipboard!");
                 }}
                 className="py-3 px-4 rounded-xl border border-[#ECE9DF] hover:bg-[#FAF9F5] text-[#1E1D1A] flex items-center justify-center gap-1.5 cursor-pointer bg-white"
               >
@@ -894,9 +1146,169 @@ export default function Projects() {
               </button>
               
               <button
-                onClick={() => {
-                  alert("Downloading ATS_Resume_Raja_Kumaran.pdf...");
+                onClick={async () => {
                   setShowDownloadModal(false);
+                  triggerToast("Compiling and generating PDF...", "info");
+                  try {
+                    const { jsPDF } = await import("jspdf");
+                    const doc = new jsPDF({
+                      orientation: "portrait",
+                      unit: "pt",
+                      format: "letter"
+                    });
+
+                    const centerText = (text: string, y: number, size: number, style = "normal") => {
+                      doc.setFont("helvetica", style);
+                      doc.setFontSize(size);
+                      const textWidth = doc.getTextWidth(text);
+                      const x = (doc.internal.pageSize.getWidth() - textWidth) / 2;
+                      doc.text(text, x, y);
+                    };
+
+                    const addSectionHeader = (title: string, y: number) => {
+                      doc.setFont("helvetica", "bold");
+                      doc.setFontSize(11);
+                      doc.setTextColor(30, 29, 26);
+                      doc.text(title.toUpperCase(), 54, y);
+                      doc.setDrawColor(239, 236, 227);
+                      doc.setLineWidth(1);
+                      doc.line(54, y + 4, doc.internal.pageSize.getWidth() - 54, y + 4);
+                      return y + 18;
+                    };
+
+                    let yPos = 50;
+
+                    // Header
+                    centerText(compiledUserData?.name || "Raja Kumaran", yPos, 16, "bold");
+                    yPos += 18;
+                    
+                    const contactInfo = `Email: ${compiledUserData?.email || "raja@pinkypow.dev"} | College: ${compiledUserData?.college || "College of Engineering"}`;
+                    centerText(contactInfo, yPos, 9, "normal");
+                    yPos += 22;
+
+                    // Education
+                    yPos = addSectionHeader("Education", yPos);
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(10);
+                    doc.text(compiledUserData?.college || "College of Engineering", 54, yPos);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(compiledUserData?.yearOfStudy || "2026", doc.internal.pageSize.getWidth() - 54 - doc.getTextWidth(compiledUserData?.yearOfStudy || "2026"), yPos);
+                    yPos += 12;
+                    doc.text(`${compiledUserData?.course || "B.Tech Information Technology"} (GPA: ${compiledUserData?.gpa || "8.5/10"})`, 54, yPos);
+                    yPos += 20;
+
+                    // Experience
+                    if (includeInternships && compiledInternships.length > 0) {
+                      yPos = addSectionHeader("Professional Experience", yPos);
+                      compiledInternships.forEach((item) => {
+                        doc.setFont("helvetica", "bold");
+                        doc.text(item.company || "Company", 54, yPos);
+                        const dateRange = item.startDate ? `${item.startDate} - ${item.endDate || "Present"}` : "Active";
+                        doc.setFont("helvetica", "normal");
+                        doc.text(dateRange, doc.internal.pageSize.getWidth() - 54 - doc.getTextWidth(dateRange), yPos);
+                        yPos += 12;
+
+                        doc.setFont("helvetica", "oblique");
+                        doc.text(item.role || "Intern", 54, yPos);
+                        const loc = item.location || "Remote";
+                        doc.setFont("helvetica", "normal");
+                        doc.text(loc, doc.internal.pageSize.getWidth() - 54 - doc.getTextWidth(loc), yPos);
+                        yPos += 12;
+
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(9);
+                        const desc = item.description || "Collaborated on codebase components and resolved project pipelines.";
+                        const splitDesc = doc.splitTextToSize(`• ${desc}`, doc.internal.pageSize.getWidth() - 108);
+                        doc.text(splitDesc, 54, yPos);
+                        yPos += (splitDesc.length * 11) + 8;
+                      });
+                      yPos += 8;
+                    }
+
+                    // Projects
+                    if (includeProjects && projects.length > 0) {
+                      yPos = addSectionHeader("Key Portfolio Projects", yPos);
+                      projects.forEach((proj) => {
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(10);
+                        doc.text(proj.title || "Project", 54, yPos);
+                        const techStr = proj.techStack ? proj.techStack.join(", ") : "";
+                        doc.setFont("helvetica", "normal");
+                        doc.text(techStr, doc.internal.pageSize.getWidth() - 54 - doc.getTextWidth(techStr), yPos);
+                        yPos += 12;
+
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(9);
+                        const splitDesc = doc.splitTextToSize(`• ${proj.description}`, doc.internal.pageSize.getWidth() - 108);
+                        doc.text(splitDesc, 54, yPos);
+                        yPos += (splitDesc.length * 11) + 8;
+                      });
+                      yPos += 8;
+                    }
+
+                    // Hackathons
+                    if (includeHackathons && compiledHackathons.length > 0) {
+                      yPos = addSectionHeader("Hackathons & Achievements", yPos);
+                      compiledHackathons.forEach((hack) => {
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(10);
+                        doc.text(`${hack.title} (${hack.status || "Participated"})`, 54, yPos);
+                        doc.setFont("helvetica", "normal");
+                        doc.text(hack.date || "", doc.internal.pageSize.getWidth() - 54 - doc.getTextWidth(hack.date || ""), yPos);
+                        yPos += 12;
+
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(9);
+                        const splitDesc = doc.splitTextToSize(`• Hosted by ${hack.hosts || "Devpost"}. ${hack.description || ""}`, doc.internal.pageSize.getWidth() - 108);
+                        doc.text(splitDesc, 54, yPos);
+                        yPos += (splitDesc.length * 11) + 8;
+                      });
+                      yPos += 8;
+                    }
+
+                    // DSA
+                    yPos = addSectionHeader("Data Structures & Algorithms", yPos);
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(9);
+                    doc.text(`• Solved ${compiledDsaCount} competitive programming algorithms on LeetCode/HackerRank.`, 54, yPos);
+                    yPos += 11;
+                    doc.text(`• Maintained an active problem solving daily streak of ${compiledDsaStreak} days.`, 54, yPos);
+                    yPos += 20;
+
+                    // Certifications
+                    if (includeCerts && compiledCerts.length > 0) {
+                      yPos = addSectionHeader("Certifications & Credentials", yPos);
+                      doc.setFont("helvetica", "normal");
+                      doc.setFontSize(9);
+                      compiledCerts.forEach((cert) => {
+                        doc.text(`• Verified: ${cert.title} (${cert.issuer}) - category: ${cert.category || "General"}`, 54, yPos);
+                        yPos += 11;
+                      });
+                      yPos += 8;
+                    }
+
+                    // Skills
+                    yPos = addSectionHeader("Technical Skills & Interests", yPos);
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(9);
+                    doc.text("Interests: ", 54, yPos);
+                    doc.setFont("helvetica", "normal");
+                    const intStr = Array.isArray(compiledUserData?.interests) ? compiledUserData.interests.join(", ") : "Web Applications, System Design";
+                    doc.text(intStr, 105, yPos);
+                    yPos += 12;
+
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Core Stack: ", 54, yPos);
+                    doc.setFont("helvetica", "normal");
+                    doc.text("React, Next.js, Node.js, TypeScript, Python, MongoDB, SQL, Git", 112, yPos);
+
+                    const finalFilename = `ATS_Resume_${(compiledUserData?.name || "Raja_Kumaran").replace(/\s+/g, "_")}.pdf`;
+                    doc.save(finalFilename);
+                    triggerToast(`Downloaded ${finalFilename} successfully!`);
+                  } catch (err) {
+                    console.error("PDF generation error:", err);
+                    triggerToast("Failed to render PDF client-side.", "info");
+                  }
                 }}
                 className="py-3 px-4 rounded-xl bg-[#2C2B27] text-white hover:bg-[#1E1D1A] flex items-center justify-center gap-1.5 cursor-pointer"
               >
@@ -905,6 +1317,19 @@ export default function Projects() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {downloadNotification && (
+        <div className="fixed bottom-6 right-6 bg-[#FAF6EA] border border-[#ECE9DF] text-[#1E1D1A] px-5 py-4 rounded-2xl shadow-2xl z-55 flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
+          <div className={`p-1.5 rounded-full ${downloadNotification.type === 'info' ? 'bg-[#FAF4D8] border-[#E8DFB3] text-[#7A6218]' : 'bg-emerald-50 border-emerald-250 text-emerald-700'}`}>
+            <CheckCircle className="w-4 h-4" />
+          </div>
+          <span className="text-xs font-bold">{downloadNotification.message}</span>
+          <button onClick={() => setDownloadNotification(null)} className="ml-2 text-[#7C786E] hover:text-[#1E1D1A] cursor-pointer">
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
     </div>

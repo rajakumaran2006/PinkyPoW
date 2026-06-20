@@ -9,27 +9,90 @@ export async function POST(req: Request) {
     await connectDB();
     
     const body = await req.json();
-    const { clerkId, name, email, techStack, platformUsernames, skillLevel } = body;
+    const {
+      username,
+      password,
+      name,
+      email,
+      techStack,
+      platformUsernames,
+      skillLevel,
+      college,
+      collegeLocation,
+      collegeCountry,
+      collegeState,
+      course,
+      yearOfStudy,
+      interests,
+      fullStackStack,
+      fullStackLevel,
+      fullStackBuiltApps,
+      gpa,
+      graduationDate,
+      priorHackathons,
+      preferredLocationType,
+      preferredRole,
+      certInterests
+    } = body;
     
-    if (!clerkId || !email || !name) {
+    if (!username || !password || !email || !name) {
       return NextResponse.json(
-        { error: 'Missing required fields (clerkId, email, name)' },
+        { error: 'Missing required fields (username, password, email, name)' },
         { status: 400 }
       );
     }
+
+    // Check duplicate username
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return NextResponse.json(
+        { error: 'Username is already taken' },
+        { status: 400 }
+      );
+    }
+
+    // Check duplicate email
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return NextResponse.json(
+        { error: 'Email is already registered' },
+        { status: 400 }
+      );
+    }
+
+    const clerkId = username; // Use username as clerkId for compatibility with dashboard endpoints
     
     // Map skillLevel (1-10) to placementScore (out of 1000). e.g., 8/10 -> 820.
     const placementScore = skillLevel ? Math.min(Math.max(skillLevel * 82, 100), 1000) : 400;
     
     // 1. Save or update the User profile
     const user = await User.findOneAndUpdate(
-      { clerkId },
+      { username },
       {
         name,
         email,
+        username,
+        password,
+        clerkId,
         techStack: techStack || [],
         platformUsernames: platformUsernames || { leetcode: '', hackerrank: '', codechef: '' },
         placementScore,
+        college: college || "",
+        collegeLocation: collegeLocation || "",
+        collegeCountry: collegeCountry || "",
+        collegeState: collegeState || "",
+        course: course || "",
+        yearOfStudy: yearOfStudy || "",
+        interests: interests || [],
+        fullStackStack: fullStackStack || "",
+        fullStackLevel: fullStackLevel || "",
+        fullStackBuiltApps: fullStackBuiltApps || "",
+        gpa: gpa || "",
+        graduationDate: graduationDate || "",
+        priorHackathons: priorHackathons || "",
+        preferredLocationType: preferredLocationType || "",
+        preferredRole: preferredRole || "",
+        certInterests: certInterests || []
       },
       { new: true, upsert: true }
     );

@@ -136,6 +136,7 @@ export default function DynamicCodingEngine() {
   // Daily Challenge Generation States
   const [generatingProblems, setGeneratingProblems] = useState(false);
   const [streakPoints, setStreakPoints] = useState(820);
+  const [dailyStreak, setDailyStreak] = useState(5);
 
   // Interactive Code Workspace Simulation Modal
   const [activeSolveProblem, setActiveSolveProblem] = useState<Problem | null>(null);
@@ -165,6 +166,7 @@ export default function DynamicCodingEngine() {
       if (data.success) {
         setPlanData(data.dsaProgress);
         setStreakPoints(data.placementScore || 820);
+        setDailyStreak(data.dailyStreak || 5);
       }
     } catch (error) {
       console.error("Error fetching DSA plan:", error);
@@ -324,6 +326,7 @@ export default function DynamicCodingEngine() {
       const data = await res.json();
       if (data.success) {
         setPlanData(data.dsaProgress);
+        setDailyStreak(data.dailyStreak || 5);
       }
     } catch (err) {
       console.error("Error creating plan:", err);
@@ -358,6 +361,7 @@ export default function DynamicCodingEngine() {
       const data = await res.json();
       if (data.success) {
         setPlanData(data.dsaProgress);
+        setDailyStreak(data.dailyStreak || 5);
       }
     } catch (err) {
       console.error("Error generating problems:", err);
@@ -380,6 +384,7 @@ export default function DynamicCodingEngine() {
       const data = await res.json();
       if (data.success) {
         setPlanData(data.dsaProgress);
+        setDailyStreak(data.dailyStreak || 5);
       }
     } catch (err) {
       console.error("Error advancing day:", err);
@@ -401,6 +406,7 @@ export default function DynamicCodingEngine() {
       const data = await res.json();
       if (data.success) {
         setPlanData(data.dsaProgress);
+        setDailyStreak(data.dailyStreak || 5);
         resetChat();
       }
     } catch (err) {
@@ -420,6 +426,28 @@ export default function DynamicCodingEngine() {
 
   const handleCloseSolveModal = () => {
     setActiveSolveProblem(null);
+  };
+
+  const handleToggleProblemCheckbox = async (problemId: string, completed: boolean) => {
+    try {
+      const res = await fetch("/api/ai/dsa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "toggle-problem",
+          problemId,
+          completed
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPlanData(data.dsaProgress);
+        setStreakPoints(data.placementScore || 820);
+        setDailyStreak(data.dailyStreak || 5);
+      }
+    } catch (err) {
+      console.error("Error toggling problem status:", err);
+    }
   };
 
   const handleRunTests = () => {
@@ -450,6 +478,7 @@ export default function DynamicCodingEngine() {
           "STATUS: ACCEPTED"
         ]);
         setStreakPoints(data.placementScore || 820);
+        setDailyStreak(data.dailyStreak || 5);
         // Refresh local plan status
         setPlanData(data.dsaProgress);
 
@@ -937,8 +966,8 @@ export default function DynamicCodingEngine() {
         {/* Streak & Score Widget */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FAF4D8] border border-[#E8DFB3] text-[#7A6218] font-bold text-xs">
-            <Flame className="w-4 h-4 text-[#F5C451]" />
-            <span>Active Progress</span>
+            <Flame className="w-4 h-4 text-[#F5C451] fill-current" />
+            <span>Streak: {dailyStreak} Days</span>
           </div>
 
           <div className="px-3.5 py-1.5 rounded-xl bg-white border border-[#ECE9DF] font-bold text-xs text-[#1E1D1A] shadow-sm">
@@ -1101,14 +1130,19 @@ export default function DynamicCodingEngine() {
                       }`}
                     >
                       <div className="flex items-start gap-3.5 min-w-0">
-                        <div className="shrink-0 mt-1">
+                        {/* Interactive Checkbox */}
+                        <div
+                          className="shrink-0 mt-1 cursor-pointer select-none"
+                          onClick={() => handleToggleProblemCheckbox(problem.id, !problem.completed)}
+                          title={problem.completed ? "Mark incomplete" : "Mark completed"}
+                        >
                           {problem.completed ? (
-                            <div className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center">
+                            <div className="w-5 h-5 rounded-md bg-emerald-600 border border-emerald-700 text-white flex items-center justify-center shadow-sm hover:scale-105 transition-all">
                               <Check className="w-3.5 h-3.5 stroke-[3]" />
                             </div>
                           ) : (
-                            <div className="w-5 h-5 rounded-md border border-[#ECE9DF] bg-white flex items-center justify-center text-[#7C786E]">
-                              <Code className="w-3 h-3" />
+                            <div className="w-5 h-5 rounded-md border border-[#ECE9DF] bg-white hover:border-[#7A6218] flex items-center justify-center text-transparent hover:text-[#7C786E]/40 transition-colors">
+                              <Check className="w-3 h-3 stroke-[2]" />
                             </div>
                           )}
                         </div>

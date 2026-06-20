@@ -53,6 +53,7 @@ export default function CommunicationCoach() {
     confidenceEstimate: string;
     feedback: string;
     nextChallenge: string;
+    fluencyScore?: number;
   } | null>(null);
 
   // Hook instantiation
@@ -66,6 +67,69 @@ export default function CommunicationCoach() {
     speak,
     stopSpeaking
   } = useVoiceCoach();
+
+  // Fluency & Real-time listening metrics tracking
+  const recordingStartTime = useRef<number | null>(null);
+  const lastSpeechTime = useRef<number | null>(null);
+  const pauseCount = useRef(0);
+  const lastTranscriptLength = useRef(0);
+
+  const getCalibrationPrompt = () => {
+    const day = new Date().getDay(); // 0 is Sunday, 1 is Monday, etc.
+    const prompts = [
+      "Explain a complex technical concept, like recursion or promises, to a non-technical person.", // Sunday
+      "Describe a technically complex feature you built. Why did you choose that solution?", // Monday
+      "Walk us through a challenging bug you recently resolved and how you debugged it.", // Tuesday
+      "Why do you want to work at our company, and how do your skills align with our goals?", // Wednesday
+      "Describe a time when you had to work with a difficult teammate. How did you handle it?", // Thursday
+      "What is your favorite programming language, and what are its pros and cons?", // Friday
+      "How do you prioritize your tasks when you have multiple deadlines?" // Saturday
+    ];
+    return prompts[day];
+  };
+
+  const calculateFluencyMetrics = (finalTranscript: string) => {
+    const durationSeconds = recordingStartTime.current
+      ? Math.max(1, Math.round((Date.now() - recordingStartTime.current) / 1000))
+      : 5;
+
+    const words = finalTranscript.trim().split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+    const wordsPerMinute = Math.round((wordCount / durationSeconds) * 60);
+
+    const fillerWords = ["um", "uh", "like", "you know", "basically", "so", "actually", "mean", "literally"];
+    let fillerCount = 0;
+    words.forEach((word) => {
+      const cleanWord = word.toLowerCase().replace(/[^a-z]/g, "");
+      if (fillerWords.includes(cleanWord)) {
+        fillerCount++;
+      }
+    });
+
+    const fillerPercentage = wordCount > 0 ? Math.round((fillerCount / wordCount) * 100) : 0;
+
+    return {
+      wordsPerMinute,
+      fillerWordsCount: fillerCount,
+      fillerPercentage,
+      pauseCount: pauseCount.current,
+      durationSeconds
+    };
+  };
+
+  useEffect(() => {
+    if (transcript.length > lastTranscriptLength.current) {
+      const now = Date.now();
+      if (lastSpeechTime.current) {
+        const gap = now - lastSpeechTime.current;
+        if (gap > 2000) {
+          pauseCount.current += 1;
+        }
+      }
+      lastSpeechTime.current = now;
+      lastTranscriptLength.current = transcript.length;
+    }
+  }, [transcript]);
 
   // 30-Day Roadmap Data
   const [roadmapDays, setRoadmapDays] = useState<RoadmapDay[]>([
@@ -181,6 +245,10 @@ export default function CommunicationCoach() {
     startListening();
     setBaselineState("recording");
     setBaselineTimer(120);
+    recordingStartTime.current = Date.now();
+    lastSpeechTime.current = Date.now();
+    pauseCount.current = 0;
+    lastTranscriptLength.current = 0;
   };
 
   const handleCompleteBaseline = async () => {
@@ -191,6 +259,7 @@ export default function CommunicationCoach() {
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     const finalTranscript = transcript || "I am demonstrating the PinkyPow AI speech evaluation system. The communication coach evaluates vocabulary, grammar, and delivery confidence.";
+    const fluencyMetrics = calculateFluencyMetrics(finalTranscript);
 
     try {
       const response = await fetch("/api/ai/evaluate-speech", {
@@ -198,7 +267,8 @@ export default function CommunicationCoach() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transcription: finalTranscript,
-          promptQuestion: "Describe a technically complex feature you built. Why did you choose that solution?"
+          promptQuestion: getCalibrationPrompt(),
+          fluencyMetrics
         })
       });
       const data = await response.json();
@@ -242,6 +312,10 @@ export default function CommunicationCoach() {
     setStandupState("recording");
     setStandupTimer(0);
     setShowAnalysis(false);
+    recordingStartTime.current = Date.now();
+    lastSpeechTime.current = Date.now();
+    pauseCount.current = 0;
+    lastTranscriptLength.current = 0;
   };
 
   const handleStopRecording = async () => {
@@ -253,6 +327,7 @@ export default function CommunicationCoach() {
 
     const finalTranscript = transcript || "An API, or Application Programming Interface, acts as a messenger between two applications, allowing them to communicate and share data securely.";
     const currentPrompt = selectedRoadmapDay.prompt;
+    const fluencyMetrics = calculateFluencyMetrics(finalTranscript);
 
     try {
       const response = await fetch("/api/ai/evaluate-speech", {
@@ -260,7 +335,8 @@ export default function CommunicationCoach() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transcription: finalTranscript,
-          promptQuestion: currentPrompt
+          promptQuestion: currentPrompt,
+          fluencyMetrics
         })
       });
       const data = await response.json();
@@ -395,6 +471,13 @@ export default function CommunicationCoach() {
                 <p className="text-xs text-[#7C786E] leading-relaxed">
                   Before unlocking your 30-day placement roadmap, take our calibration test. This establishes your verbal speed, grammatical baseline, and default confidence metrics.
                 </p>
+
+                <div className="p-4 rounded-2xl bg-[#FAF9F5] border border-[#ECE9DF] max-w-sm mx-auto shadow-sm">
+                  <span className="block text-[8px] text-[#7C786E] font-bold uppercase tracking-wider">Today's Calibration Prompt</span>
+                  <p className="text-xs font-semibold text-[#1E1D1A] mt-1 italic">
+                    "{getCalibrationPrompt()}"
+                  </p>
+                </div>
               </div>
 
               {/* State Machine for Baseline Assessment */}
@@ -431,7 +514,7 @@ export default function CommunicationCoach() {
                   <div className="p-4 rounded-2xl bg-[#FAF9F5] border border-[#ECE9DF] text-center shadow-sm">
                     <span className="block text-[9px] text-[#7C786E] font-bold uppercase tracking-wider">Calibration Prompt</span>
                     <p className="text-xs font-semibold text-[#1E1D1A] mt-1 italic">
-                      "Describe a technically complex feature you built. Why did you choose that solution?"
+                      "{getCalibrationPrompt()}"
                     </p>
                   </div>
 
@@ -631,7 +714,7 @@ export default function CommunicationCoach() {
             ) : showAnalysis ? (
               <div className="space-y-6 mt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
                 {/* SVG Progress score rings */}
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   <ScoreRing 
                      score={evaluationResult ? evaluationResult.vocabularyScore * 10 : 88} 
                      label="Vocabulary" 
@@ -641,6 +724,11 @@ export default function CommunicationCoach() {
                      score={evaluationResult ? evaluationResult.grammarScore * 10 : 92} 
                      label="Grammar" 
                      colorClass="stroke-[#2C2B27]" 
+                  />
+                  <ScoreRing 
+                     score={evaluationResult ? (evaluationResult.fluencyScore ? evaluationResult.fluencyScore * 10 : 80) : 80} 
+                     label="Fluency" 
+                     colorClass="stroke-[#3B82F6]" 
                   />
                   <ScoreRing 
                      score={

@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   Home, Briefcase, Trophy, MessageSquare, Code,
   Award, FolderGit, User, Menu, X, ChevronLeft,
-  Bell, Moon, Search,
+  Bell, Moon, Search, LogOut
 } from "lucide-react";
 
 /* ── Constants ──────────────────────────────────────── */
@@ -17,7 +17,7 @@ export const SIDEBAR_W = 240;  // px — sidebar width
 /* ── Nav items & page meta ──────────────────────────── */
 const navItems = [
   { name: "Dashboard",      href: "/dashboard",      Icon: Home },
-  { name: "Internships",    href: "/internships",    Icon: Briefcase },
+  { name: "Jobs and Internships", href: "/internships",    Icon: Briefcase },
   { name: "Hackathons",     href: "/hackathons",     Icon: Trophy },
   { name: "Communication",  href: "/communication",  Icon: MessageSquare },
   { name: "DSA",            href: "/dsa",            Icon: Code },
@@ -28,7 +28,7 @@ const navItems = [
 
 const pageMeta: Record<string, { title: string; sub: string }> = {
   "/dashboard":      { title: "Dashboard",      sub: "Placement overview & performance metrics" },
-  "/internships":    { title: "Internships",    sub: "Track and manage your applications" },
+  "/internships":    { title: "Jobs and Internships", sub: "Internships & full-time offers" },
   "/hackathons":     { title: "Hackathons",     sub: "Discover & track coding events" },
   "/communication":  { title: "Communication",  sub: "Speech practice & coach tasks" },
   "/dsa":            { title: "DSA",            sub: "Dynamic problem plans & battleground" },
@@ -42,9 +42,31 @@ interface SidebarProps { placementScore?: number; }
 
 export default function Sidebar({ placementScore = 820 }: SidebarProps) {
   const pathname    = usePathname();
+  const router      = useRouter();
   const [open, setOpen]         = useState(true);   // desktop collapse
   const [drawer, setDrawer]     = useState(false);  // mobile drawer
   const [search, setSearch]     = useState("");
+  const [currentUser, setCurrentUser] = useState<{ name: string; placementScore: number } | null>(null);
+
+  // Retrieve current user details from localStorage
+  useEffect(() => {
+    const session = localStorage.getItem("currentUser");
+    if (session) {
+      try {
+        setCurrentUser(JSON.parse(session));
+      } catch (e) {
+        console.error("Failed to parse user session in Sidebar:", e);
+      }
+    }
+  }, []);
+
+  const scoreToUse = currentUser ? currentUser.placementScore : placementScore;
+  const nameToUse = currentUser ? currentUser.name : "Raja Kumaran";
+
+  const handleLogout = () => {
+    localStorage.removeItem("currentUser");
+    router.push("/");
+  };
 
   const meta = pageMeta[pathname] ?? { title: "PinkyPow", sub: "AI Placement Preparation" };
   const items = navItems.filter(i => i.name.toLowerCase().includes(search.toLowerCase()));
@@ -57,6 +79,11 @@ export default function Sidebar({ placementScore = 820 }: SidebarProps) {
       );
     }
   }, [open]);
+
+  // Extract initials
+  const getInitials = (n: string) => {
+    return n.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
+  };
 
   /* ── JSX ── */
   return (
@@ -144,8 +171,25 @@ export default function Sidebar({ placementScore = 820 }: SidebarProps) {
             <button style={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, background: "none", border: "none", cursor: "pointer", color: "#a1a1aa" }}>
               <Bell size={16} />
             </button>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#e4e4e7", border: "2px solid #d4d4d8", overflow: "hidden", flexShrink: 0 }}>
-              <Image src="/profile_avatar.png" alt="Avatar" width={28} height={28} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            
+            {/* Dynamic Initial Avatar */}
+            <div style={{ 
+              width: 28, 
+              height: 28, 
+              borderRadius: "50%", 
+              background: "linear-gradient(to top right, #ec4899, #9333ea)", 
+              border: "2px solid #d4d4d8", 
+              overflow: "hidden", 
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#ffffff",
+              fontSize: "10px",
+              fontWeight: "extrabold",
+              letterSpacing: "0.05em"
+            }}>
+              {getInitials(nameToUse)}
             </div>
           </div>
         </div>
@@ -184,7 +228,16 @@ export default function Sidebar({ placementScore = 820 }: SidebarProps) {
             <X size={16} />
           </button>
         </div>
-        <NavContent items={items} search={search} setSearch={setSearch} pathname={pathname} onNav={() => setDrawer(false)} score={placementScore} />
+        <NavContent 
+          items={items} 
+          search={search} 
+          setSearch={setSearch} 
+          pathname={pathname} 
+          onNav={() => setDrawer(false)} 
+          score={scoreToUse} 
+          name={nameToUse} 
+          onLogout={handleLogout} 
+        />
       </aside>
 
       {/* ══════════ DESKTOP SIDEBAR PANEL ══════════ */}
@@ -202,7 +255,16 @@ export default function Sidebar({ placementScore = 820 }: SidebarProps) {
       }}
         className="desktop-sidebar"
       >
-        <NavContent items={items} search={search} setSearch={setSearch} pathname={pathname} onNav={() => {}} score={placementScore} />
+        <NavContent 
+          items={items} 
+          search={search} 
+          setSearch={setSearch} 
+          pathname={pathname} 
+          onNav={() => {}} 
+          score={scoreToUse} 
+          name={nameToUse} 
+          onLogout={handleLogout} 
+        />
       </aside>
 
       {/* Responsive CSS */}
@@ -237,7 +299,7 @@ export default function Sidebar({ placementScore = 820 }: SidebarProps) {
 
 /* ── Shared nav body ──────────────────────────────── */
 function NavContent({
-  items, search, setSearch, pathname, onNav, score,
+  items, search, setSearch, pathname, onNav, score, name, onLogout
 }: {
   items: typeof navItems;
   search: string;
@@ -245,6 +307,8 @@ function NavContent({
   pathname: string;
   onNav: () => void;
   score: number;
+  name: string;
+  onLogout: () => void;
 }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden", padding: "16px 12px" }}>
@@ -294,13 +358,39 @@ function NavContent({
         {items.length === 0 && (
           <span style={{ fontSize: 11, color: "#a1a1aa", fontStyle: "italic", padding: "8px 12px" }}>No items found</span>
         )}
+
+        {/* Logout Button */}
+        <button 
+          onClick={onLogout}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "8px 12px",
+            borderRadius: 8,
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            fontSize: 13,
+            color: "#ef4444",
+            marginTop: "auto",
+            width: "100%",
+            textAlign: "left",
+            transition: "background 0.15s"
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+        >
+          <LogOut size={15} style={{ flexShrink: 0, color: "#ef4444" }} />
+          <span style={{ fontWeight: 500 }}>Sign Out</span>
+        </button>
       </nav>
 
       {/* Score footer */}
       <div style={{ marginTop: "auto", paddingTop: 12, borderTop: "1px solid rgba(228,228,231,0.6)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 4px 0" }}>
         <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
           <span style={{ fontSize: 8, textTransform: "uppercase", letterSpacing: "0.14em", color: "#a1a1aa", fontWeight: 700 }}>Placement Score</span>
-          <span style={{ fontSize: 12, fontWeight: 600, color: "#27272a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Raja Kumaran</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#27272a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</span>
         </div>
         <span style={{ background: "#fffbeb", color: "#b45309", fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 8, border: "1px solid rgba(180,130,0,0.2)", flexShrink: 0 }}>
           {score}

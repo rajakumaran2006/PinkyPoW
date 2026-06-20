@@ -12,20 +12,21 @@ interface HackathonListing {
   category: string;
   skills: string[];
   participants: number;
+  fitScore?: number;
 }
 
 export async function POST(req: Request) {
+  let body: any = {};
   try {
-    let body: any = {};
     try {
       body = await req.json();
     } catch {
       // Allow empty body
     }
 
-    const { techStack = [], search = '' } = body;
+    const { techStack = [], search = '', collegeCountry = '', collegeState = '' } = body;
 
-    const hackathons = await fetchAndFilterHackathons(techStack, search);
+    const hackathons = await fetchAndFilterHackathons(techStack, search, collegeCountry, collegeState);
 
     return NextResponse.json({
       success: true,
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error('Hackathon API Route Error:', error);
-    const fallback = getFallbackHackathons();
+    const fallback = getFallbackHackathons(body?.techStack || [], body?.collegeCountry || '', body?.collegeState || '');
     return NextResponse.json({
       success: true,
       isFallback: true,
@@ -47,14 +48,14 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
-    const hackathons = await fetchAndFilterHackathons([], search);
+    const hackathons = await fetchAndFilterHackathons([], search, '', '');
     return NextResponse.json({
       success: true,
       hackathons,
     });
   } catch (error: any) {
     console.error('Hackathon API GET Route Error:', error);
-    const fallback = getFallbackHackathons();
+    const fallback = getFallbackHackathons([], '', '');
     return NextResponse.json({
       success: true,
       isFallback: true,
@@ -63,7 +64,7 @@ export async function GET(req: Request) {
   }
 }
 
-async function fetchAndFilterHackathons(techStack: string[], search: string): Promise<HackathonListing[]> {
+async function fetchAndFilterHackathons(techStack: string[], search: string, collegeCountry?: string, collegeState?: string): Promise<HackathonListing[]> {
   try {
     const url = `https://devpost.com/api/hackathons?search=${encodeURIComponent(search)}`;
     const response = await fetch(url, {
@@ -76,13 +77,13 @@ async function fetchAndFilterHackathons(techStack: string[], search: string): Pr
 
     if (!response.ok) {
       console.warn(`Devpost JSON API returned status ${response.status}. Using fallback.`);
-      return getFallbackHackathons();
+      return getFallbackHackathons(techStack, collegeCountry, collegeState);
     }
 
     const data = await response.json();
     if (!data || !Array.isArray(data.hackathons)) {
       console.warn('Devpost JSON API returned invalid format. Using fallback.');
-      return getFallbackHackathons();
+      return getFallbackHackathons(techStack, collegeCountry, collegeState);
     }
 
     // Filter and map Devpost hackathons
@@ -102,6 +103,42 @@ async function fetchAndFilterHackathons(techStack: string[], search: string): Pr
         const location = h.displayed_location?.location || 'Online';
         const isOnline = location.toLowerCase().includes('online') || false;
 
+        // Calculate fit score (matching tech stack + location)
+        let skillMatches = 0;
+        const searchStr = `${h.title} ${category} ${skills.join(' ')}`.toLowerCase();
+        
+        if (techStack && techStack.length > 0) {
+          for (const tech of techStack) {
+            if (searchStr.includes(tech.toLowerCase())) {
+              skillMatches++;
+            }
+          }
+        }
+        
+        let score = 50; // Base score
+        if (techStack && techStack.length > 0) {
+          score += Math.round((skillMatches / techStack.length) * 40);
+        }
+        
+        // Region matching (boost up to 10 points)
+        let regionBoost = 0;
+        const locLower = location.toLowerCase();
+        if (collegeCountry) {
+          if (locLower.includes(collegeCountry.toLowerCase())) {
+            regionBoost += 5;
+          }
+        }
+        if (collegeState) {
+          if (locLower.includes(collegeState.toLowerCase())) {
+            regionBoost += 5;
+          }
+        }
+        if (isOnline || locLower.includes('remote') || locLower.includes('global')) {
+          regionBoost += 4;
+        }
+        score += regionBoost;
+        const fitScore = Math.min(score, 100);
+
         return {
           id: String(h.id),
           title: h.title,
@@ -114,24 +151,25 @@ async function fetchAndFilterHackathons(techStack: string[], search: string): Pr
           category: category,
           skills: skills,
           participants: h.registrations_count || 0,
+          fitScore
         };
       });
 
     if (activeHackathons.length === 0) {
       console.warn('No open hackathons found in active Devpost response. Using fallback.');
-      return getFallbackHackathons();
+      return getFallbackHackathons(techStack, collegeCountry, collegeState);
     }
 
     return activeHackathons;
   } catch (error) {
     console.error('Error fetching Devpost hackathons:', error);
-    return getFallbackHackathons();
+    return getFallbackHackathons(techStack, collegeCountry, collegeState);
   }
 }
 
-function getFallbackHackathons(): HackathonListing[] {
+function getFallbackHackathons(techStack: string[], collegeCountry?: string, collegeState?: string): HackathonListing[] {
   // Return realistic open hackathons in case the API is blocked or offline
-  return [
+  const list = [
     {
       id: 'devpost-fallback-1',
       title: 'Build with Gemini XPRIZE',
@@ -172,4 +210,46 @@ function getFallbackHackathons(): HackathonListing[] {
       participants: 2150,
     },
   ];
+
+  return list.map(item => {
+    let skillMatches = 0;
+    const searchStr = `${item.title} ${item.category} ${item.skills.join(' ')}`.toLowerCase();
+    
+    if (techStack && techStack.length > 0) {
+      for (const tech of techStack) {
+        if (searchStr.includes(tech.toLowerCase())) {
+          skillMatches++;
+        }
+      }
+    }
+    
+    let score = 50; // Base score
+    if (techStack && techStack.length > 0) {
+      score += Math.round((skillMatches / techStack.length) * 40);
+    }
+    
+    // Region matching (boost up to 10 points)
+    let regionBoost = 0;
+    const locLower = item.location.toLowerCase();
+    if (collegeCountry) {
+      if (locLower.includes(collegeCountry.toLowerCase())) {
+        regionBoost += 5;
+      }
+    }
+    if (collegeState) {
+      if (locLower.includes(collegeState.toLowerCase())) {
+        regionBoost += 5;
+      }
+    }
+    if (item.isOnline || locLower.includes('remote') || locLower.includes('global')) {
+      regionBoost += 4;
+    }
+    score += regionBoost;
+    const fitScore = Math.min(score, 100);
+
+    return {
+      ...item,
+      fitScore
+    };
+  });
 }

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { techStack = [], userLevel = 'Entry' } = body;
+    const { techStack = [], userLevel = 'Entry', type = 'internship', collegeCountry = '', collegeState = '' } = body;
 
     // Validate inputs
     const validatedTechStack = Array.isArray(techStack) 
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       : [];
     const validatedUserLevel = String(userLevel).trim();
 
-    const listings = await fetchAndFilterInternships(validatedTechStack, validatedUserLevel);
+    const listings = await fetchAndFilterInternships(validatedTechStack, validatedUserLevel, type, collegeCountry, collegeState);
 
     return NextResponse.json({
       success: true,
@@ -39,7 +39,10 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('Internship API Error:', error);
     // Return custom mock data matched to user techStack on error
-    const fallback = generateMockInternships(body?.techStack || [], body?.userLevel || 'Entry');
+    const type = body?.type || 'internship';
+    const fallback = type === 'fulltime'
+      ? generateMockFulltime(body?.techStack || [], body?.userLevel || 'Entry', body?.collegeCountry || '', body?.collegeState || '')
+      : generateMockInternships(body?.techStack || [], body?.userLevel || 'Entry', body?.collegeCountry || '', body?.collegeState || '');
     return NextResponse.json({
       success: true,
       isFallback: true,
@@ -48,15 +51,18 @@ export async function POST(req: Request) {
   }
 }
 
-async function fetchAndFilterInternships(techStack: string[], userLevel: string): Promise<InternshipListing[]> {
+async function fetchAndFilterInternships(techStack: string[], userLevel: string, type: 'internship' | 'fulltime', collegeCountry?: string, collegeState?: string): Promise<InternshipListing[]> {
   try {
-    // Attempt to fetch Summer 2026 listings, with Summer 2025 as a secondary fallback
-    let response = await fetch('https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/dev/README.md', {
+    let url = 'https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/dev/README.md';
+    if (type === 'fulltime') {
+      url = 'https://raw.githubusercontent.com/SimplifyJobs/New-Grad-Positions/dev/README.md';
+    }
+    let response = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0' },
       next: { revalidate: 3600 },
     });
 
-    if (!response.ok) {
+    if (!response.ok && type === 'internship') {
       console.warn('Summer 2026 repo fetch failed, trying Summer 2025 repo.');
       response = await fetch('https://raw.githubusercontent.com/SimplifyJobs/Summer2025-Internships/dev/README.md', {
         headers: { 'User-Agent': 'Mozilla/5.0' },
@@ -65,8 +71,8 @@ async function fetchAndFilterInternships(techStack: string[], userLevel: string)
     }
 
     if (!response.ok) {
-      console.warn('Both 2026 and 2025 repo fetches failed. Using fallback mocks.');
-      return generateMockInternships(techStack, userLevel);
+      console.warn(`Fetch failed for type ${type}. Using fallback mocks.`);
+      return type === 'fulltime' ? generateMockFulltime(techStack, userLevel, collegeCountry, collegeState) : generateMockInternships(techStack, userLevel, collegeCountry, collegeState);
     }
 
     const content = await response.text();
@@ -95,7 +101,7 @@ async function fetchAndFilterInternships(techStack: string[], userLevel: string)
           const postedDate = postedDateText.endsWith('d') ? `${postedDateText} ago` : postedDateText;
 
           if (companyName && roleTitle) {
-            const matchPercentage = calculateMatchPercentage(roleTitle, companyName, techStack);
+            const matchPercentage = calculateMatchPercentage(roleTitle, companyName, techStack, location, collegeCountry, collegeState);
             parsedListings.push({
               companyName,
               roleTitle,
@@ -158,7 +164,7 @@ async function fetchAndFilterInternships(techStack: string[], userLevel: string)
         }
 
         if (companyRaw && roleTitle) {
-          const matchPercentage = calculateMatchPercentage(roleTitle, companyRaw, techStack);
+          const matchPercentage = calculateMatchPercentage(roleTitle, companyRaw, techStack, location, collegeCountry, collegeState);
           parsedListings.push({
             companyName: companyRaw,
             roleTitle,
@@ -173,7 +179,7 @@ async function fetchAndFilterInternships(techStack: string[], userLevel: string)
 
     if (parsedListings.length === 0) {
       console.warn('No internships parsed from HTML tables or markdown. Using fallback mocks.');
-      return generateMockInternships(techStack, userLevel);
+      return type === 'fulltime' ? generateMockFulltime(techStack, userLevel, collegeCountry, collegeState) : generateMockInternships(techStack, userLevel, collegeCountry, collegeState);
     }
 
     // Sort by match percentage descending
@@ -183,7 +189,7 @@ async function fetchAndFilterInternships(techStack: string[], userLevel: string)
     return parsedListings.slice(0, 20);
   } catch (error) {
     console.error('Error fetching/parsing internships:', error);
-    return generateMockInternships(techStack, userLevel);
+    return type === 'fulltime' ? generateMockFulltime(techStack, userLevel, collegeCountry, collegeState) : generateMockInternships(techStack, userLevel, collegeCountry, collegeState);
   }
 }
 
@@ -225,7 +231,7 @@ function extractUrlFromMarkdown(md: string): string {
   return '';
 }
 
-function calculateMatchPercentage(roleTitle: string, companyName: string, techStack: string[]): number {
+function calculateMatchPercentage(roleTitle: string, companyName: string, techStack: string[], location: string, collegeCountry?: string, collegeState?: string): number {
   if (!techStack || techStack.length === 0) {
     return 75; // Default match score if user profile has no tech stack
   }
@@ -256,12 +262,35 @@ function calculateMatchPercentage(roleTitle: string, companyName: string, techSt
     }
   }
 
-  // Base score 40, dynamic component up to 55, capped at 98%
-  const score = 40 + Math.round((matches / techStack.length) * 55);
-  return Math.min(score, 98);
+  // Base score 40, dynamic component up to 50
+  let score = 40 + Math.round((matches / techStack.length) * 50);
+
+  // Region based fit scoring (up to 10 points boost)
+  let regionBoost = 0;
+  const locLower = location.toLowerCase();
+  if (collegeCountry) {
+    const countryLower = collegeCountry.toLowerCase();
+    if (locLower.includes(countryLower)) {
+      regionBoost += 5;
+    }
+  }
+  if (collegeState) {
+    const stateLower = collegeState.toLowerCase();
+    if (locLower.includes(stateLower)) {
+      regionBoost += 5;
+    }
+  }
+  if (locLower.includes('remote') || locLower.includes('global')) {
+    // remote options fit all regions well
+    regionBoost += 4;
+  }
+  
+  score += regionBoost;
+
+  return Math.min(score, 100);
 }
 
-function generateMockInternships(techStack: string[], userLevel: string): InternshipListing[] {
+function generateMockInternships(techStack: string[], userLevel: string, collegeCountry?: string, collegeState?: string): InternshipListing[] {
   // If user tech stack contains AI/ML keywords, output AI-oriented mock data
   const hasAI = techStack.some(t => {
     const lower = t.toLowerCase();
@@ -407,3 +436,149 @@ function generateMockInternships(techStack: string[], userLevel: string): Intern
     },
   ];
 }
+
+function generateMockFulltime(techStack: string[], userLevel: string, collegeCountry?: string, collegeState?: string): InternshipListing[] {
+  const hasAI = techStack.some(t => {
+    const lower = t.toLowerCase();
+    return lower.includes('python') || lower.includes('ai') || lower.includes('ml') || lower.includes('pytorch') || lower.includes('data');
+  });
+
+  const hasFrontend = techStack.some(t => {
+    const lower = t.toLowerCase();
+    return lower.includes('react') || lower.includes('vue') || lower.includes('next') || lower.includes('css') || lower.includes('frontend') || lower.includes('ts');
+  });
+
+  if (hasAI) {
+    return [
+      {
+        companyName: 'OpenAI',
+        roleTitle: `AI Resident / Engineer (${userLevel})`,
+        applyUrl: 'https://openai.com/careers',
+        postedDate: '1d ago',
+        location: 'San Francisco, CA (Hybrid)',
+        matchPercentage: 96,
+      },
+      {
+        companyName: 'Google DeepMind',
+        roleTitle: 'Research Engineer - Machine Learning',
+        applyUrl: 'https://careers.google.com',
+        postedDate: '3d ago',
+        location: 'London, UK (Hybrid)',
+        matchPercentage: 92,
+      },
+      {
+        companyName: 'Anthropic',
+        roleTitle: 'AI Alignment & Safety Engineer',
+        applyUrl: 'https://anthropic.com/careers',
+        postedDate: '4d ago',
+        location: 'San Francisco, CA',
+        matchPercentage: 88,
+      },
+      {
+        companyName: 'Meta',
+        roleTitle: 'AI Production Engineer',
+        applyUrl: 'https://metacareers.com',
+        postedDate: '5d ago',
+        location: 'Menlo Park, CA (Hybrid)',
+        matchPercentage: 85,
+      },
+      {
+        companyName: 'Hugging Face',
+        roleTitle: 'Open Source ML Engineer',
+        applyUrl: 'https://huggingface.co/careers',
+        postedDate: '1w ago',
+        location: 'Remote',
+        matchPercentage: 82,
+      },
+    ];
+  }
+
+  if (hasFrontend) {
+    return [
+      {
+        companyName: 'Vercel',
+        roleTitle: `Frontend Engineer - Next.js (${userLevel})`,
+        applyUrl: 'https://vercel.com/careers',
+        postedDate: '2d ago',
+        location: 'Remote',
+        matchPercentage: 95,
+      },
+      {
+        companyName: 'Figma',
+        roleTitle: 'Web Graphics & Full Stack Engineer',
+        applyUrl: 'https://figma.com/careers',
+        postedDate: '4d ago',
+        location: 'San Francisco, CA',
+        matchPercentage: 90,
+      },
+      {
+        companyName: 'Stripe',
+        roleTitle: 'Frontend Engineer (Payments UI)',
+        applyUrl: 'https://stripe.com/jobs',
+        postedDate: '5d ago',
+        location: 'Seattle, WA (Hybrid)',
+        matchPercentage: 87,
+      },
+      {
+        companyName: 'Supabase',
+        roleTitle: 'Full Stack Engineer',
+        applyUrl: 'https://supabase.com/careers',
+        postedDate: '1w ago',
+        location: 'Remote',
+        matchPercentage: 84,
+      },
+      {
+        companyName: 'Netflix',
+        roleTitle: 'UI Engineer (Growth)',
+        applyUrl: 'https://jobs.netflix.com',
+        postedDate: '1w ago',
+        location: 'Los Gatos, CA',
+        matchPercentage: 81,
+      },
+    ];
+  }
+
+  return [
+    {
+      companyName: 'Google',
+      roleTitle: `Associate Software Engineer (${userLevel})`,
+      applyUrl: 'https://careers.google.com',
+      postedDate: '1d ago',
+      location: 'Mountain View, CA',
+      matchPercentage: 94,
+    },
+    {
+      companyName: 'Apple',
+      roleTitle: 'Software Engineer',
+      applyUrl: 'https://apple.com/jobs',
+      postedDate: '2d ago',
+      location: 'Cupertino, CA',
+      matchPercentage: 89,
+    },
+    {
+      companyName: 'Stripe',
+      roleTitle: 'Software Engineer (Systems)',
+      applyUrl: 'https://stripe.com/jobs',
+      postedDate: '4d ago',
+      location: 'San Francisco, CA (Hybrid)',
+      matchPercentage: 85,
+    },
+    {
+      companyName: 'Microsoft',
+      roleTitle: 'Software Engineer (New Grad)',
+      applyUrl: 'https://careers.microsoft.com',
+      postedDate: '1w ago',
+      location: 'Redmond, WA',
+      matchPercentage: 80,
+    },
+    {
+      companyName: 'Databricks',
+      roleTitle: 'Software Engineer (Entry Level)',
+      applyUrl: 'https://databricks.com/company/careers',
+      postedDate: '1w ago',
+      location: 'Remote',
+      matchPercentage: 76,
+    },
+  ];
+}
+

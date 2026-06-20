@@ -75,12 +75,21 @@ export async function POST(req: Request) {
           techStack: user.techStack,
           platformUsernames: user.platformUsernames,
           college: user.college,
+          collegeLocation: user.collegeLocation,
+          collegeCountry: user.collegeCountry || '',
+          collegeState: user.collegeState || '',
           course: user.course,
           yearOfStudy: user.yearOfStudy,
           interests: user.interests,
           fullStackStack: user.fullStackStack,
           fullStackLevel: user.fullStackLevel,
-          fullStackBuiltApps: user.fullStackBuiltApps
+          fullStackBuiltApps: user.fullStackBuiltApps,
+          gpa: user.gpa || '',
+          graduationDate: user.graduationDate || '',
+          priorHackathons: user.priorHackathons || '',
+          preferredLocationType: user.preferredLocationType || '',
+          preferredRole: user.preferredRole || '',
+          certInterests: user.certInterests || []
         }
       });
     }
@@ -115,12 +124,21 @@ export async function POST(req: Request) {
         techStack: user.techStack,
         platformUsernames: user.platformUsernames,
         college: user.college,
+        collegeLocation: user.collegeLocation,
+        collegeCountry: user.collegeCountry || '',
+        collegeState: user.collegeState || '',
         course: user.course,
         yearOfStudy: user.yearOfStudy,
         interests: user.interests,
         fullStackStack: user.fullStackStack,
         fullStackLevel: user.fullStackLevel,
-        fullStackBuiltApps: user.fullStackBuiltApps
+        fullStackBuiltApps: user.fullStackBuiltApps,
+        gpa: user.gpa || '',
+        graduationDate: user.graduationDate || '',
+        priorHackathons: user.priorHackathons || '',
+        preferredLocationType: user.preferredLocationType || '',
+        preferredRole: user.preferredRole || '',
+        certInterests: user.certInterests || []
       }
     });
   } catch (error: any) {
