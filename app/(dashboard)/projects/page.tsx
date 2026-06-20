@@ -1,1 +1,1 @@
-// interactive board implementation
+// Added Tailwind-like card design
