@@ -566,9 +566,9 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
     <div className="space-y-12 animate-in fade-in duration-500 max-w-6xl mx-auto pb-12 text-[#1E1D1A]">
       
       {/* 1. Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-[#EFECE3] pb-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-[#FDF2F8] pb-8">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF4D8] border border-[#E8DFB3] text-[#7A6218] text-xs font-semibold">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] text-xs font-semibold">
             <FolderGit className="w-3.5 h-3.5" /> Resume Compiler
           </div>
           <h1 className="text-4xl font-normal text-[#1E1D1A] tracking-tight">
@@ -580,18 +580,18 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
         </div>
 
         {/* Quick Stats banner */}
-        <div className="flex items-center gap-6 p-4 rounded-3xl bg-white border border-[#ECE9DF] shadow-sm">
-          <div className="text-center px-4 border-r border-[#EFECE3]">
+        <div className="flex items-center gap-6 p-4 rounded-3xl bg-white border border-[#FCE7F3] shadow-sm">
+          <div className="text-center px-4 border-r border-[#FDF2F8]">
             <span className="block text-[10px] text-[#7C786E] font-bold uppercase tracking-wider font-sans">Lab Projects</span>
             <span className="text-2xl font-black text-[#1E1D1A]">{projects.length}</span>
           </div>
-          <div className="text-center px-4 border-r border-[#EFECE3]">
+          <div className="text-center px-4 border-r border-[#FDF2F8]">
             <span className="block text-[10px] text-[#7C786E] font-bold uppercase tracking-wider font-sans">ATS Match</span>
-            <span className="text-2xl font-black text-[#7A6218]">98%</span>
+            <span className="text-2xl font-black text-[#be185d]">98%</span>
           </div>
           <div className="text-center px-4">
             <span className="block text-[10px] text-[#7C786E] font-bold uppercase tracking-wider font-sans">Status</span>
-            <span className="text-xs font-black text-[#7A6218] border border-[#E8DFB3] bg-[#FAF4D8] px-2 py-0.5 rounded-md uppercase">Synced</span>
+            <span className="text-xs font-black text-[#be185d] border border-[#E8DFB3] bg-[#FCE7F3] px-2 py-0.5 rounded-md uppercase">Synced</span>
           </div>
         </div>
       </div>
@@ -622,11 +622,11 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                 return (
                   <div
                     key={proj._id}
-                    className="warm-card rounded-3xl p-5 border border-[#EFECE3] hover:border-[#F5C451] transition-all duration-300 flex flex-col gap-4 bg-white shadow-sm"
+                    className="warm-card rounded-3xl p-5 border border-[#FDF2F8] hover:border-[#ec4899] transition-all duration-300 flex flex-col gap-4 bg-white shadow-sm"
                   >
                     <div className="flex justify-between items-start gap-4">
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-sm font-bold text-[#1E1D1A] truncate leading-snug group-hover:text-[#7A6218] transition-colors">
+                        <h4 className="text-sm font-bold text-[#1E1D1A] truncate leading-snug group-hover:text-[#be185d] transition-colors">
                           {proj.title}
                         </h4>
 
@@ -635,7 +635,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                           {proj.techStack.map((skill, idx) => (
                             <span
                               key={idx}
-                              className="text-[9px] font-medium px-2 py-0.5 rounded-md bg-[#FAF9F5] border border-[#ECE9DF] text-[#4E4B42]"
+                              className="text-[9px] font-medium px-2 py-0.5 rounded-md bg-[#FFF5F7] border border-[#FCE7F3] text-[#4E4B42]"
                             >
                               {skill}
                             </span>
@@ -650,7 +650,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                       <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => setExpandedProjectId(isExpanded ? null : proj._id || null)}
-                          className="p-1.5 text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5] rounded-lg border border-[#ECE9DF]"
+                          className="p-1.5 text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FFF5F7] rounded-lg border border-[#FCE7F3]"
                           title="View Phases Tracking"
                         >
                           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -658,7 +658,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
 
                         <button
                           onClick={() => handleRemoveProject(proj._id)}
-                          className="p-1.5 text-[#7C786E] hover:text-red-650 hover:bg-[#FAF9F5] rounded-lg border border-[#ECE9DF]"
+                          className="p-1.5 text-[#7C786E] hover:text-red-650 hover:bg-[#FFF5F7] rounded-lg border border-[#FCE7F3]"
                           title="Remove Project"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -670,7 +670,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                     <div className="flex items-center gap-3">
                       <div className="flex-1 bg-[#E5E2D6] h-1.5 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-[#7A6218] to-[#2C2B27] transition-all duration-300"
+                          className="h-full bg-gradient-to-r from-[#be185d] to-[#2C2B27] transition-all duration-300"
                           style={{ width: `${progress}%` }}
                         />
                       </div>
@@ -681,10 +681,10 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
 
                     {/* Expanded Phases checklist */}
                     {isExpanded && proj.phases && proj.phases.length > 0 && (
-                      <div className="pt-4 border-t border-[#EFECE3] space-y-4 animate-in slide-in-from-top-4 duration-300">
+                      <div className="pt-4 border-t border-[#FDF2F8] space-y-4 animate-in slide-in-from-top-4 duration-300">
                         {proj.phases.map((phase, idx) => (
                           <div key={idx} className="space-y-2">
-                            <span className="block text-[10px] text-[#7A6218] font-bold uppercase tracking-wider">
+                            <span className="block text-[10px] text-[#be185d] font-bold uppercase tracking-wider">
                               {phase.name}
                             </span>
                             <div className="space-y-2 pl-2">
@@ -726,9 +726,9 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
           </div>
 
           {/* Add Project Form Card */}
-          <div className="warm-card rounded-3xl p-6 border border-[#EFECE3] bg-white shadow-sm">
-            <h3 className="text-xs text-[#7C786E] font-bold uppercase tracking-wider flex items-center gap-1.5 mb-4 border-b border-[#EFECE3] pb-2">
-              <Plus className="w-3.5 h-3.5 text-[#7A6218]" /> Register New Project Manually
+          <div className="warm-card rounded-3xl p-6 border border-[#FDF2F8] bg-white shadow-sm">
+            <h3 className="text-xs text-[#7C786E] font-bold uppercase tracking-wider flex items-center gap-1.5 mb-4 border-b border-[#FDF2F8] pb-2">
+              <Plus className="w-3.5 h-3.5 text-[#be185d]" /> Register New Project Manually
             </h3>
             
             <form onSubmit={handleAddProject} className="space-y-4">
@@ -742,7 +742,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                   placeholder="e.g. Distributed Ledger Sync Broker"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
                 />
               </div>
 
@@ -755,7 +755,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                   placeholder="e.g. React, Go, WebSockets, Docker"
                   value={newSkills}
                   onChange={(e) => setNewSkills(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
                 />
               </div>
 
@@ -769,7 +769,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                   placeholder="e.g. Developed a serverless video encoder processing raw files using multi-thread AWS Lambda functions, achieving 60% faster rendering times."
                   value={newSummary}
                   onChange={(e) => setNewSummary(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors resize-none shadow-sm"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors resize-none shadow-sm"
                 />
               </div>
 
@@ -789,16 +789,16 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
         <div className="lg:col-span-5 space-y-8">
           
           {/* AI Project Planner card */}
-          <div className="warm-card rounded-3xl p-6 border border-[#EFECE3] bg-white space-y-6 shadow-sm relative overflow-hidden">
+          <div className="warm-card rounded-3xl p-6 border border-[#FDF2F8] bg-white space-y-6 shadow-sm relative overflow-hidden">
             {/* Glow design */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#F5C451]/5 rounded-full blur-2xl -z-10 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#ec4899]/5 rounded-full blur-2xl -z-10 pointer-events-none" />
 
-            <div className="border-b border-[#EFECE3] pb-3 flex items-center justify-between">
+            <div className="border-b border-[#FDF2F8] pb-3 flex items-center justify-between">
               <h3 className="text-sm font-bold text-[#1E1D1A] flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-[#F5C451]" />
+                <Sparkles className="w-4 h-4 text-[#ec4899]" />
                 AI Project Planner
               </h3>
-              <span className="px-2 py-0.5 rounded bg-[#FAF4D8] border border-[#E8DFB3] text-[#7A6218] text-[9px] font-bold uppercase">
+              <span className="px-2 py-0.5 rounded bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] text-[9px] font-bold uppercase">
                 Interactive
               </span>
             </div>
@@ -821,7 +821,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                         className={`py-2 px-1 rounded-xl border text-[10px] font-bold transition-all cursor-pointer ${
                           plannerLevel === lvl
                             ? "bg-[#2C2B27] text-white border-[#2C2B27]"
-                            : "bg-[#FAF9F5] border-[#ECE9DF] text-[#7C786E]"
+                            : "bg-[#FFF5F7] border-[#FCE7F3] text-[#7C786E]"
                         }`}
                       >
                         {lvl}
@@ -836,7 +836,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                     type="text"
                     value={plannerStack}
                     onChange={(e) => setPlannerStack(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] shadow-sm font-sans"
+                    className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] shadow-sm font-sans"
                   />
                 </div>
 
@@ -845,7 +845,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                   <select
                     value={plannerDomain}
                     onChange={(e) => setPlannerDomain(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] shadow-sm"
+                    className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] shadow-sm"
                   >
                     <option value="AI/ML Agents">AI/ML Agents</option>
                     <option value="SaaS & Developer Tools">SaaS & Developer Tools</option>
@@ -878,8 +878,8 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
             {/* STEP 2: FOLLOW-UP QUESTION */}
             {plannerStep === 2 && (
               <div className="space-y-4 animate-in zoom-in-95 duration-200">
-                <div className="p-3.5 rounded-2xl bg-[#FAF9F5] border border-[#ECE9DF] space-y-2">
-                  <span className="block text-[9px] text-[#7A6218] font-bold uppercase tracking-wider">
+                <div className="p-3.5 rounded-2xl bg-[#FFF5F7] border border-[#FCE7F3] space-y-2">
+                  <span className="block text-[9px] text-[#be185d] font-bold uppercase tracking-wider">
                     AI Architect Inquiry
                   </span>
                   <p className="text-xs text-[#1E1D1A] leading-relaxed font-sans font-medium">
@@ -896,14 +896,14 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                     value={followUpAnswer}
                     onChange={(e) => setFollowUpAnswer(e.target.value)}
                     placeholder="e.g. I prefer to focus on high throughput pipelines with vector search integration, rather than complex offline sync UI..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#7A6218] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors resize-none shadow-sm font-sans"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors resize-none shadow-sm font-sans"
                   />
                 </div>
 
                 <div className="flex gap-3">
                   <button
                     onClick={() => setPlannerStep(1)}
-                    className="flex-1 py-2.5 rounded-xl bg-white border border-[#ECE9DF] text-[#7C786E] text-xs font-bold transition-all hover:bg-[#FAF9F5]"
+                    className="flex-1 py-2.5 rounded-xl bg-white border border-[#FCE7F3] text-[#7C786E] text-xs font-bold transition-all hover:bg-[#FFF5F7]"
                   >
                     Back
                   </button>
@@ -949,7 +949,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                   </span>
                   <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
                     {proposedProject.phases?.map((p, idx) => (
-                      <div key={idx} className="p-2 bg-[#FAF9F5] border border-[#ECE9DF] rounded-xl text-[10px] space-y-1">
+                      <div key={idx} className="p-2 bg-[#FFF5F7] border border-[#FCE7F3] rounded-xl text-[10px] space-y-1">
                         <span className="block font-bold text-[#1E1D1A]">{p.name}</span>
                         <p className="text-zinc-550 leading-normal pl-1 truncate">
                           Tasks: {p.tasks.map((t) => t.name).join(" • ")}
@@ -962,7 +962,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                 <div className="flex gap-3">
                   <button
                     onClick={() => setPlannerStep(2)}
-                    className="flex-1 py-2.5 rounded-xl bg-white border border-[#ECE9DF] text-[#7C786E] text-xs font-bold transition-all hover:bg-[#FAF9F5]"
+                    className="flex-1 py-2.5 rounded-xl bg-white border border-[#FCE7F3] text-[#7C786E] text-xs font-bold transition-all hover:bg-[#FFF5F7]"
                   >
                     Back
                   </button>
@@ -980,7 +980,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
           </div>
 
           {/* Resume compiler controls */}
-          <div className="warm-card rounded-3xl p-6 border border-[#EFECE3] bg-white flex flex-col justify-between space-y-6 shadow-sm">
+          <div className="warm-card rounded-3xl p-6 border border-[#FDF2F8] bg-white flex flex-col justify-between space-y-6 shadow-sm">
             <div className="space-y-4">
               <span className="block text-[10px] text-[#7C786E] font-bold uppercase tracking-wider">Include Datasources</span>
               
@@ -991,7 +991,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                   className="flex items-center gap-3 cursor-pointer text-xs select-none group"
                 >
                   {includeInternships ? (
-                    <CheckSquare className="w-5 h-5 text-[#7A6218] shrink-0" />
+                    <CheckSquare className="w-5 h-5 text-[#be185d] shrink-0" />
                   ) : (
                     <Square className="w-5 h-5 text-[#7C786E] group-hover:text-[#4E4B42] shrink-0" />
                   )}
@@ -1007,7 +1007,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                   className="flex items-center gap-3 cursor-pointer text-xs select-none group"
                 >
                   {includeHackathons ? (
-                    <CheckSquare className="w-5 h-5 text-[#7A6218] shrink-0" />
+                    <CheckSquare className="w-5 h-5 text-[#be185d] shrink-0" />
                   ) : (
                     <Square className="w-5 h-5 text-[#7C786E] group-hover:text-[#4E4B42] shrink-0" />
                   )}
@@ -1023,7 +1023,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                   className="flex items-center gap-3 cursor-pointer text-xs select-none group"
                 >
                   {includeCerts ? (
-                    <CheckSquare className="w-5 h-5 text-[#7A6218] shrink-0" />
+                    <CheckSquare className="w-5 h-5 text-[#be185d] shrink-0" />
                   ) : (
                     <Square className="w-5 h-5 text-[#7C786E] group-hover:text-[#4E4B42] shrink-0" />
                   )}
@@ -1039,7 +1039,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                   className="flex items-center gap-3 cursor-pointer text-xs select-none group"
                 >
                   {includeProjects ? (
-                    <CheckSquare className="w-5 h-5 text-[#7A6218] shrink-0" />
+                    <CheckSquare className="w-5 h-5 text-[#be185d] shrink-0" />
                   ) : (
                     <Square className="w-5 h-5 text-[#7C786E] group-hover:text-[#4E4B42] shrink-0" />
                   )}
@@ -1056,7 +1056,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
               <button
                 onClick={startResumeCompilation}
                 disabled={isCompiling}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-[#7A6218] to-[#2C2B27] hover:from-[#8F7420] hover:to-[#1E1D1A] text-white font-black text-xs uppercase tracking-wider shadow-md shadow-[#7A6218]/10 hover:shadow-[#7A6218]/25 transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-[#be185d] to-[#2C2B27] hover:from-[#8F7420] hover:to-[#1E1D1A] text-white font-black text-xs uppercase tracking-wider shadow-md shadow-[#be185d]/10 hover:shadow-[#be185d]/25 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 {isCompiling ? (
                   <>
@@ -1065,7 +1065,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 text-amber-200" />
+                    <Sparkles className="w-4 h-4 text-pink-200" />
                     <span>Generate ATS-Friendly Resume</span>
                   </>
                 )}
@@ -1075,11 +1075,11 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                 <div className="space-y-2 bg-[#21201D] rounded-xl p-3 border border-zinc-800 font-mono text-[9px] text-zinc-450 max-h-[85px] overflow-y-auto scrollbar-none shadow-inner">
                   <div className="flex justify-between items-center pb-1.5 border-b border-zinc-800 mb-1.5">
                     <span className="text-[8px] text-zinc-500 uppercase font-bold">Build Stream</span>
-                    <span className="text-[#F5C451] font-bold">{compileProgress}%</span>
+                    <span className="text-[#ec4899] font-bold">{compileProgress}%</span>
                   </div>
                   {compileLogs.map((log, index) => (
                     <div key={index} className="flex gap-1.5 items-start">
-                      <span className="text-[#F5C451]/60 shrink-0">&gt;</span>
+                      <span className="text-[#ec4899]/60 shrink-0">&gt;</span>
                       <span className="leading-snug text-zinc-350">{log}</span>
                     </div>
                   ))}
@@ -1095,20 +1095,20 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
       {showDownloadModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div
-            className="w-full max-w-md bg-[#FAF6EA] rounded-3xl p-6 space-y-6 border border-[#ECE9DF] shadow-2xl relative animate-in zoom-in-95 duration-300"
+            className="w-full max-w-md bg-[#FFF5F7] rounded-3xl p-6 space-y-6 border border-[#FCE7F3] shadow-2xl relative animate-in zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
             <button
               onClick={() => setShowDownloadModal(false)}
-              className="absolute right-4 top-4 p-1.5 rounded-full hover:bg-[#FAF9F5] border border-transparent hover:border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] transition-colors"
+              className="absolute right-4 top-4 p-1.5 rounded-full hover:bg-[#FFF5F7] border border-transparent hover:border-[#FCE7F3] text-[#7C786E] hover:text-[#1E1D1A] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
 
             {/* Header */}
             <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-[#FAF4D8] border border-[#E8DFB3] flex items-center justify-center text-[#7A6218] mx-auto">
+              <div className="w-12 h-12 rounded-full bg-[#FCE7F3] border border-[#E8DFB3] flex items-center justify-center text-[#be185d] mx-auto">
                 <CheckCircle className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-[#1E1D1A] tracking-tight">
@@ -1120,10 +1120,10 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
             </div>
 
             {/* Resume Quality report */}
-            <div className="p-4 rounded-2xl bg-white border border-[#EFECE3] space-y-3 text-xs shadow-sm">
-              <div className="flex justify-between items-center text-[#7C786E] font-semibold border-b border-[#EFECE3] pb-2">
+            <div className="p-4 rounded-2xl bg-white border border-[#FDF2F8] space-y-3 text-xs shadow-sm">
+              <div className="flex justify-between items-center text-[#7C786E] font-semibold border-b border-[#FDF2F8] pb-2">
                 <span>Optimization Grade</span>
-                <span className="text-[#7A6218] font-black">A+ / Tier 1</span>
+                <span className="text-[#be185d] font-black">A+ / Tier 1</span>
               </div>
               <div className="space-y-1 text-[#7C786E] text-[11px] leading-relaxed">
                 <p>• Chronological order satisfies ATS parsing guidelines.</p>
@@ -1139,7 +1139,7 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                   navigator.clipboard.writeText(compiledLaTeX);
                   triggerToast("LaTeX Source copied to clipboard!");
                 }}
-                className="py-3 px-4 rounded-xl border border-[#ECE9DF] hover:bg-[#FAF9F5] text-[#1E1D1A] flex items-center justify-center gap-1.5 cursor-pointer bg-white"
+                className="py-3 px-4 rounded-xl border border-[#FCE7F3] hover:bg-[#FFF5F7] text-[#1E1D1A] flex items-center justify-center gap-1.5 cursor-pointer bg-white"
               >
                 <Copy className="w-4 h-4 text-[#7C786E]" />
                 <span>Copy LaTeX</span>
@@ -1322,8 +1322,8 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
 
       {/* Toast Notification */}
       {downloadNotification && (
-        <div className="fixed bottom-6 right-6 bg-[#FAF6EA] border border-[#ECE9DF] text-[#1E1D1A] px-5 py-4 rounded-2xl shadow-2xl z-55 flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
-          <div className={`p-1.5 rounded-full ${downloadNotification.type === 'info' ? 'bg-[#FAF4D8] border-[#E8DFB3] text-[#7A6218]' : 'bg-emerald-50 border-emerald-250 text-emerald-700'}`}>
+        <div className="fixed bottom-6 right-6 bg-[#FFF5F7] border border-[#FCE7F3] text-[#1E1D1A] px-5 py-4 rounded-2xl shadow-2xl z-55 flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
+          <div className={`p-1.5 rounded-full ${downloadNotification.type === 'info' ? 'bg-[#FCE7F3] border-[#E8DFB3] text-[#be185d]' : 'bg-emerald-50 border-emerald-250 text-emerald-700'}`}>
             <CheckCircle className="w-4 h-4" />
           </div>
           <span className="text-xs font-bold">{downloadNotification.message}</span>

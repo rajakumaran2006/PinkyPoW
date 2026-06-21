@@ -83,6 +83,12 @@ async function fetchAndFilterInternships(techStack: string[], userLevel: string,
       $('table tbody tr').each((_, el) => {
         const tds = $(el).find('td');
         if (tds.length >= 5) {
+          const appText = cleanText($(tds[3]).text()).toLowerCase();
+          const rowText = cleanText($(el).text()).toLowerCase();
+          if (appText.includes('🔒') || appText.includes('closed') || appText.includes('not open') || rowText.includes('🔒') || rowText.includes('closed')) {
+            return; // skip closed/locked internship
+          }
+
           const companyName = cleanText($(tds[0]).text());
           const roleTitle = cleanText($(tds[1]).text());
           const location = cleanText($(tds[2]).text());
@@ -136,10 +142,16 @@ async function fetchAndFilterInternships(techStack: string[], userLevel: string,
           continue;
         }
 
-        let companyRaw = columns[0];
-        const roleRaw = columns[1];
-        const locationRaw = columns[2] || '';
         const applicationRaw = columns[3] || '';
+        const roleRaw = columns[1] || '';
+        const appRawLower = applicationRaw.toLowerCase();
+        const roleRawLower = roleRaw.toLowerCase();
+        if (appRawLower.includes('🔒') || appRawLower.includes('closed') || appRawLower.includes('not open') || roleRawLower.includes('🔒') || roleRawLower.includes('closed')) {
+          continue;
+        }
+
+        let companyRaw = columns[0];
+        const locationRaw = columns[2] || '';
         const ageRaw = columns[4] || '';
 
         // Check for sub-roles or nested listings

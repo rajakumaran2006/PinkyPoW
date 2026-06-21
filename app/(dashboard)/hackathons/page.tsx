@@ -1,22 +1,24 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Trophy,
-  Calendar,
-  MapPin,
-  DollarSign,
-  Plus,
-  Check,
-  Trash2,
-  Users,
-  ArrowRight,
   Sparkles,
-  Clock,
-  ExternalLink,
-  Search,
-  Filter,
-  CheckCircle2
+  Terminal,
+  Check,
+  Plus,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Building,
+  ArrowUpRight,
+  TrendingUp,
+  RefreshCw,
+  FolderPlus,
+  X,
+  Calendar,
+  DollarSign
 } from "lucide-react";
 
 interface HackathonEvent {
@@ -29,213 +31,298 @@ interface HackathonEvent {
   isNearMe: boolean;
   isMatched: boolean;
   prizePool: string;
-  bannerGradient: string;
+  bannerGradient?: string;
   category: string;
   description: string;
   skills: string[];
-  participants: number;
-  timelineState: "team_formation" | "registration" | "submission" | "judging";
+  participants?: number;
+  timelineState?: "team_formation" | "registration" | "submission" | "judging";
   deadline: string;
   url: string;
   fitScore?: number;
 }
 
-export default function HackathonRadar() {
-  // Hardcoded rich mock data for hackathons
-  const initialHackathons: HackathonEvent[] = [
-    {
-      id: "hack-1",
-      title: "CalHacks 13.0",
-      hosts: "UC Berkeley",
-      date: "June 25 - 27, 2026",
-      location: "San Francisco, CA",
-      isOnline: false,
-      isNearMe: true,
-      isMatched: true,
-      prizePool: "$100,000",
-      bannerGradient: "from-pink-500 via-purple-500 to-indigo-600",
-      category: "Generative AI & Web3",
-      description: "The world's largest collegiate hackathon returns to SF. Build groundbreaking applications with top-tier API sponsors and compute resources.",
-      skills: ["React", "Python", "Next.js", "Solidity"],
-      participants: 1200,
-      timelineState: "team_formation",
-      deadline: "5 days left",
-      url: "https://devpost.com/hackathons"
-    },
-    {
-      id: "hack-2",
-      title: "Vercel Global AI Challenge",
-      hosts: "Vercel × OpenAI",
-      date: "July 2 - 5, 2026",
-      location: "Online",
-      isOnline: true,
-      isNearMe: false,
-      isMatched: true,
-      prizePool: "$50,000",
-      bannerGradient: "from-purple-600 via-indigo-600 to-blue-500",
-      category: "Artificial Intelligence",
-      description: "Build Next.js AI applications that push the boundaries of product design, real-time audio, and developer productivity.",
-      skills: ["Next.js", "OpenAI API", "Tailwind CSS", "TypeScript"],
-      participants: 3450,
-      timelineState: "registration",
-      deadline: "12 days left",
-      url: "https://devpost.com/hackathons"
-    },
-    {
-      id: "hack-3",
-      title: "EthDenver 2026",
-      hosts: "Ethereum Foundation",
-      date: "July 12 - 15, 2026",
-      location: "Denver, CO",
-      isOnline: false,
-      isNearMe: false,
-      isMatched: false,
-      prizePool: "$250,000",
-      bannerGradient: "from-blue-600 via-teal-500 to-emerald-400",
-      category: "Blockchain / DevTools",
-      description: "Join the largest community-owned Web3 hackathon on the planet. Create next-gen decentralized applications, protocols, and L2 scaling tools.",
-      skills: ["Solidity", "Rust", "Go", "Web3.js"],
-      participants: 4000,
-      timelineState: "team_formation",
-      deadline: "22 days left",
-      url: "https://devpost.com/hackathons"
-    },
-    {
-      id: "hack-4",
-      title: "Stripe API Buildathon",
-      hosts: "Stripe Developer Relations",
-      date: "July 20 - 22, 2026",
-      location: "Online",
-      isOnline: true,
-      isNearMe: false,
-      isMatched: true,
-      prizePool: "$20,000",
-      bannerGradient: "from-rose-500 via-orange-500 to-yellow-500",
-      category: "Fintech & Payments",
-      description: "Reimagine the checkout experience, usage-based billing structures, or developer marketplaces using the latest Stripe SDK updates.",
-      skills: ["React", "Node.js", "Stripe API", "PostgreSQL"],
-      participants: 980,
-      timelineState: "submission",
-      deadline: "1 month left",
-      url: "https://devpost.com/hackathons"
-    },
-    {
-      id: "hack-5",
-      title: "Cloudflare Edge Challenge",
-      hosts: "Cloudflare",
-      date: "August 1 - 5, 2026",
-      location: "Online",
-      isOnline: true,
-      isNearMe: false,
-      isMatched: false,
-      prizePool: "$30,000",
-      bannerGradient: "from-teal-400 via-emerald-500 to-green-600",
-      category: "Cloud Infrastructure",
-      description: "Write globally distributed serverless workers, KV stores, and low-latency image compression scripts running directly on the edge.",
-      skills: ["Cloudflare Workers", "Wasm", "TypeScript", "Wrangler"],
-      participants: 1400,
-      timelineState: "judging",
-      deadline: "about 2 months left",
-      url: "https://devpost.com/hackathons"
-    },
-    {
-      id: "hack-6",
-      title: "Meta Llama Hack",
-      hosts: "Meta AI",
-      date: "August 15 - 17, 2026",
-      location: "Menlo Park, CA",
-      isOnline: false,
-      isNearMe: true,
-      isMatched: false,
-      prizePool: "$80,000",
-      bannerGradient: "from-violet-600 via-fuchsia-500 to-pink-500",
-      category: "LLM Fine-tuning",
-      description: "Fine-tune Llama 3 models for complex, multi-modal business flows, agentic search systems, and high-efficiency offline operations.",
-      skills: ["PyTorch", "Hugging Face", "Python", "Docker"],
-      participants: 600,
-      timelineState: "registration",
-      deadline: "2 months left",
-      url: "https://devpost.com/hackathons"
-    }
-  ];
+interface TrackerCard {
+  id: string;
+  title: string;
+  hosts: string;
+  location: string;
+  prizePool: string;
+  category: string;
+  description: string;
+  skills: string[];
+  status: "Saved" | "Applied" | "Participated" | "Shortlisted" | "Won";
+  column: "saved" | "applied" | "won_participated";
+  logoText: string;
+  logoBg: string;
+  applyLink: string;
+  date?: string;
+  createdAt?: string;
+  shortlistedRounds?: number;
+}
 
-  // Active filters and tracking states
-  const [filter, setFilter] = useState<"All" | "Near Me" | "Online" | "Matched">("All");
+const COLUMNS = [
+  { id: "saved", title: "Saved", accent: "border-t-zinc-500/30 text-white" },
+  { id: "applied", title: "Applied", accent: "border-t-pink-500/30 text-white" },
+  { id: "won_participated", title: "Won / Participated", accent: "border-t-emerald-500/30 text-white" }
+] as const;
+
+const CompanyLogo = ({
+  company,
+  applyUrl,
+  logoBg,
+  logoText,
+  size = "md"
+}: {
+  company: string;
+  applyUrl?: string;
+  logoBg: string;
+  logoText: string;
+  size?: "sm" | "md";
+}) => {
+  const [imgFailed, setImgFailed] = useState(false);
+  const domain = React.useMemo(() => {
+    if (applyUrl) {
+      try {
+        const url = new URL(applyUrl);
+        let hostname = url.hostname.toLowerCase();
+        hostname = hostname.replace(/^www\./, "");
+        const jobBoards = [
+          "greenhouse.io",
+          "lever.co",
+          "myworkdayjobs.com",
+          "github.com",
+          "simplify.jobs",
+          "jobs.ashbyhq.com",
+          "ashbyhq.com",
+          "jobvite.com",
+          "bamboohr.com",
+          "devpost.com",
+          "devfolio.co",
+          "mlh.io"
+        ];
+        if (!jobBoards.some(board => hostname.includes(board))) {
+          return hostname;
+        }
+      } catch (e) {}
+    }
+    const cleanName = company
+      .toLowerCase()
+      .replace(/\s+tech(nology)?$/g, "")
+      .replace(/\s+inc\.?$/g, "")
+      .replace(/\s+corp(oration)?$/g, "")
+      .replace(/\s+co\.?$/g, "")
+      .replace(/\s+ltd\.?$/g, "")
+      .replace(/[^a-z0-9]/g, "");
+    return `${cleanName}.com`;
+  }, [company, applyUrl]);
+
+  const logoUrl = `https://logo.clearbit.com/${domain}`;
+  const sizeClasses = size === "sm" ? "w-6.5 h-6.5 text-[9px]" : "w-10 h-10 text-base";
+
+  if (imgFailed) {
+    return (
+      <div className={`rounded-full flex items-center justify-center font-bold text-gray-600 bg-gray-200 border border-gray-300 shrink-0 ${sizeClasses}`}>
+        {logoText}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`rounded-full flex items-center justify-center font-bold text-gray-600 shadow-sm overflow-hidden bg-gray-200 border border-gray-300 shrink-0 ${sizeClasses}`}>
+      <img
+        src={logoUrl}
+        alt={`${company} Logo`}
+        className="w-full h-full object-contain p-0.5 rounded-full"
+        onError={() => setImgFailed(true)}
+      />
+    </div>
+  );
+};
+
+const getDynamicMatchScore = (title: string, hosts: string, skills: string[]) => {
+  let userTechStack = ["React", "TypeScript", "Node.js", "Python", "Next.js", "AI", "ML"];
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("currentUser");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.techStack && parsed.techStack.length > 0) {
+          userTechStack = parsed.techStack;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
+  const searchStr = `${title} ${hosts} ${(skills || []).join(" ")}`.toLowerCase();
+  let matches = 0;
+
+  for (const tech of userTechStack) {
+    const term = tech.toLowerCase();
+    if (searchStr.includes(term)) {
+      matches++;
+    }
+  }
+
+  // Base score 40, dynamic component up to 60
+  let score = 40 + Math.round((matches / Math.max(userTechStack.length, 1)) * 60);
+  return Math.min(score, 100);
+};
+
+const getDeadline = (card: TrackerCard) => {
+  if (card.date && card.date.trim() !== "") {
+    return card.date;
+  }
+  if (card.createdAt) {
+    const createdDate = new Date(card.createdAt);
+    const deadlineDate = new Date(createdDate.getTime() + 14 * 24 * 60 * 60 * 1000);
+    return deadlineDate.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  }
+  return "TBD";
+};
+
+export default function HackathonRadar() {
+  const [isFetching, setIsFetching] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fetchProgress, setFetchProgress] = useState(0);
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
+  const [matches, setMatches] = useState<HackathonEvent[]>([]);
+  const [trackerCards, setTrackerCards] = useState<TrackerCard[]>([]);
+  const [hasFetched, setHasFetched] = useState(false);
+  const [fetchedData, setFetchedData] = useState<HackathonEvent[] | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
+  // Filters State
   const [searchQuery, setSearchQuery] = useState("");
-  const [dbHackathons, setDbHackathons] = useState<any[]>([]);
-  const [activeTrackerId, setActiveTrackerId] = useState<string>("");
+  const [workModeFilter, setWorkModeFilter] = useState("all");
+  const [regionFilter, setRegionFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
   const [customAiQuery, setCustomAiQuery] = useState("");
   const [aiFilteredIds, setAiFilteredIds] = useState<string[] | null>(null);
   const [isAiFiltering, setIsAiFiltering] = useState(false);
 
-  // AI Matches fetcher states
-  const [isFetching, setIsFetching] = useState(false);
-  const [fetchProgress, setFetchProgress] = useState(0);
-  const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
-  const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
-  const [hackathons, setHackathons] = useState<HackathonEvent[]>(initialHackathons);
-  const [hasFetched, setHasFetched] = useState(false);
-  const [fetchedData, setFetchedData] = useState<HackathonEvent[] | null>(null);
-
-  // Manual Form States
+  // Custom Manual Addition Form State
+  const [username, setUsername] = useState<string>("Najla1208");
   const [formTitle, setFormTitle] = useState("");
   const [formHosts, setFormHosts] = useState("");
   const [formDate, setFormDate] = useState("");
   const [formLocation, setFormLocation] = useState("");
-  const [formIsOnline, setFormIsOnline] = useState(false);
   const [formPrizePool, setFormPrizePool] = useState("");
   const [formCategory, setFormCategory] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [formSkills, setFormSkills] = useState("");
   const [formStatus, setFormStatus] = useState<"Saved" | "Applied" | "Participated" | "Shortlisted" | "Won">("Saved");
   const [formApplyLink, setFormApplyLink] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [formIsOnline, setFormIsOnline] = useState(false);
 
-  const companiesToScan = ["Devpost API Node", "MLH Seasons Node", "Devfolio Portals", "HackerEarth Scraper", "GitHub Seeds"];
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("currentUser");
+      if (stored) {
+        try {
+          const user = JSON.parse(stored);
+          if (user && user.username) {
+            setUsername(user.username);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, []);
 
-  // Fetch hackathons from db
-  const fetchHackathons = async (username: string) => {
+  const fetchHackathonsFromDb = async () => {
     try {
       const res = await fetch(`/api/hackathons?username=${username}`);
       const data = await res.json();
       if (data.success && data.hackathons) {
-        setDbHackathons(data.hackathons);
+        const mapped: TrackerCard[] = data.hackathons.map((item: any) => {
+          const logoColors = [
+            "bg-gradient-to-tr from-indigo-500 to-purple-600",
+            "bg-gradient-to-tr from-emerald-500 to-teal-600",
+            "bg-gradient-to-tr from-orange-500 via-rose-500 to-purple-500",
+            "bg-gradient-to-tr from-zinc-800 to-zinc-950 border border-white/10",
+            "bg-gradient-to-tr from-blue-500 to-indigo-600",
+            "bg-gradient-to-tr from-red-600 to-red-800",
+            "bg-gradient-to-tr from-zinc-600 to-zinc-800"
+          ];
+          
+          let columnId: "saved" | "applied" | "won_participated" = "saved";
+          const s = item.status.toLowerCase();
+          if (s === "applied" || s === "shortlisted") columnId = "applied";
+          else if (s === "participated" || s === "won" || s === "decided") columnId = "won_participated";
+          
+          const firstChar = item.hosts ? item.hosts.charAt(0).toUpperCase() : "H";
+          const colorHash = item.hosts ? item.hosts.charCodeAt(0) % logoColors.length : 0;
+
+          return {
+            id: item._id,
+            title: item.title,
+            hosts: item.hosts || "Unknown Host",
+            location: item.location || "Remote",
+            prizePool: item.prizePool || "TBD",
+            category: item.category || "General",
+            description: item.description || "",
+            skills: item.skills || [],
+            status: item.status || "Saved",
+            column: columnId,
+            logoText: firstChar,
+            logoBg: logoColors[colorHash],
+            applyLink: item.applyLink || "",
+            date: item.date,
+            createdAt: item.createdAt,
+            shortlistedRounds: item.shortlistedRounds || 0
+          };
+        });
+        setTrackerCards(mapped);
       }
     } catch (err) {
-      console.error("Error fetching hackathons:", err);
+      console.error("Error loading hackathons:", err);
     }
   };
 
   useEffect(() => {
-    const session = localStorage.getItem("currentUser");
-    if (session) {
-      try {
-        const user = JSON.parse(session);
-        setCurrentUser(user);
-        fetchHackathons(user.username);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }, []);
+    fetchHackathonsFromDb();
+  }, [username]);
+
+  const companiesToScan = ["Devpost API Node", "MLH Seasons Node", "Devfolio Portals", "HackerEarth Scraper", "GitHub Seeds"];
 
   const handleFetchMatches = () => {
     setIsFetching(true);
     setFetchProgress(0);
     setTerminalLogs([]);
+    setMatches([]);
     setFetchedData(null);
     setCurrentSearchIndex(0);
+    
+    // Reset filters
+    setSearchQuery("");
+    setWorkModeFilter("all");
+    setRegionFilter("all");
+    setRoleFilter("all");
+    setCustomAiQuery("");
+    setAiFilteredIds(null);
 
     let userTechStack = ["React", "TypeScript", "Node.js", "Python", "Next.js", "AI", "ML"];
     let userCountry = "";
     let userState = "";
-    if (currentUser) {
-      if (currentUser.techStack && currentUser.techStack.length > 0) {
-        userTechStack = currentUser.techStack;
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("currentUser");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.techStack && parsed.techStack.length > 0) {
+            userTechStack = parsed.techStack;
+          }
+          userCountry = parsed.collegeCountry || "";
+          userState = parsed.collegeState || "";
+        } catch (e) {
+          console.error(e);
+        }
       }
-      userCountry = currentUser.collegeCountry || "";
-      userState = currentUser.collegeState || "";
     }
 
     fetch("/api/scrape/hackathons", {
@@ -251,33 +338,22 @@ export default function HackathonRadar() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.hackathons) {
-          const bannerGradients = [
-            "from-pink-500 via-purple-500 to-indigo-600",
-            "from-purple-600 via-indigo-600 to-blue-500",
-            "from-blue-600 via-teal-500 to-emerald-400",
-            "from-rose-500 via-orange-500 to-yellow-500",
-            "from-teal-400 via-emerald-500 to-green-600",
-            "from-violet-600 via-fuchsia-500 to-pink-500"
-          ];
           const mapped: HackathonEvent[] = data.hackathons.map((h: any, idx: number) => ({
-            id: h.id,
+            id: h.id || `scraped-${idx}-${Date.now()}`,
             title: h.title,
             hosts: h.location.toLowerCase().includes("online") ? "Devpost Global" : h.location,
-            date: h.date,
-            location: h.location,
-            isOnline: h.isOnline,
+            date: h.date || "TBD",
+            location: h.location || "Online",
+            isOnline: h.isOnline || h.location.toLowerCase().includes("online"),
             isNearMe: !h.isOnline && idx % 3 === 0,
-            isMatched: h.skills.some((s: string) => ["react", "next.js", "typescript", "python", "machine learning", "ai", "machine learning/ai"].includes(s.toLowerCase())),
-            prizePool: h.prizePool,
-            bannerGradient: bannerGradients[idx % bannerGradients.length],
-            category: h.category,
-            description: `${h.title} hackathon listed on Devpost. Focuses on ${h.skills.join(", ")}. Participate to build, collaborate, and win prizes!`,
-            skills: h.skills.slice(0, 4),
-            participants: h.participants || Math.floor(Math.random() * 200) + 100,
-            timelineState: idx % 4 === 0 ? "team_formation" : idx % 4 === 1 ? "registration" : idx % 4 === 2 ? "submission" : "judging",
-            deadline: h.deadline,
-            url: h.url,
-            fitScore: h.fitScore
+            isMatched: h.skills.some((s: string) => ["react", "next.js", "typescript", "python", "machine learning", "ai"].includes(s.toLowerCase())),
+            prizePool: h.prizePool || "$10,000",
+            category: h.category || "General",
+            description: h.description || `${h.title} hackathon. Focuses on ${(h.skills || []).join(", ")}.`,
+            skills: (h.skills || []).slice(0, 4),
+            deadline: h.deadline || "Apply Soon",
+            url: h.url || "https://devpost.com/hackathons",
+            fitScore: h.fitScore || getDynamicMatchScore(h.title, h.location, h.skills)
           }));
           setFetchedData(mapped);
         } else {
@@ -306,7 +382,6 @@ export default function HackathonRadar() {
 
     const interval = setInterval(() => {
       setFetchProgress((prev) => {
-        // If data is not loaded yet and we are near the end, hold at 90%
         if (prev >= 90 && !fetchedData) {
           return 90;
         }
@@ -315,9 +390,7 @@ export default function HackathonRadar() {
           clearInterval(interval);
           setTimeout(() => {
             setIsFetching(false);
-            if (fetchedData && fetchedData.length > 0) {
-              setHackathons(fetchedData);
-            }
+            setMatches(fetchedData || []);
             setHasFetched(true);
           }, 600);
           return 100;
@@ -334,10 +407,215 @@ export default function HackathonRadar() {
       });
 
       setCurrentSearchIndex((prev) => (prev + 1) % companiesToScan.length);
-    }, 350);
+    }, 300);
 
     return () => clearInterval(interval);
   }, [isFetching, fetchProgress, fetchedData]);
+
+  // Add Match to Tracker
+  const handleAddToTracker = async (match: HackathonEvent) => {
+    if (trackerCards.some((c) => c.title === match.title)) return;
+
+    try {
+      const res = await fetch("/api/hackathons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username,
+          title: match.title,
+          hosts: match.hosts,
+          date: match.date,
+          location: match.location,
+          isOnline: match.isOnline,
+          prizePool: match.prizePool,
+          category: match.category,
+          description: match.description,
+          skills: match.skills,
+          status: "Saved",
+          applyLink: match.url
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.hackathon) {
+        const logoColors = [
+          "bg-gradient-to-tr from-indigo-500 to-purple-600",
+          "bg-gradient-to-tr from-emerald-500 to-teal-600",
+          "bg-gradient-to-tr from-orange-500 via-rose-500 to-purple-500",
+          "bg-gradient-to-tr from-zinc-800 to-zinc-950 border border-white/10",
+          "bg-gradient-to-tr from-blue-500 to-indigo-600",
+          "bg-gradient-to-tr from-red-600 to-red-800",
+          "bg-gradient-to-tr from-zinc-600 to-zinc-800"
+        ];
+        const firstChar = match.hosts ? match.hosts.charAt(0).toUpperCase() : "H";
+        const colorHash = match.hosts ? match.hosts.charCodeAt(0) % logoColors.length : 0;
+
+        const newCard: TrackerCard = {
+          id: data.hackathon._id,
+          title: match.title,
+          hosts: match.hosts,
+          location: match.location,
+          prizePool: match.prizePool,
+          category: match.category,
+          description: match.description,
+          skills: match.skills,
+          status: "Saved",
+          column: "saved",
+          logoText: firstChar,
+          logoBg: logoColors[colorHash],
+          applyLink: match.url,
+          createdAt: data.hackathon.createdAt,
+          date: match.date
+        };
+        setTrackerCards((prev) => [newCard, ...prev]);
+        setMatches((prev) => prev.filter((m) => m.id !== match.id));
+      }
+    } catch (err) {
+      console.error("Error adding hackathon to tracker:", err);
+    }
+  };
+
+  // Move Tracker Card Column
+  const handleMoveCard = async (cardId: string, direction: "left" | "right") => {
+    const columnsOrder: ("saved" | "applied" | "won_participated")[] = [
+      "saved",
+      "applied",
+      "won_participated"
+    ];
+
+    const card = trackerCards.find((c) => c.id === cardId);
+    if (!card) return;
+
+    const currentIndex = columnsOrder.indexOf(card.column);
+    let nextIndex = currentIndex;
+    if (direction === "left" && currentIndex > 0) {
+      nextIndex = currentIndex - 1;
+    } else if (direction === "right" && currentIndex < columnsOrder.length - 1) {
+      nextIndex = currentIndex + 1;
+    }
+
+    if (nextIndex === currentIndex) return;
+    const nextColumn = columnsOrder[nextIndex];
+
+    let dbStatus: "Saved" | "Applied" | "Participated" | "Shortlisted" | "Won" = "Saved";
+    if (nextColumn === "applied") dbStatus = "Applied";
+    else if (nextColumn === "won_participated") dbStatus = "Participated";
+
+    try {
+      const res = await fetch("/api/hackathons", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: cardId,
+          status: dbStatus
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTrackerCards((prev) =>
+          prev.map((c) => (c.id === cardId ? { ...c, column: nextColumn, status: dbStatus } : c))
+        );
+      }
+    } catch (err) {
+      console.error("Error updating hackathon card column:", err);
+    }
+  };
+
+  // Remove Card
+  const handleRemoveCard = async (cardId: string) => {
+    try {
+      const res = await fetch(`/api/hackathons?id=${cardId}`, {
+        method: "DELETE"
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTrackerCards((prev) => prev.filter((card) => card.id !== cardId));
+      }
+    } catch (err) {
+      console.error("Error deleting hackathon card:", err);
+    }
+  };
+
+  // Add custom manual hackathon
+  const handleSubmitCustomHackathon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formTitle || !formHosts) return;
+
+    try {
+      const res = await fetch("/api/hackathons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username,
+          title: formTitle,
+          hosts: formHosts,
+          status: formStatus,
+          location: formLocation || (formIsOnline ? "Online" : "Remote"),
+          isOnline: formIsOnline,
+          prizePool: formPrizePool || "TBD",
+          category: formCategory || "General",
+          description: formDescription,
+          skills: formSkills ? formSkills.split(",").map(s => s.trim()).filter(Boolean) : [],
+          applyLink: formApplyLink,
+          date: formDate
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.hackathon) {
+        const logoColors = [
+          "bg-gradient-to-tr from-indigo-500 to-purple-600",
+          "bg-gradient-to-tr from-emerald-500 to-teal-600",
+          "bg-gradient-to-tr from-orange-500 via-rose-500 to-purple-500",
+          "bg-gradient-to-tr from-zinc-800 to-zinc-950 border border-white/10",
+          "bg-gradient-to-tr from-blue-500 to-indigo-600",
+          "bg-gradient-to-tr from-red-600 to-red-800",
+          "bg-gradient-to-tr from-zinc-600 to-zinc-800"
+        ];
+        
+        let columnId: "saved" | "applied" | "won_participated" = "saved";
+        if (formStatus === "Applied" || formStatus === "Shortlisted") columnId = "applied";
+        else if (formStatus === "Participated" || formStatus === "Won") columnId = "won_participated";
+
+        const firstChar = formHosts.charAt(0).toUpperCase();
+        const colorHash = formHosts.charCodeAt(0) % logoColors.length;
+
+        const newCard: TrackerCard = {
+          id: data.hackathon._id,
+          title: formTitle,
+          hosts: formHosts,
+          location: formLocation || (formIsOnline ? "Online" : "Remote"),
+          prizePool: formPrizePool || "TBD",
+          category: formCategory || "General",
+          description: formDescription,
+          skills: formSkills ? formSkills.split(",").map(s => s.trim()).filter(Boolean) : [],
+          status: formStatus,
+          column: columnId,
+          logoText: firstChar,
+          logoBg: logoColors[colorHash],
+          applyLink: formApplyLink,
+          createdAt: data.hackathon.createdAt,
+          date: formDate
+        };
+
+        setTrackerCards((prev) => [newCard, ...prev]);
+        
+        // Reset form
+        setFormTitle("");
+        setFormHosts("");
+        setFormDate("");
+        setFormLocation("");
+        setFormPrizePool("");
+        setFormCategory("");
+        setFormDescription("");
+        setFormSkills("");
+        setFormStatus("Saved");
+        setFormApplyLink("");
+        setFormIsOnline(false);
+        setIsModalOpen(false);
+      }
+    } catch (err) {
+      console.error("Error submitting manual hackathon:", err);
+    }
+  };
 
   // Custom AI Filter Handler
   const handleAiFilter = async () => {
@@ -351,7 +629,7 @@ export default function HackathonRadar() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          hackathons,
+          hackathons: matches,
           query: customAiQuery
         })
       });
@@ -365,8 +643,8 @@ export default function HackathonRadar() {
       console.error("AI filter request failed:", err);
       // fallback local search
       const keywords = customAiQuery.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-      const matchingIds = hackathons.filter((item) => {
-        const itemText = `${item.title} ${item.hosts} ${item.category} ${item.description} ${(item.skills || []).join(' ')}`.toLowerCase();
+      const matchingIds = matches.filter((item) => {
+        const itemText = `${item.title} ${item.hosts} ${item.location} ${(item.skills || []).join(' ')} ${item.category}`.toLowerCase();
         return keywords.length === 0 || keywords.some((kw) => itemText.includes(kw));
       }).map(item => item.id);
       setAiFilteredIds(matchingIds);
@@ -380,346 +658,79 @@ export default function HackathonRadar() {
     setAiFilteredIds(null);
   };
 
-  // Filtering Logic
-  const filteredHackathons = useMemo(() => {
-    return hackathons.filter((event) => {
-      // AI custom query filter if active
-      if (aiFilteredIds !== null && !aiFilteredIds.includes(event.id)) {
-        return false;
-      }
-
-      // Filter tab check
-      if (filter === "Near Me" && !event.isNearMe) return false;
-      if (filter === "Online" && !event.isOnline) return false;
-      if (filter === "Matched" && !event.isMatched) return false;
-
-      // Search query check
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        return (
-          event.title.toLowerCase().includes(query) ||
-          event.category.toLowerCase().includes(query) ||
-          event.hosts.toLowerCase().includes(query) ||
-          event.skills.some((s) => s.toLowerCase().includes(query))
-        );
-      }
-      return true;
-    });
-  }, [filter, searchQuery, hackathons, aiFilteredIds]);
-  // Tracked Hackathons titles for check
-  const trackedIds = useMemo(() => {
-    return dbHackathons.map((h) => h.title);
-  }, [dbHackathons]);
-
-  // Tracked active Hackathons (status is Saved or Applied)
-  const activeTrackedHackathons = useMemo(() => {
-    return dbHackathons.filter((h) => h.status === "Saved" || h.status === "Applied");
-  }, [dbHackathons]);
-
-  // Filter tracked hackathons by current search query & active tabs
-  const filteredTrackedHackathons = useMemo(() => {
-    return activeTrackedHackathons.filter((event) => {
-      // Find matching item in the full hackathons list (both initial and scraped ones)
-      const matchingScraped = hackathons.find((h) => h.title.toLowerCase() === event.title.toLowerCase());
-      const isOnline = event.isOnline ?? matchingScraped?.isOnline ?? false;
-      
-      const userCountry = currentUser?.collegeCountry || "";
-      const userState = currentUser?.collegeState || "";
-      const isNearMe = matchingScraped 
-        ? matchingScraped.isNearMe 
-        : (!isOnline && event.location && (userCountry || userState) 
-            ? (event.location.toLowerCase().includes(userCountry.toLowerCase()) || event.location.toLowerCase().includes(userState.toLowerCase())) 
-            : false);
-      
-      let userTechStack = ["React", "TypeScript", "Node.js", "Python", "Next.js", "AI", "ML"];
-      if (currentUser?.techStack && currentUser.techStack.length > 0) {
-        userTechStack = currentUser.techStack;
-      }
-      const isMatched = matchingScraped 
-        ? matchingScraped.isMatched 
-        : (event.skills && event.skills.some((s: string) => userTechStack.some((uts: string) => uts.toLowerCase() === s.toLowerCase())));
-
-      // AI custom query filter if active
-      if (aiFilteredIds !== null) {
-        if (matchingScraped && !aiFilteredIds.includes(matchingScraped.id)) {
-          return false;
-        }
-        if (!matchingScraped) {
-          const keywords = customAiQuery.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-          const itemText = `${event.title} ${event.hosts} ${event.category} ${event.description} ${(event.skills || []).join(' ')}`.toLowerCase();
-          if (keywords.length > 0 && !keywords.some((kw) => itemText.includes(kw))) {
-            return false;
-          }
-        }
-      }
-
-      // Filter tab check
-      if (filter === "Near Me" && !isNearMe) return false;
-      if (filter === "Online" && !isOnline) return false;
-      if (filter === "Matched" && !isMatched) return false;
-
-      // Search query check
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        const matchesQuery = 
-          event.title.toLowerCase().includes(query) ||
-          (event.category && event.category.toLowerCase().includes(query)) ||
-          (event.hosts && event.hosts.toLowerCase().includes(query)) ||
-          (event.skills && event.skills.some((s: string) => s.toLowerCase().includes(query)));
-        if (!matchesQuery) return false;
-      }
-
-      return true;
-    });
-  }, [activeTrackedHackathons, filter, searchQuery, aiFilteredIds, hackathons, currentUser]);
-
-  // History/Participated Hackathons (status is Participated, Shortlisted, or Won)
-  const participatedHackathons = useMemo(() => {
-    return dbHackathons.filter((h) => h.status === "Participated" || h.status === "Shortlisted" || h.status === "Won");
-  }, [dbHackathons]);
-
-  // Active tracked hackathon details for timeline view
-  const activeTrackedEvent = useMemo(() => {
-    return filteredTrackedHackathons.find((h) => h._id === activeTrackerId) || filteredTrackedHackathons[0] || null;
-  }, [filteredTrackedHackathons, activeTrackerId]);
-
-  // Toggle tracker addition (via DB POST/DELETE)
-  const handleToggleTrack = async (event: any) => {
-    // Check if event is from scraper (using title) or database (already has _id)
-    const titleToCheck = event.title;
-    const existing = dbHackathons.find((h) => h.title === titleToCheck);
-    if (existing) {
-      try {
-        const res = await fetch(`/api/hackathons?id=${existing._id}`, { method: "DELETE" });
-        const data = await res.json();
-        if (data.success) {
-          setDbHackathons((prev) => prev.filter((item) => item._id !== existing._id));
-          if (activeTrackerId === existing._id) {
-            const remaining = dbHackathons.filter((item) => item._id !== existing._id && (item.status === "Saved" || item.status === "Applied"));
-            if (remaining.length > 0) {
-              setActiveTrackerId(remaining[0]._id);
-            } else {
-              setActiveTrackerId("");
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Error deleting tracked hackathon:", err);
-      }
-    } else {
-      const session = localStorage.getItem("currentUser");
-      if (!session) return;
-      try {
-        const user = JSON.parse(session);
-        const res = await fetch("/api/hackathons", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: user.username,
-            title: event.title,
-            hosts: event.hosts,
-            date: event.date,
-            location: event.location,
-            isOnline: event.isOnline,
-            prizePool: event.prizePool,
-            category: event.category,
-            description: event.description,
-            skills: event.skills,
-            status: "Saved",
-            applyLink: event.url
-          })
-        });
-        const data = await res.json();
-        if (data.success && data.hackathon) {
-          setDbHackathons((prev) => [data.hackathon, ...prev]);
-          if (!activeTrackerId) {
-            setActiveTrackerId(data.hackathon._id);
-          }
-        }
-      } catch (err) {
-        console.error("Error adding to tracker:", err);
-      }
+  // Computed Filtered Matches
+  const filteredMatches = matches.filter((match) => {
+    if (aiFilteredIds !== null && !aiFilteredIds.includes(match.id)) {
+      return false;
     }
-  };
 
-  // Update Hackathon Status/Rounds in Database
-  const handleUpdateStatus = async (hackathonId: string, newStatus: string, shortlistedRounds?: number) => {
-    try {
-      const res = await fetch("/api/hackathons", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: hackathonId,
-          status: newStatus,
-          shortlistedRounds: shortlistedRounds ?? 0
-        })
-      });
-      const data = await res.json();
-      if (data.success && data.hackathon) {
-        setDbHackathons((prev) =>
-          prev.map((h) => (h._id === hackathonId ? data.hackathon : h))
-        );
-      }
-    } catch (err) {
-      console.error("Error updating hackathon status:", err);
+    const locLower = match.location.toLowerCase();
+    if (workModeFilter === "remote") {
+      if (!locLower.includes("remote") && !locLower.includes("online")) return false;
+    } else if (workModeFilter === "hybrid") {
+      if (!locLower.includes("hybrid")) return false;
+    } else if (workModeFilter === "office") {
+      if (locLower.includes("remote") || locLower.includes("online") || locLower.includes("hybrid")) return false;
     }
-  };;
 
-  // Submit custom manual hackathon
-  const handleSubmitCustomHackathon = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formTitle.trim() || !formHosts.trim()) return;
-
-    setIsSubmitting(true);
-    const session = localStorage.getItem("currentUser");
-    if (!session) {
-      setIsSubmitting(false);
-      return;
+    if (regionFilter !== "all") {
+      if (regionFilter === "us" && !locLower.includes("us") && !locLower.includes("san francisco") && !locLower.includes("new york") && !locLower.includes("ca") && !locLower.includes("ny")) return false;
+      if (regionFilter === "uk" && !locLower.includes("uk") && !locLower.includes("london")) return false;
+      if (regionFilter === "global" && !locLower.includes("global") && !locLower.includes("online")) return false;
     }
-    try {
-      const user = JSON.parse(session);
-      const res = await fetch("/api/hackathons", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: user.username,
-          title: formTitle.trim(),
-          hosts: formHosts.trim(),
-          date: formDate.trim() || "TBD",
-          location: formLocation.trim() || (formIsOnline ? "Online" : "Unknown"),
-          isOnline: formIsOnline,
-          prizePool: formPrizePool.trim(),
-          category: formCategory.trim() || "General",
-          description: formDescription.trim(),
-          skills: formSkills.split(",").map(s => s.trim()).filter(s => s.length > 0),
-          status: formStatus,
-          applyLink: formApplyLink.trim()
-        })
-      });
-      const data = await res.json();
-      if (data.success && data.hackathon) {
-        // Clear form fields
-        setFormTitle("");
-        setFormHosts("");
-        setFormDate("");
-        setFormLocation("");
-        setFormIsOnline(false);
-        setFormPrizePool("");
-        setFormCategory("");
-        setFormDescription("");
-        setFormSkills("");
-        setFormStatus("Saved");
-        setFormApplyLink("");
-        
-        // Refresh tracked hackathons list
-        await fetchHackathons(user.username);
-      }
-    } catch (err) {
-      console.error("Error adding custom hackathon:", err);
-    } finally {
-      setIsSubmitting(false);
+
+    if (roleFilter !== "all") {
+      const titleLower = match.title.toLowerCase();
+      const catLower = match.category.toLowerCase();
+      if (roleFilter === "frontend" && !titleLower.includes("frontend") && !titleLower.includes("web") && !titleLower.includes("ux") && !titleLower.includes("ui")) return false;
+      if (roleFilter === "backend" && !titleLower.includes("backend") && !titleLower.includes("infra")) return false;
+      if (roleFilter === "aiml" && !titleLower.includes("ai") && !titleLower.includes("ml") && !titleLower.includes("machine") && !catLower.includes("artificial") && !catLower.includes("llama")) return false;
     }
-  };;
 
-  // Helper for generating custom dates / subtexts for tracker steps
-  const getTimelineSteps = (event: HackathonEvent) => {
-    // We map states: Team Formation -> Registration Deadline -> Project Submission -> Judging
-    const statesOrder = ["team_formation", "registration", "submission", "judging"];
-    const currentIndex = statesOrder.indexOf(event.timelineState);
+    if (searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase();
+      const titleMatch = match.title.toLowerCase().includes(query);
+      const hostMatch = match.hosts.toLowerCase().includes(query);
+      const locMatch = match.location.toLowerCase().includes(query);
+      const skillMatch = match.skills.some(s => s.toLowerCase().includes(query));
+      if (!titleMatch && !hostMatch && !locMatch && !skillMatch) return false;
+    }
 
-    return [
-      {
-        key: "team_formation",
-        label: "Team Formation",
-        description: "Form a group of 2-4 members with matching technical profiles.",
-        status: currentIndex > 0 ? "completed" : currentIndex === 0 ? "current" : "upcoming",
-        date: "Completed on Time"
-      },
-      {
-        key: "registration",
-        label: "Registration Deadline",
-        description: "Submit resume, portfolio link, and project proposal guidelines.",
-        status: currentIndex > 1 ? "completed" : currentIndex === 1 ? "current" : "upcoming",
-        date: "Closing soon"
-      },
-      {
-        key: "submission",
-        label: "Project Submission",
-        description: "Upload GitHub repository, demo video, and setup documentation.",
-        status: currentIndex > 2 ? "completed" : currentIndex === 2 ? "current" : "upcoming",
-        date: "July 24, 2026"
-      },
-      {
-        key: "judging",
-        label: "Judging & Results",
-        description: "Presentation to judges panel and distribution of placement offers.",
-        status: currentIndex > 3 ? "completed" : currentIndex === 3 ? "current" : "upcoming",
-        date: "Winner announcement"
-      }
-    ];
-  };
+    return true;
+  });
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-[1360px] mx-auto pb-12 text-[#1E1D1A]">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-[#EFECE3] pb-6">
-        <div>
-          <h1 className="text-4xl font-normal text-[#1E1D1A] tracking-tight flex items-center gap-3">
-            <Trophy className="w-10 h-10 text-[#F5C451]" />
-            Hackathon Radar
-          </h1>
-          <p className="text-[#7C786E] text-sm mt-2 max-w-xl">
-            Discover, track, and win global coding events. Match your tech stack with official sponsor briefs and secure fast-tracked placements.
-          </p>
-        </div>
-
-        {/* Quick Stats banner */}
-        <div className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-[#ECE9DF] shadow-sm">
-          <div className="text-center px-4 border-r border-[#ECE9DF]">
-            <span className="block text-[9px] text-[#7C786E] font-semibold uppercase tracking-wider">Active Events</span>
-            <span className="text-2xl font-black text-[#1E1D1A]">{hackathons.length}</span>
-          </div>
-          <div className="text-center px-4 border-r border-[#ECE9DF]">
-            <span className="block text-[9px] text-[#7C786E] font-semibold uppercase tracking-wider">Tracked</span>
-            <span className="text-2xl font-black text-[#7A6218]">{trackedIds.length}</span>
-          </div>
-          <div className="text-center px-4">
-            <span className="block text-[9px] text-[#7C786E] font-semibold uppercase tracking-wider">Total Prizes</span>
-            <span className="text-2xl font-black text-[#2C2B27]">$530k</span>
-          </div>
-        </div>
-      </div>
 
       {/* Scraper / Fetch Dashboard */}
-      <div className="warm-card p-6 relative overflow-hidden bg-white hover:border-[#F5C451] transition-all duration-300">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1.5 text-center md:text-left">
-            <h2 className="text-lg font-bold text-[#1E1D1A] tracking-tight flex items-center justify-center md:justify-start gap-2">
-              <Sparkles className="w-5 h-5 text-[#F5C451]" />
-              Real-time AI Match Fetcher
+      <div className="warm-card p-4 relative overflow-hidden bg-white">
+        <div className="absolute top-0 right-0 w-50 h-50 bg-[#ec4899]/5 rounded-full blur-3xl -z-10 pointer-events-none" />
+
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="text-center md:text-left">
+            <h2 className="text-lg uppercase font-bold text-[#1E1D1A] tracking-tight flex items-center justify-center md:justify-start gap-2">
+              Real time AI Hackathon Fetcher
             </h2>
-            <p className="text-xs text-[#7C786E] max-w-md">
-              Trigger a live scan across Devpost, MLH, and Devfolio to match open hackathons directly to your profile.
-            </p>
           </div>
 
           <button
             onClick={handleFetchMatches}
             disabled={isFetching}
-            className={`relative py-3 px-8 rounded-2xl font-extrabold text-sm tracking-wide transition-all duration-500 group shadow-md cursor-pointer ${
+            className={`relative py-3 px-8 rounded-2xl font-extrabold text-sm tracking-wide transition-all duration-500 group shadow-sm ${
               isFetching
-                ? "bg-[#E5E2D6] text-[#7C786E] border border-[#ECE9DF] cursor-not-allowed"
-                : "bg-[#2C2B27] text-white hover:bg-[#1E1D1A]"
+                ? "bg-[#E5E2D6] text-[#7C786E] border border-[#FCE7F3] cursor-not-allowed"
+                : "bg-[#2C2B27] text-white hover:bg-[#1E1D1A] cursor-pointer"
             }`}
           >
             {isFetching ? (
               <span className="flex items-center gap-2">
-                <span className="w-4 h-4 rounded-full border-2 border-zinc-400 border-t-[#F5C451] animate-spin" />
-                Scraping Portals...
+                <RefreshCw className="w-4 h-4 animate-spin text-[#ec4899]" />
+                Scraping Hackathon Portals...
               </span>
             ) : (
-              <span className="flex items-center gap-2">
-                Fetch AI Matches
-                <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-0.5 transition-transform" />
+              <span className="flex uppercase items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-[#ec4899] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                Fetch Hackathons
               </span>
             )}
           </button>
@@ -727,747 +738,707 @@ export default function HackathonRadar() {
 
         {/* Live Scraper Terminal Log animation */}
         {isFetching && (
-          <div className="mt-6 rounded-2xl bg-[#1E1D1A] border border-[#ECE9DF] p-4 space-y-3 font-mono text-[11px] text-zinc-300 shadow-inner">
-            <div className="flex items-center justify-between border-b border-white/5 pb-2">
-              <div className="flex items-center gap-2 text-zinc-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                <span>pinkypow-hack-scraper.sh</span>
+          <div className="mt-6 rounded-2xl bg-zinc-950 border border-zinc-800 p-5 space-y-4 font-mono text-[11px] text-zinc-300 shadow-2xl relative overflow-hidden">
+            <style>{`
+              @keyframes blink {
+                50% { opacity: 0; }
+              }
+              .terminal-cursor {
+                animation: blink 1s step-start infinite;
+              }
+            `}</style>
+
+            {/* Header: OS window style controls */}
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 mr-1">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                </div>
+                <div className="flex items-center gap-2 text-zinc-400">
+                  <Terminal className="w-3.5 h-3.5 text-zinc-500" />
+                  <span className="text-[10px] text-zinc-400 tracking-wider">pinkypow@scraper:~</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-[#F5C451] font-semibold animate-pulse">
-                  Scanning: {companiesToScan[currentSearchIndex]}...
+              
+              <div className="flex items-center gap-3">
+                <span className="text-[9px] bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-md text-emerald-400 font-bold animate-pulse">
+                  Scanning: {companiesToScan[currentSearchIndex]}
                 </span>
-                <span className="text-zinc-500">{Math.round(fetchProgress)}%</span>
+                <span className="text-zinc-500 font-bold">{Math.round(fetchProgress)}%</span>
               </div>
             </div>
             
-            {/* Progress bar */}
-            <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+            {/* Progress bar (glowing design) */}
+            <div className="relative w-full bg-zinc-900 h-2.5 rounded-full overflow-hidden border border-zinc-800/80">
               <div
-                className="bg-gradient-to-r from-[#F5C451] to-amber-600 h-full transition-all duration-300"
+                className="bg-gradient-to-r from-emerald-500 via-teal-400 to-[#ec4899] h-full transition-all duration-300 relative rounded-full shadow-[0_0_8px_rgba(16,185,129,0.3)]"
                 style={{ width: `${fetchProgress}%` }}
               />
             </div>
 
-            <div className="space-y-1.5 max-h-32 overflow-y-auto pt-1">
-              {terminalLogs.map((log, idx) => (
-                <div key={idx} className="flex gap-2">
-                  <span className="text-[#F5C451] shrink-0">➔</span>
-                  <span className="break-all">{log}</span>
-                </div>
-              ))}
+            {/* Active Logs Console */}
+            <div className="space-y-2 max-h-40 overflow-y-auto pt-2 pr-2 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+              {terminalLogs.map((log, idx) => {
+                let logColor = "text-zinc-400";
+                let logIcon = "⚡";
+                const lowerLog = log.toLowerCase();
+                
+                if (lowerLog.includes("complete") || lowerLog.includes("synced")) {
+                  logColor = "text-emerald-400 font-bold";
+                  logIcon = "✓";
+                } else if (lowerLog.includes("scraping") || lowerLog.includes("scan")) {
+                  logColor = "text-cyan-400";
+                  logIcon = "🔍";
+                } else if (lowerLog.includes("calibrating") || lowerLog.includes("vector")) {
+                  logColor = "text-indigo-400";
+                  logIcon = "🔮";
+                } else if (lowerLog.includes("initializing") || lowerLog.includes("node")) {
+                  logColor = "text-amber-400";
+                  logIcon = "⚙️";
+                }
+                
+                return (
+                  <div key={idx} className={`flex items-start gap-3 leading-relaxed ${logColor}`}>
+                    <span className="shrink-0 select-none opacity-80">{logIcon}</span>
+                    <span className="break-all">{log}</span>
+                  </div>
+                );
+              })}
+              
+              {/* Active prompt with cursor */}
+              <div className="flex items-center gap-2 text-zinc-500 pt-1.5 border-t border-zinc-900/60 mt-1">
+                <span className="text-zinc-600 select-none">$</span>
+                <span className="text-zinc-400">awaiting response...</span>
+                <span className="w-1.5 h-3 bg-[#ec4899] terminal-cursor" />
+              </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Filter and Search Bar (Sticky) */}
-      <div className="sticky top-0 z-20 py-4 bg-[#FAF6EA]/95 backdrop-blur-md border-b border-[#EFECE3] flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7C786E]" />
-          <input
-            type="text"
-            placeholder="Search by tech stack, hosts, or name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-2.5 rounded-full bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-sm text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
-          />
-        </div>
-
-        {/* Filters pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-          <Filter className="w-4 h-4 text-[#7C786E] mr-2 shrink-0 hidden sm:block" />
-          {(["All", "Near Me", "Online", "Matched"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 whitespace-nowrap cursor-pointer ${
-                filter === tab
-                  ? "bg-[#2C2B27] text-white shadow-md"
-                  : "bg-white text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5] border border-[#ECE9DF] shadow-sm"
-              }`}
-            >
-              {tab === "Matched" ? "Matched to My Skills" : tab === "Near Me" ? "Near Me (Location-based)" : tab}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Custom AI Semantic Filter */}
-      <div className="warm-card p-6 bg-white border border-[#ECE9DF] rounded-2xl shadow-sm space-y-4">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <span className="text-xs font-extrabold text-[#7A6218] uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-[#F5C451]" />
-              Custom AI Semantic Filter
-            </span>
-            <p className="text-xs text-[#7C786E]">
-              Type your custom requirements (e.g. "Generative AI hackathons in SF with &gt; 50k prize pool") and let AI filter accordingly.
-            </p>
-          </div>
-          {aiFilteredIds !== null && (
-            <button
-              onClick={handleClearAiFilter}
-              className="text-xs font-bold text-rose-600 hover:text-rose-700 cursor-pointer"
-            >
-              Clear Filter
-            </button>
-          )}
-        </div>
-        <div className="flex gap-3">
-          <input
-            type="text"
-            value={customAiQuery}
-            onChange={(e) => setCustomAiQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAiFilter()}
-            placeholder="e.g. AI hackathons with prize pool &gt; 50,000..."
-            className="flex-1 px-4 py-3 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] text-xs text-[#1E1D1A] placeholder-[#7C786E]/50 focus:outline-none focus:border-[#F5C451]"
-          />
-          <button
-            onClick={handleAiFilter}
-            disabled={isAiFiltering}
-            className="px-6 py-3 bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-extrabold text-xs rounded-xl transition-all flex items-center gap-1 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isAiFiltering ? "Filtering..." : "Filter with AI"}
-          </button>
-        </div>
-      </div>
-
-      {/* Discovery Grid */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-[#1E1D1A] tracking-tight flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[#F5C451]" />
-            Discover Coding Events ({filteredHackathons.length})
-          </h2>
-        </div>
-
-        {filteredHackathons.length === 0 ? (
-          <div className="warm-card p-12 text-center text-[#7C786E] bg-white">
-            <Trophy className="w-12 h-12 text-[#7C786E] mx-auto mb-2" />
-            <h3 className="text-lg font-bold text-[#1E1D1A]">No hackathons found</h3>
-            <p className="text-xs text-[#7C786E] max-w-sm mx-auto mt-1">
-              We couldn't find any hackathons matching your search or active filter tab. Try resetting your search query.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredHackathons.map((event) => {
-              const isTracked = trackedIds.includes(event.title);
-              return (
-                <div
-                  key={event.id}
-                  className="warm-card overflow-hidden flex flex-col justify-between hover:border-[#F5C451] transition-all duration-300 group bg-white"
-                >
-                  {/* Subtle Gradient Event Banner */}
-                  <div className={`h-24 bg-gradient-to-r ${event.bannerGradient} relative p-4 flex flex-col justify-between`}>
-                    {/* Glass Overlay for depth */}
-                    <div className="absolute inset-0 bg-black/10 backdrop-brightness-95 pointer-events-none" />
-                    
-                    <div className="relative z-10 flex justify-between items-start">
-                      <span className="px-2.5 py-0.5 rounded-full bg-black/35 backdrop-blur-sm border border-white/10 text-[10px] text-white font-bold uppercase tracking-wider">
-                        {event.category}
-                      </span>
-                      
-                      {event.fitScore !== undefined ? (
-                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/25 backdrop-blur-sm border border-amber-400/20 text-[10px] text-amber-200 font-bold uppercase tracking-wider flex items-center gap-1">
-                          <Sparkles className="w-3.5 h-3.5 text-[#F5C451]" /> {event.fitScore}% Match
-                        </span>
-                      ) : event.isMatched && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/25 backdrop-blur-sm border border-emerald-400/20 text-[10px] text-emerald-200 font-bold uppercase tracking-wider flex items-center gap-1">
-                          <Check className="w-3.5 h-3.5" /> Skill Match
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="relative z-10">
-                      <span className="text-[10px] text-white/80 font-semibold uppercase">{event.hosts}</span>
-                    </div>
-                  </div>
-
-                  {/* Body Content */}
-                  <div className="p-6 flex-1 flex flex-col justify-between space-y-6">
-                    <div className="space-y-3">
-                      <h3 className="text-lg font-bold text-[#1E1D1A] group-hover:text-[#7A6218] transition-colors tracking-tight leading-snug">
-                        {event.title}
-                      </h3>
-
-                      <p className="text-xs text-[#7C786E] leading-relaxed line-clamp-3">
-                        {event.description}
-                      </p>
-                    </div>
-
-                    {/* Metadata */}
-                    <div className="space-y-4 pt-2">
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="flex items-center gap-2 text-[#7C786E]">
-                          <Calendar className="w-4 h-4 text-[#7C786E] shrink-0" />
-                          <span className="truncate">{event.date}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-[#7C786E]">
-                          <MapPin className="w-4 h-4 text-[#7C786E] shrink-0" />
-                          <span className="truncate">{event.isOnline ? "Online" : event.location}</span>
-                        </div>
-                      </div>
-
-                      {/* Deadline info */}
-                      <div className="flex items-center gap-2 text-xs font-semibold text-rose-600 bg-rose-500/5 border border-rose-500/10 px-3 py-1.5 rounded-xl shadow-inner mt-2">
-                        <Clock className="w-4 h-4 text-rose-500 shrink-0" />
-                        <span>Deadline: {event.deadline}</span>
-                      </div>
-
-                      {/* Tech stack badges */}
-                      <div className="flex flex-wrap gap-1">
-                        {event.skills.map((skill) => (
-                          <span
-                            key={skill}
-                            className="text-[9px] font-semibold px-2 py-0.5 rounded-md bg-[#FAF9F5] border border-[#ECE9DF] text-[#4E4B42]"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Prize pool info */}
-                      <div className="flex items-center justify-between p-3 rounded-2xl bg-[#FAF9F5] border border-[#ECE9DF] shadow-sm">
-                        <span className="text-[9px] text-[#7C786E] font-bold uppercase tracking-wider">Prize Pool</span>
-                        <span className="text-sm font-black text-[#1E1D1A] flex items-center gap-1">
-                          <DollarSign className="w-4 h-4 text-emerald-600" />
-                          {event.prizePool}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Action buttons */}
-                    <div className="pt-2 flex items-center gap-2">
-                      <button
-                        onClick={() => handleToggleTrack(event)}
-                        className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 shadow-sm ${
-                          isTracked
-                            ? "bg-[#E5E2D6] text-[#7C786E] border border-[#ECE9DF] shadow-inner"
-                            : "bg-[#2C2B27] text-white hover:bg-[#1E1D1A]"
-                        }`}
-                      >
-                        {isTracked ? (
-                          <>
-                            <Check className="w-3.5 h-3.5 text-[#7A6218]" />
-                            Tracked
-                          </>
-                        ) : (
-                          <>
-                            <Plus className="w-3.5 h-3.5" />
-                            Add to Tracker
-                          </>
-                        )}
-                      </button>
-
-                      <a
-                        href={event.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2.5 rounded-xl bg-white border border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5] transition-colors shadow-sm"
-                        title="Open Hackathon Application"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Tracker Timeline View */}
-      <div className="border-t border-[#EFECE3] pt-10 space-y-6">
-        <div>
-          <h2 className="text-2xl font-extrabold text-[#1E1D1A] tracking-tight flex items-center gap-2">
-            <Clock className="w-6 h-6 text-[#2C2B27]" />
-            My Hackathon Tracker
-          </h2>
-          <p className="text-[#7C786E] text-xs mt-1">
-            Stay on top of deadlines, milestone deliveries, and interview scheduling for your active hackathons.
-          </p>
-        </div>
-
-        {activeTrackedHackathons.length === 0 ? (
-          <div className="warm-card p-10 text-center text-[#7C786E] bg-white">
-            <Clock className="w-10 h-10 text-[#7C786E] opacity-40 mx-auto mb-2" />
-            <h3 className="font-bold text-[#1E1D1A] text-sm">No tracked hackathons yet</h3>
-            <p className="text-xs text-[#7C786E] max-w-sm mx-auto mt-1">
-              Track hackathons using the "Add to Tracker" button above to map your preparation milestones.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Sidebar selection of tracked events */}
-            <div className="lg:col-span-4 space-y-2">
-              <span className="block text-[9px] text-[#7C786E] font-bold uppercase tracking-wider px-2 mb-2">Tracked Events ({filteredTrackedHackathons.length})</span>
-              <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
-                {filteredTrackedHackathons.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-[#7C786E] bg-white border border-[#ECE9DF] rounded-2xl">
-                    No tracked hackathons match the active filter.
-                  </div>
-                ) : (
-                  filteredTrackedHackathons.map((h) => {
-                    const isActive = h._id === activeTrackerId;
-                    return (
-                      <div
-                        key={h._id}
-                        onClick={() => setActiveTrackerId(h._id)}
-                        className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-between shadow-sm ${
-                          isActive
-                            ? "bg-[#FAF9F5] border-[#F5C451] text-[#1E1D1A]"
-                            : "bg-white border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5]"
-                        }`}
-                      >
-                        <div className="min-w-0 pr-2">
-                          <span className="block text-[9px] text-[#7C786E] uppercase font-semibold">{h.hosts}</span>
-                          <h4 className="font-bold text-[#1E1D1A] text-sm truncate mt-0.5">{h.title}</h4>
-                          <div className="flex items-center gap-1.5 mt-1 text-[10px] text-[#7C786E] font-medium">
-                            <span className={`w-1.5 h-1.5 rounded-full ${
-                              h.timelineState === "team_formation" ? "bg-amber-500 animate-pulse" :
-                              h.timelineState === "registration" ? "bg-blue-500 animate-pulse" :
-                              h.timelineState === "submission" ? "bg-purple-500 animate-pulse" : "bg-emerald-500"
-                            }`} />
-                            <span className="capitalize">{h.timelineState ? h.timelineState.replace("_", " ") : "Saved"}</span>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleTrack(h);
-                          }}
-                          className="p-2 text-[#7C786E] hover:text-rose-600 transition-colors"
-                          title="Stop Tracking"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
-            {/* Active event timeline dashboard */}
-            {activeTrackedEvent ? (
-              <div className="lg:col-span-8 warm-card p-6 md:p-8 space-y-6 bg-white">
-                {/* Event header inside tracker */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EFECE3] pb-6">
-                  <div>
-                    <span className="text-[9px] text-[#7C786E] font-bold uppercase tracking-wider">Tracking Milestone Roadmap</span>
-                    <h3 className="text-xl font-bold text-[#1E1D1A] mt-1 leading-tight">{activeTrackedEvent.title}</h3>
-                    <p className="text-xs text-[#7C786E] mt-1 flex items-center gap-1">
-                      Hosted by {activeTrackedEvent.hosts} •
-                      <MapPin className="w-3.5 h-3.5 text-[#7C786E] inline mx-0.5" />
-                      {activeTrackedEvent.isOnline ? "Online" : activeTrackedEvent.location}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className="px-3 py-1 rounded-full bg-[#FAF9F5] border border-[#ECE9DF] text-[10px] text-[#4E4B42] font-semibold uppercase flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-[#7A6218]" />
-                      {activeTrackedEvent.participants || 0} Teams
-                    </span>
-                    <a
-                      href={activeTrackedEvent.url || activeTrackedEvent.applyLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="py-1.5 px-4 rounded-xl bg-[#2C2B27] text-white hover:bg-[#1E1D1A] font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>View Brief</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </a>
-                  </div>
-                </div>
-
-                {/* Status Update Actions */}
-                <div className="bg-[#FAF9F5] border border-[#ECE9DF] p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-                  <div className="space-y-0.5">
-                    <span className="text-[9px] text-[#7C786E] font-bold uppercase tracking-wider block">Update Application Progress</span>
-                    <span className="text-xs text-[#1E1D1A] font-semibold">Current: <span className="text-[#7A6218]">{activeTrackedEvent.status}</span></span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {activeTrackedEvent.status === "Saved" && (
-                      <button
-                        onClick={() => handleUpdateStatus(activeTrackedEvent._id, "Applied")}
-                        className="px-3 py-1.5 rounded-xl bg-[#FAF9F5] hover:bg-[#FAF4D8] border border-[#ECE9DF] hover:border-[#F5C451] text-xs font-bold text-[#1E1D1A] transition-all cursor-pointer"
-                      >
-                        Mark Applied
-                      </button>
-                    )}
-                    <button
-                      onClick={() => handleUpdateStatus(activeTrackedEvent._id, "Participated")}
-                      className="px-3 py-1.5 rounded-xl bg-[#FAF9F5] hover:bg-amber-50 border border-[#ECE9DF] hover:border-[#F5C451] text-xs font-bold text-[#7A6218] transition-all cursor-pointer"
-                    >
-                      Participated
-                    </button>
-                    <button
-                      onClick={() => handleUpdateStatus(activeTrackedEvent._id, "Shortlisted", 1)}
-                      className="px-3 py-1.5 rounded-xl bg-[#FAF9F5] hover:bg-blue-50 border border-[#ECE9DF] hover:border-blue-300 text-xs font-bold text-blue-700 transition-all cursor-pointer"
-                    >
-                      Shortlisted
-                    </button>
-                    <button
-                      onClick={() => handleUpdateStatus(activeTrackedEvent._id, "Won")}
-                      className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#F5C451] hover:brightness-105 text-white text-xs font-black transition-all cursor-pointer shadow-sm"
-                    >
-                      🏆 Won Hackathon
-                    </button>
-                  </div>
-                </div>
-
-                {/* Timeline Grid */}
-                <div className="space-y-8 relative before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-[2px] before:bg-[#EFECE3]">
-                  {getTimelineSteps(activeTrackedEvent).map((step, idx) => (
-                    <div key={step.key} className="flex gap-4 relative group">
-                      {/* Step Indicator */}
-                      <div className="relative z-10 shrink-0">
-                        {step.status === "completed" ? (
-                          <div className="w-9 h-9 rounded-full bg-emerald-100 border-2 border-emerald-600 flex items-center justify-center text-emerald-700">
-                            <Check className="w-4 h-4 stroke-[3]" />
-                          </div>
-                        ) : step.status === "current" ? (
-                          <div className="w-9 h-9 rounded-full bg-[#FAF4D8] border-2 border-[#F5C451] flex items-center justify-center text-[#7A6218] shadow-[0_0_15px_rgba(245,196,81,0.2)] animate-pulse">
-                            <Clock className="w-4 h-4" />
-                          </div>
-                        ) : (
-                          <div className="w-9 h-9 rounded-full bg-white border-2 border-[#ECE9DF] flex items-center justify-center text-[#7C786E]">
-                            <span className="text-xs font-bold">{idx + 1}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Content block */}
-                      <div className="flex-1 p-4 rounded-2xl bg-[#FAF9F5] border border-[#ECE9DF] group-hover:border-[#F5C451] transition-colors flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-sm text-[#1E1D1A]">
-                              {step.label}
-                            </h4>
-                            {step.status === "current" && (
-                              <span className="px-2 py-0.5 rounded bg-[#FAF4D8] border border-[#E8DFB3] text-[8px] text-[#7A6218] font-bold uppercase tracking-wider">
-                                Active Step
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-[#7C786E] mt-1 leading-relaxed max-w-lg">
-                            {step.description}
-                          </p>
-                        </div>
-
-                        <div className="sm:text-right shrink-0">
-                          <span className={`block text-[9px] font-bold uppercase tracking-wider ${
-                            step.status === "completed" ? "text-emerald-700" :
-                            step.status === "current" ? "text-[#7A6218] animate-pulse" : "text-[#7C786E]"
-                          }`}>
-                            {step.status === "completed" ? "Done" : step.status === "current" ? "Action Needed" : "Locked"}
-                          </span>
-                          <span className="block text-[10px] text-[#7C786E] font-semibold mt-0.5">
-                            {step.key === "registration" ? activeTrackedEvent.deadline : step.date}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="lg:col-span-8 warm-card p-10 text-center text-[#7C786E] bg-white flex flex-col items-center justify-center min-h-[300px]">
-                <Clock className="w-10 h-10 text-[#7C786E] opacity-40 mb-2 animate-pulse" />
-                <h3 className="font-bold text-[#1E1D1A] text-sm">No match for current filter</h3>
-                <p className="text-xs text-[#7C786E] max-w-sm mt-1 mx-auto">
-                  Try choosing another filter tab or clearing your search to see your tracked milestones.
-                </p>
-              </div>
+      {/* New Matches Grid (Revealed after fetch) */}
+      {(hasFetched || matches.length > 0) && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-[#7C786E] uppercase tracking-widest flex items-center gap-2">
+              <Plus className="w-4 h-4 text-[#2C2B27]" />
+              New Matches Found ({filteredMatches.length} / {matches.length})
+            </h3>
+            {matches.length === 0 && (
+              <span className="text-xs text-[#7C786E]">All matches added to tracker. Fetch again to refresh.</span>
             )}
           </div>
-        )}
-      </div>
 
-      {/* Participated Hackathon History Section */}
-      <div className="border-t border-[#EFECE3] pt-10 space-y-6">
-        <div>
-          <h2 className="text-2xl font-extrabold text-[#1E1D1A] tracking-tight flex items-center gap-2">
-            <Trophy className="w-6 h-6 text-[#F5C451]" />
-            Participated Hackathon History
-          </h2>
-          <p className="text-[#7C786E] text-xs mt-1">
-            Review and manage the status of your past hackathons. Updates here directly feed into your AI-generated resume builder.
-          </p>
-        </div>
-
-        {participatedHackathons.length === 0 ? (
-          <div className="warm-card p-10 text-center text-[#7C786E] bg-white">
-            <Trophy className="w-10 h-10 text-[#7C786E] opacity-40 mx-auto mb-2" />
-            <h3 className="font-bold text-[#1E1D1A] text-sm">No history records yet</h3>
-            <p className="text-xs text-[#7C786E] max-w-sm mx-auto mt-1">
-              Mark an active hackathon as Participated, Shortlisted, or Won, or register one manually using the form below.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {participatedHackathons.map((h) => (
-              <div
-                key={h._id}
-                className="warm-card bg-white p-5 border border-[#ECE9DF] hover:border-[#F5C451] transition-all duration-300 rounded-2xl shadow-sm flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex justify-between items-start">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider ${
-                      h.status === "Won" ? "bg-amber-100 text-amber-800 border border-amber-200" :
-                      h.status === "Shortlisted" ? "bg-blue-100 text-blue-800 border border-blue-200" :
-                      "bg-zinc-100 text-zinc-800 border border-zinc-200"
-                    }`}>
-                      {h.status === "Won" ? "🏆 Winner" : h.status === "Shortlisted" ? `Shortlisted` : "Participated"}
-                    </span>
-                    <button
-                      onClick={() => handleToggleTrack(h)}
-                      className="text-[#7C786E] hover:text-rose-600 transition-colors p-1"
-                      title="Delete Record"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+          {/* FILTERS PANEL */}
+          {matches.length > 0 && (
+            <div className="warm-card p-6 bg-white space-y-6 border border-zinc-200 rounded-2xl shadow-sm">
+              <div className="flex flex-col lg:flex-row gap-6 items-stretch justify-between">
+                {/* Left side: Standard filters */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 flex-1">
+                  {/* Search Input */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-[#7C786E] uppercase tracking-wider">Search Matches</label>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Hackathon title, host, skill..."
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-100 border border-zinc-200 text-xs text-[#1E1D1A] placeholder-[#7C786E]/60 focus:outline-none focus:border-zinc-500 transition-all"
+                    />
                   </div>
 
-                  <h3 className="font-bold text-[#1E1D1A] text-base mt-3 leading-snug">{h.title}</h3>
-                  <p className="text-xs text-[#7C786E] mt-1">Hosted by {h.hosts || "Unknown Host"}</p>
-                  <p className="text-[11px] text-[#7C786E] mt-1 flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {h.date || "TBD"}
-                  </p>
-                  
-                  {h.description && (
-                    <p className="text-[11px] text-[#7C786E] mt-2 line-clamp-2 italic leading-relaxed">
-                      "{h.description}"
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-[#EFECE3] space-y-3">
-                  <div className="space-y-1">
-                    <label className="text-[9px] text-[#7C786E] font-bold uppercase tracking-wider block">Achievement Status</label>
+                  {/* Work Mode / Setting */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-[#7C786E] uppercase tracking-wider">Work Mode</label>
                     <select
-                      value={h.status}
-                      onChange={(e) => handleUpdateStatus(h._id, e.target.value, h.shortlistedRounds)}
-                      className="w-full px-3 py-2 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] text-xs text-[#1E1D1A] focus:outline-none focus:border-[#F5C451]"
+                      value={workModeFilter}
+                      onChange={(e) => setWorkModeFilter(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-100 border border-zinc-200 text-xs text-[#1E1D1A] focus:outline-none focus:border-zinc-500 transition-all cursor-pointer"
                     >
-                      <option value="Participated">Just Participated</option>
-                      <option value="Shortlisted">Shortlisted</option>
-                      <option value="Won">Won / Winner</option>
+                      <option value="all">All Modes</option>
+                      <option value="remote">Online / Virtual</option>
+                      <option value="office">In-Person / Offline</option>
                     </select>
                   </div>
 
-                  {h.status === "Shortlisted" && (
-                    <div className="space-y-1">
-                      <label className="text-[9px] text-[#7C786E] font-bold uppercase tracking-wider block">Shortlisted Rounds reached</label>
-                      <div className="flex gap-1.5">
-                        {[1, 2, 3, 4].map((r) => (
-                          <button
-                            key={r}
-                            onClick={() => handleUpdateStatus(h._id, "Shortlisted", r)}
-                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all border ${
-                              (h.shortlistedRounds || 0) === r
-                                ? "bg-blue-600 border-blue-600 text-white shadow-sm"
-                                : "bg-[#FAF9F5] border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A]"
-                            }`}
-                          >
-                            R{r}
-                          </button>
-                        ))}
+                  {/* Region */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-[#7C786E] uppercase tracking-wider">Region</label>
+                    <select
+                      value={regionFilter}
+                      onChange={(e) => setRegionFilter(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-100 border border-zinc-200 text-xs text-[#1E1D1A] focus:outline-none focus:border-zinc-500 transition-all cursor-pointer"
+                    >
+                      <option value="all">All Regions</option>
+                      <option value="us">United States (US)</option>
+                      <option value="uk">United Kingdom (UK)</option>
+                      <option value="global">Global Remote / Online</option>
+                    </select>
+                  </div>
+
+                  {/* Tech Domain */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-[#7C786E] uppercase tracking-wider">Role Domain</label>
+                    <select
+                      value={roleFilter}
+                      onChange={(e) => setRoleFilter(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-100 border border-zinc-200 text-xs text-[#1E1D1A] focus:outline-none focus:border-zinc-500 transition-all cursor-pointer"
+                    >
+                      <option value="all">All Themes</option>
+                      <option value="frontend">Web / Frontend / UI</option>
+                      <option value="backend">Backend / Cloud / Web3</option>
+                      <option value="aiml">AI / ML / Python</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Right side / Custom AI filter */}
+                <div className="w-full lg:w-[380px] p-4 rounded-2xl bg-zinc-100 border border-zinc-200 space-y-2.5 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-extrabold text-zinc-700 uppercase tracking-wider flex items-center gap-1.5">
+                        Custom AI Semantic Filter
+                      </span>
+                      {aiFilteredIds !== null && (
+                        <button
+                          onClick={handleClearAiFilter}
+                          className="text-[9px] uppercase font-bold text-[#7C786E] hover:text-rose-600 cursor-pointer"
+                        >
+                          Clear Filter
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={customAiQuery}
+                        onChange={(e) => setCustomAiQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAiFilter()}
+                        placeholder="e.g. AI hackathons with prize pool > 50,000..."
+                        className="flex-1 px-3 py-2 rounded-xl bg-white border border-zinc-200 text-xs text-[#1E1D1A] placeholder-[#7C786E]/50 focus:outline-none focus:border-zinc-500"
+                      />
+                      <button
+                        onClick={handleAiFilter}
+                        disabled={isAiFiltering}
+                        className="px-4 py-2 bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-extrabold text-xs rounded-xl transition-all flex items-center gap-1 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isAiFiltering ? "..." : "Filter"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {filteredMatches.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredMatches.map((match) => {
+                const firstChar = match.hosts ? match.hosts.charAt(0).toUpperCase() : "H";
+                const logoColors = [
+                  "bg-gradient-to-tr from-indigo-500 to-purple-600",
+                  "bg-gradient-to-tr from-emerald-500 to-teal-600",
+                  "bg-gradient-to-tr from-orange-500 via-rose-500 to-purple-500",
+                  "bg-gradient-to-tr from-zinc-800 to-zinc-950 border border-white/10",
+                  "bg-gradient-to-tr from-blue-500 to-indigo-600",
+                  "bg-gradient-to-tr from-red-600 to-red-800",
+                  "bg-gradient-to-tr from-zinc-600 to-zinc-800"
+                ];
+                const logoBg = logoColors[match.hosts.charCodeAt(0) % logoColors.length];
+
+                return (
+                  <div
+                    key={match.id}
+                    className="warm-card p-5 hover:border-zinc-300 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden bg-white hover:shadow-md"
+                  >
+                    <div className="space-y-4">
+                      {/* Header: Logo + Fit % */}
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-3">
+                          <CompanyLogo
+                            company={match.hosts}
+                            applyUrl={match.url}
+                            logoBg={logoBg}
+                            logoText={firstChar}
+                          />
+                          <div>
+                            <h4 className="font-bold text-[#1E1D1A] text-sm tracking-tight leading-tight group-hover:text-[#be185d] transition-colors duration-300">
+                              {match.hosts}
+                            </h4>
+                            <span className="text-[10px] text-[#7C786E] flex items-center gap-1 mt-0.5 font-medium">
+                              <MapPin className="w-3 h-3 text-[#7C786E]" />
+                              {match.location}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <span className="text-[9px] text-[#7C786E] block uppercase font-bold tracking-wider">Fit Score</span>
+                          <span className="text-[#be185d] font-black text-sm">{match.fitScore}% Match</span>
+                        </div>
                       </div>
+
+                      {/* Hackathon title */}
+                      <div>
+                        <p className="text-xs font-semibold text-[#1E1D1A] line-clamp-2 leading-relaxed">
+                          {match.title}
+                        </p>
+                        <div className="mt-2 space-y-0.5">
+                          <div className="text-[10px] text-[#7C786E] flex items-center gap-1">
+                            <span className="font-semibold">Prize Pool:</span>
+                            <span className="font-bold text-[#1E1D1A] flex items-center gap-0.5"><DollarSign className="w-3.5 h-3.5 text-emerald-600" />{match.prizePool}</span>
+                          </div>
+                          <div className="text-[10px] text-[#7C786E] flex items-center gap-1.5">
+                            <span>Deadline:</span>
+                            <span className="font-extrabold text-zinc-900">{match.deadline}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2.5 mt-5 pt-4 border-t border-[#FDF2F8]">
+                      <button
+                        onClick={() => handleAddToTracker(match)}
+                        className="flex-1 py-2 px-3 rounded-xl bg-[#2C2B27] hover:bg-[#1E1D1A] text-white hover:text-[#ec4899] font-bold transition-all duration-300 flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                      >
+                        <FolderPlus className="w-3.5 h-3.5" />
+                        Add to Tracker
+                      </button>
+                      <a
+                        href={match.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-2 px-3 rounded-xl bg-white border border-gray-200 text-[#1E1D1A] hover:bg-gray-100 font-bold text-xs transition-colors flex items-center justify-center cursor-pointer shadow-sm"
+                      >
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            hasFetched && (
+              <div className="warm-card p-8 text-center text-[#7C786E] bg-white rounded-2xl border border-gray-200 shadow-sm">
+                <Check className="w-8 h-8 text-emerald-600 mx-auto mb-2 animate-bounce" />
+                <p className="text-xs font-bold text-[#1E1D1A]">No hackathons fit current filter criteria.</p>
+                <p className="text-[10px] text-[#7C786E] mt-1 max-w-xs mx-auto">
+                  Try adjusting your filters, clearing your custom AI search, or clicking 'Fetch Hackathons' again to refresh.
+                </p>
+              </div>
+            )
+          )}
+        </div>
+      )}
+
+      {/* Kanban Tracker Board */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-[#7C786E] uppercase tracking-widest flex items-center gap-2">
+            Hackathon Stage Tracker
+          </h3>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center uppercase gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-bold text-sm shadow-sm cursor-pointer transition-all active:scale-95 shrink-0"
+            >
+              <FolderPlus className="w-3.5 h-3.5" />
+              Add Hackathon
+            </button>
+          </div>
+        </div>
+
+        {/* Board Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {COLUMNS.map((column) => {
+            const cardsInCol = trackerCards.filter((card) => card.column === column.id);
+
+            let headerBg = "bg-[#FAF9F6] text-[#1E1D1A]";
+            let dotColor = "bg-zinc-500";
+            if (column.id === "saved") {
+              dotColor = "bg-[#7C786E]";
+            } else if (column.id === "applied") {
+              dotColor = "bg-[#084298]";
+            } else if (column.id === "won_participated") {
+              dotColor = "bg-[#10B981]";
+            }
+
+            return (
+              <div
+                key={column.id}
+                className="flex flex-col h-[580px] bg-[#FAF9F6] rounded-3xl p-3 border border-[#FDF2F8]/60 shadow-sm"
+              >
+                {/* Column Header */}
+                <div className="flex justify-between items-center mb-3 px-1">
+                  <div className="flex items-center gap-1.5">
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-extrabold tracking-wide ${headerBg}`}>
+                      <span className={`w-2 h-2 rounded-full ${dotColor} opacity-75`} />
+                      {column.title.toUpperCase()}
+                      <span className="opacity-60 font-medium">|</span>
+                      <span className="font-black">{cardsInCol.length}</span>
+                    </div>
+                  </div>
+                  
+                  <button
+                    onClick={() => {
+                      setFormStatus(
+                        column.id === "saved"
+                          ? "Saved"
+                          : column.id === "applied"
+                          ? "Applied"
+                          : "Won"
+                      );
+                      setIsModalOpen(true);
+                    }}
+                    className="p-1.5 hover:bg-[#FDF2F8] text-[#7C786E] hover:text-[#1E1D1A] rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Cards Container */}
+                <div className="flex-1 flex flex-col overflow-y-auto space-y-3 pr-0.5 scrollbar-none py-1">
+                  {cardsInCol.length > 0 ? (
+                    cardsInCol.map((card) => {
+                      const dynamicScore = getDynamicMatchScore(card.title, card.hosts, card.skills);
+
+                      return (
+                        <div
+                          key={card.id}
+                          className="p-4 rounded-2xl bg-white border border-[#FDF2F8] hover:border-zinc-300 hover:shadow-md transition-all duration-300 relative group/card shadow-sm"
+                        >
+                          <div className="space-y-3">
+                            {/* Card Top */}
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-2">
+                                <CompanyLogo
+                                  company={card.hosts}
+                                  applyUrl={card.applyLink}
+                                  logoBg={card.logoBg}
+                                  logoText={card.logoText}
+                                  size="sm"
+                                />
+                                <span className="font-extrabold text-[#1E1D1A] text-xs truncate max-w-[100px]">
+                                  {card.hosts}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[9px] text-[#7C786E] font-semibold opacity-70">
+                                  {card.createdAt ? new Date(card.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : ""}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Card Body */}
+                            <div>
+                              <p className="text-[12px] font-bold text-[#1E1D1A] leading-snug">
+                                {card.title}
+                              </p>
+                              <div className="mt-1 space-y-0.5">
+                                <div className="text-[10px] text-[#7C786E] flex items-center gap-1">
+                                  <span className="font-semibold">Prize:</span>
+                                  <span className="font-bold text-[#1E1D1A] flex items-center gap-0.5"><DollarSign className="w-3.5 h-3.5 text-emerald-600" />{card.prizePool}</span>
+                                </div>
+                                <div className="text-[10px] text-[#7C786E] flex items-center gap-1">
+                                  <span className="font-semibold">Date:</span>
+                                  <span className="font-bold text-[#1E1D1A]">{getDeadline(card)}</span>
+                                </div>
+                                <div className="text-[10px] text-[#7C786E] flex items-center gap-1.5 flex-wrap">
+                                  <span>Match Score:</span>
+                                  <span className="font-extrabold text-zinc-900 mr-1">{dynamicScore}% Match</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Action Link button */}
+                            {card.applyLink && (
+                              <a
+                                href={card.applyLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#ec4899] text-white border border-zinc-200 hover:border-zinc-900 transition-all text-[10px] font-extrabold"
+                              >
+                                <span className="truncate text-pink-100 uppercase">Apply Link</span>
+                                <ArrowUpRight className="w-3.5 h-3.5 text-amber-50" />
+                              </a>
+                            )}
+
+                            {/* Card Footer: Navigation Controls */}
+                            <div className="flex items-center justify-between pt-2 border-t border-[#FDF2F8]/60 mt-1">
+                              <button
+                                onClick={() => handleMoveCard(card.id, "left")}
+                                disabled={card.column === "saved"}
+                                className={`p-1 rounded-lg border border-[#FDF2F8] bg-white transition-all text-[#7C786E] hover:text-[#1E1D1A] cursor-pointer shadow-sm ${
+                                  card.column === "saved" ? "opacity-30 cursor-not-allowed" : "hover:bg-[#FFF5F7]"
+                                }`}
+                              >
+                                <ChevronLeft className="w-3.5 h-3.5" />
+                              </button>
+                              
+                              <button
+                                onClick={() => setDeleteTargetId(card.id)}
+                                className="text-[9px] text-[#7C786E] hover:text-rose-600 font-extrabold tracking-wider transition-colors cursor-pointer"
+                              >
+                                REMOVE
+                              </button>
+
+                              <button
+                                onClick={() => handleMoveCard(card.id, "right")}
+                                disabled={card.column === "won_participated"}
+                                className={`p-1 rounded-lg border border-[#FDF2F8] bg-white transition-all text-[#7C786E] hover:text-[#1E1D1A] cursor-pointer shadow-sm ${
+                                  card.column === "won_participated" ? "opacity-30 cursor-not-allowed" : "hover:bg-[#FFF5F7]"
+                                }`}
+                              >
+                                <ChevronRight className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="flex-1 min-h-[250px] flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-[#FDF2F8] rounded-3xl text-[#7C786E] bg-white/50 hover:bg-white/80 hover:border-[#ec4899]/50 transition-all duration-300 shadow-sm select-none">
+                      <Trophy className="w-8 h-8 mb-3 text-[#7C786E]/40 stroke-[1.5]" />
+                      <p className="text-xs uppercase font-extrabold text-[#1E1D1A] tracking-wider">Empty Stage</p>
                     </div>
                   )}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Manual Add Hackathon Form */}
-      <div className="warm-card p-8 bg-white border border-[#ECE9DF] rounded-3xl shadow-sm space-y-6">
-        <div className="border-b border-[#EFECE3] pb-3">
-          <h3 className="text-lg font-bold text-[#1E1D1A] flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-[#F5C451]" />
-            Register Completed or External Hackathon
-          </h3>
-          <p className="text-xs text-[#7C786E] mt-1">
-            Keep track of hackathons you participated in, won, applied to, or saved to include in your profile and ATS resume.
-          </p>
+            );
+          })}
         </div>
-
-        <form onSubmit={handleSubmitCustomHackathon} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="space-y-1.5">
-              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
-                Hackathon Title *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. CalHacks 13.0"
-                value={formTitle}
-                onChange={(e) => setFormTitle(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
-                Host / Organizer *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. UC Berkeley"
-                value={formHosts}
-                onChange={(e) => setFormHosts(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
-                Date / Duration
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. June 25 - 27, 2026"
-                value={formDate}
-                onChange={(e) => setFormDate(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
-                Location
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. San Francisco, CA"
-                value={formLocation}
-                disabled={formIsOnline}
-                onChange={(e) => setFormLocation(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm disabled:opacity-50"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
-                Prize Pool
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. $100,000"
-                value={formPrizePool}
-                onChange={(e) => setFormPrizePool(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
-                Category
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Generative AI & Web3"
-                value={formCategory}
-                onChange={(e) => setFormCategory(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
-                Technologies / Skills (comma separated)
-              </label>
-              <input
-                type="text"
-                placeholder="React, Next.js, Python, Solidity"
-                value={formSkills}
-                onChange={(e) => setFormSkills(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
-                Application Link
-              </label>
-              <input
-                type="url"
-                placeholder="https://calhacks.io"
-                value={formApplyLink}
-                onChange={(e) => setFormApplyLink(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
-                Participation Status
-              </label>
-              <select
-                value={formStatus}
-                onChange={(e: any) => setFormStatus(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] transition-colors shadow-sm cursor-pointer"
-              >
-                <option value="Saved">Saved</option>
-                <option value="Applied">Applied</option>
-                <option value="Participated">Participated</option>
-                <option value="Shortlisted">Shortlisted</option>
-                <option value="Won">Won / Winner</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
-            <label className="flex items-center gap-2 text-xs text-[#7C786E] cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={formIsOnline}
-                onChange={(e) => {
-                  setFormIsOnline(e.target.checked);
-                  if (e.target.checked) setFormLocation("Online");
-                  else setFormLocation("");
-                }}
-                className="rounded border-[#ECE9DF] text-[#F5C451] focus:ring-[#F5C451] w-4 h-4"
-              />
-              <span>This is an Online / Virtual Hackathon</span>
-            </label>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
-              Hackathon Description / Project Built
-            </label>
-            <textarea
-              rows={3}
-              placeholder="Describe the project you built, problem solved, and key tools used (e.g. Created a real-time ledger sync system using Redis and Next.js, winning the sponsor track prize)."
-              value={formDescription}
-              onChange={(e) => setFormDescription(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors resize-none shadow-sm"
-            />
-          </div>
-
-          <div className="pt-2 flex justify-end">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-3 rounded-xl bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-extrabold text-xs tracking-wider transition-all cursor-pointer shadow-md disabled:opacity-50"
-            >
-              {isSubmitting ? "Registering..." : "Register Hackathon"}
-            </button>
-          </div>
-        </form>
       </div>
+
+      {/* Register Manual Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-[rgba(0,0,0,0.6)] backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-[#FCE7F3] rounded-3xl shadow-xl w-full max-w-3xl overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#FDF2F8] px-8 py-5">
+              <div>
+                <h3 className="text-lg uppercase font-bold text-[#1E1D1A] flex items-center gap-2">
+                  Register Completed or External Hackathon
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-[#FFF5F7] text-[#7C786E] hover:text-[#1E1D1A] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body / Form */}
+            <form onSubmit={handleSubmitCustomHackathon} className="p-8 space-y-6 max-h-[85vh] overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Hackathon Title *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. CalHacks 13.0"
+                    value={formTitle}
+                    onChange={(e) => setFormTitle(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-gray-100 border border-gray-200 focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Host / Organizer *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. UC Berkeley"
+                    value={formHosts}
+                    onChange={(e) => setFormHosts(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-gray-100 border border-gray-200 focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Date / Duration
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. June 25 - 27, 2026"
+                    value={formDate}
+                    onChange={(e) => setFormDate(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-gray-100 border border-gray-200 focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. San Francisco, CA"
+                    value={formLocation}
+                    disabled={formIsOnline}
+                    onChange={(e) => setFormLocation(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-gray-100 border border-gray-200 focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm disabled:opacity-50"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Prize Pool
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. $100,000"
+                    value={formPrizePool}
+                    onChange={(e) => setFormPrizePool(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-gray-100 border border-gray-200 focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Category
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Generative AI"
+                    value={formCategory}
+                    onChange={(e) => setFormCategory(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-gray-100 border border-gray-200 focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Technologies (comma separated)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="React, Next.js, Python"
+                    value={formSkills}
+                    onChange={(e) => setFormSkills(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-gray-100 border border-[#FCE7F3] focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Application Link
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://devpost.com"
+                    value={formApplyLink}
+                    onChange={(e) => setFormApplyLink(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-gray-100 border border-gray-200 focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                    Participation Status
+                  </label>
+                  <select
+                    value={formStatus}
+                    onChange={(e: any) => setFormStatus(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-gray-100 border border-gray-200 focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] transition-colors shadow-sm cursor-pointer"
+                  >
+                    <option value="Saved">Saved</option>
+                    <option value="Applied">Applied</option>
+                    <option value="Participated">Participated</option>
+                    <option value="Shortlisted">Shortlisted</option>
+                    <option value="Won">Won</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
+                <label className="flex items-center gap-2 text-xs text-[#7C786E] cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={formIsOnline}
+                    onChange={(e) => {
+                      setFormIsOnline(e.target.checked);
+                      if (e.target.checked) setFormLocation("Online");
+                      else setFormLocation("");
+                    }}
+                    className="rounded border-[#FCE7F3] text-[#ec4899] focus:ring-[#ec4899] w-4 h-4"
+                  />
+                  <span>This is an Online / Virtual Hackathon</span>
+                </label>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+                  Hackathon Description / Project Built
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Describe the project built or hackathon focus..."
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-gray-100 border border-gray-200 focus:outline-none focus:border-[#be185d] text-xs text-[#1E1D1A] placeholder-[#7C786E]/55 transition-colors resize-none shadow-sm"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-5 py-2.5 rounded-xl border border-[#FCE7F3] bg-white text-[#1E1D1A] font-bold text-xs tracking-wider transition-all cursor-pointer shadow-sm hover:bg-[#FFF5F7]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-extrabold text-xs tracking-wider transition-all cursor-pointer shadow-md"
+                >
+                  Add to Tracker
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTargetId && (
+        <div className="fixed inset-0 bg-[rgba(0,0,0,0.6)] backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-[#FCE7F3] rounded-3xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 p-6 space-y-4">
+            <h3 className="text-base font-bold text-[#1E1D1A]">Delete Tracker Card</h3>
+            <p className="text-xs text-[#7C786E]">
+              Are you sure you want to remove this hackathon from your tracker? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTargetId(null)}
+                className="px-5 py-2.5 rounded-xl border border-[#FCE7F3] bg-white text-[#1E1D1A] font-bold text-xs tracking-wider transition-all cursor-pointer shadow-sm hover:bg-[#FFF5F7]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  await handleRemoveCard(deleteTargetId);
+                  setDeleteTargetId(null);
+                }}
+                className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs tracking-wider transition-all cursor-pointer shadow-md rounded-xl"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

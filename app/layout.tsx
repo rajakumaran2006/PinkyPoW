@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PinkyPow | AI Placement Preparation",
   description: "Accelerate your placements with AI-driven skill calibration, DSA challenges, and communication analysis.",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

@@ -398,13 +398,13 @@ export default function Certifications() {
     <div className="space-y-8 animate-in fade-in duration-500 max-w-[1360px] mx-auto pb-12 text-[#1E1D1A]">
       
       {/* 1. Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-[#EFECE3] pb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-[#FDF2F8] pb-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF4D8] border border-[#E8DFB3] text-[#7A6218] text-xs font-semibold">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] text-xs font-semibold">
             <ShieldCheck className="w-3.5 h-3.5" /> Credentials & discovery
           </div>
           <h1 className="text-4xl font-normal text-[#1E1D1A] tracking-tight flex items-center gap-3">
-            <Award className="w-10 h-10 text-[#F5C451] shrink-0" />
+            <Award className="w-10 h-10 text-[#ec4899] shrink-0" />
             Verified Credentials
           </h1>
           <p className="text-[#7C786E] text-sm max-w-xl">
@@ -413,14 +413,14 @@ export default function Certifications() {
         </div>
 
         {/* Quick Credentials Summary Card */}
-        <div className="flex items-center gap-4 p-5 rounded-3xl bg-white border border-[#ECE9DF] shadow-sm">
-          <div className="text-center px-4 border-r border-[#ECE9DF]">
+        <div className="flex items-center gap-4 p-5 rounded-3xl bg-white border border-[#FCE7F3] shadow-sm">
+          <div className="text-center px-4 border-r border-[#FCE7F3]">
             <span className="block text-[9px] text-[#7C786E] font-semibold uppercase tracking-wider">My Certs</span>
             <span className="text-2xl font-black text-[#1E1D1A]">{myCerts.length}</span>
           </div>
-          <div className="text-center px-4 border-r border-[#ECE9DF]">
+          <div className="text-center px-4 border-r border-[#FCE7F3]">
             <span className="block text-[9px] text-[#7C786E] font-semibold uppercase tracking-wider">AI Scanned</span>
-            <span className="text-2xl font-black text-[#7A6218]">{recommendedCerts.length}</span>
+            <span className="text-2xl font-black text-[#be185d]">{recommendedCerts.length}</span>
           </div>
           <div className="text-center px-4">
             <span className="block text-[9px] text-[#7C786E] font-semibold uppercase tracking-wider font-sans">Avg Value</span>
@@ -440,9 +440,9 @@ export default function Certifications() {
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] hover:bg-[#FAF9F5] text-[#1E1D1A] text-xs font-bold transition-all cursor-pointer shadow-sm hover:border-[#F5C451]"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] hover:bg-[#FFF5F7] text-[#1E1D1A] text-xs font-bold transition-all cursor-pointer shadow-sm hover:border-[#ec4899]"
           >
-            <Plus className="w-4 h-4 text-[#7A6218]" />
+            <Plus className="w-4 h-4 text-[#be185d]" />
             Add Certificate
           </button>
         </div>
@@ -453,10 +453,10 @@ export default function Certifications() {
             <div
               key={cert._id}
               onClick={() => setSelectedCert(cert)}
-              className="warm-card rounded-2xl p-6 flex flex-col justify-between border border-[#EFECE3] hover:border-[#F5C451] transition-all duration-300 relative overflow-hidden group bg-white cursor-pointer"
+              className="warm-card rounded-2xl p-6 flex flex-col justify-between border border-[#FDF2F8] hover:border-[#ec4899] transition-all duration-300 relative overflow-hidden group bg-white cursor-pointer"
             >
               {/* Subtle top ambient color gradient */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#F5C451] via-[#7A6218] to-[#2C2B27] opacity-60" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#ec4899] via-[#be185d] to-[#2C2B27] opacity-60" />
 
               <div className="space-y-4">
                 <div className="flex justify-between items-start">
@@ -464,7 +464,7 @@ export default function Certifications() {
                     <span className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block truncate">
                       {cert.issuer}
                     </span>
-                    <h3 className="font-bold text-[#1E1D1A] text-base leading-snug mt-1.5 group-hover:text-[#7A6218] transition-colors line-clamp-2">
+                    <h3 className="font-bold text-[#1E1D1A] text-base leading-snug mt-1.5 group-hover:text-[#be185d] transition-colors line-clamp-2">
                       {cert.title}
                     </h3>
                   </div>
@@ -475,7 +475,7 @@ export default function Certifications() {
                         <ShieldCheck className="w-4 h-4" />
                       </div>
                     ) : (
-                      <div className="p-1 rounded bg-[#FAF4D8] border border-[#E8DFB3] text-[#7A6218] animate-pulse">
+                      <div className="p-1 rounded bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] animate-pulse">
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       </div>
                     )}
@@ -485,7 +485,7 @@ export default function Certifications() {
                         e.stopPropagation();
                         handleDeleteCert(cert._id);
                       }}
-                      className="p-1 rounded text-[#7C786E] hover:text-red-650 hover:bg-[#FAF9F5] transition-colors cursor-pointer border border-transparent hover:border-[#ECE9DF]"
+                      className="p-1 rounded text-[#7C786E] hover:text-red-650 hover:bg-[#FFF5F7] transition-colors cursor-pointer border border-transparent hover:border-[#FCE7F3]"
                       title="Delete Certificate"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -493,15 +493,15 @@ export default function Certifications() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-2 border-t border-[#EFECE3]">
+                <div className="flex items-center gap-2 pt-2 border-t border-[#FDF2F8]">
                   <span className="text-[#7C786E] text-[10px] uppercase font-bold">Category</span>
-                  <span className="px-2 py-0.5 rounded-md bg-[#FAF9F5] border border-[#ECE9DF] text-[#4E4B42] text-[10px] font-semibold">
+                  <span className="px-2 py-0.5 rounded-md bg-[#FFF5F7] border border-[#FCE7F3] text-[#4E4B42] text-[10px] font-semibold">
                     {cert.category || "General"}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-[#EFECE3] flex items-center justify-between text-xs">
+              <div className="mt-6 pt-4 border-t border-[#FDF2F8] flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5 text-[#7C786E]">
                   <Calendar className="w-3.5 h-3.5 text-[#7C786E]" />
                   <span>{cert.date || "Active"}</span>
@@ -513,7 +513,7 @@ export default function Certifications() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="p-1.5 rounded bg-[#FAF9F5] hover:bg-white border border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] transition-colors shadow-sm"
+                    className="p-1.5 rounded bg-[#FFF5F7] hover:bg-white border border-[#FCE7F3] text-[#7C786E] hover:text-[#1E1D1A] transition-colors shadow-sm"
                     title="Verify Credential URL"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -536,13 +536,13 @@ export default function Certifications() {
       </div>
 
       {/* 3. AI Discovery Engine (Main Section) */}
-      <div className="border-t border-[#EFECE3] pt-10 space-y-8">
+      <div className="border-t border-[#FDF2F8] pt-10 space-y-8">
         
         {/* Banner with engine summary */}
         <div className="warm-card p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-white">
           <div className="space-y-2">
             <h3 className="text-xl font-bold text-[#1E1D1A] tracking-tight flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[#F5C451]" />
+              <Sparkles className="w-5 h-5 text-[#ec4899]" />
               AI Discovery Engine
             </h3>
             <p className="text-xs text-[#7C786E] max-w-xl leading-relaxed">
@@ -576,16 +576,16 @@ export default function Certifications() {
           <div className="bg-[#21201D] border border-[#2D2C28] rounded-2xl p-5 space-y-4 animate-in slide-in-from-top-4 duration-300 text-zinc-300">
             <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#F5C451] animate-ping" />
+                <span className="w-2 h-2 rounded-full bg-[#ec4899] animate-ping" />
                 <span className="text-[10px] text-zinc-450 font-bold uppercase tracking-wider font-mono">AI Scraper Crawler Pipeline</span>
               </div>
-              <span className="text-xs text-[#F5C451] font-bold font-mono">{scanProgress}%</span>
+              <span className="text-xs text-[#ec4899] font-bold font-mono">{scanProgress}%</span>
             </div>
 
             {/* Progress Bar */}
             <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#F5C451] to-[#7A6218] transition-all duration-300"
+                className="h-full bg-gradient-to-r from-[#ec4899] to-[#be185d] transition-all duration-300"
                 style={{ width: `${scanProgress}%` }}
               />
             </div>
@@ -594,7 +594,7 @@ export default function Certifications() {
             <div className="space-y-1.5 font-mono text-[10px] text-zinc-500 max-h-[140px] overflow-y-auto scrollbar-none pt-1">
               {scanLogs.map((log, idx) => (
                 <div key={idx} className="flex items-start gap-2">
-                  <span className="text-[#F5C451]/70 shrink-0">&gt;</span>
+                  <span className="text-[#ec4899]/70 shrink-0">&gt;</span>
                   <span className="text-zinc-300">{log}</span>
                 </div>
               ))}
@@ -613,7 +613,7 @@ export default function Certifications() {
                   placeholder="Filter certifications..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#ec4899] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
                 />
               </div>
 
@@ -627,7 +627,7 @@ export default function Certifications() {
                     className={`px-3 py-1.5 rounded-xl text-[10px] font-bold tracking-wide transition-all duration-300 whitespace-nowrap cursor-pointer ${
                       activeCategory === cat
                         ? "bg-[#2C2B27] text-white shadow-sm"
-                        : "bg-white text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5] border border-[#ECE9DF] shadow-sm"
+                        : "bg-white text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FFF5F7] border border-[#FCE7F3] shadow-sm"
                     }`}
                   >
                     {cat}
@@ -637,11 +637,10 @@ export default function Certifications() {
             </div>
 
             {/* Custom AI Semantic Filter */}
-            <div className="warm-card p-6 bg-white border border-[#ECE9DF] rounded-2xl shadow-sm space-y-4">
+            <div className="warm-card p-6 bg-white border border-[#FCE7F3] rounded-2xl shadow-sm space-y-4">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <span className="text-xs font-extrabold text-[#7A6218] uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-[#F5C451]" />
+                  <span className="text-xs font-extrabold text-[#be185d] uppercase tracking-wider flex items-center gap-1.5">
                     Custom AI Semantic Filter
                   </span>
                   <p className="text-xs text-[#7C786E]">
@@ -664,7 +663,7 @@ export default function Certifications() {
                   onChange={(e) => setCustomAiQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAiFilter()}
                   placeholder="e.g. AI certifications with skills including Python..."
-                  className="flex-1 px-4 py-3 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF] text-xs text-[#1E1D1A] placeholder-[#7C786E]/50 focus:outline-none focus:border-[#F5C451]"
+                  className="flex-1 px-4 py-3 rounded-xl bg-[#FFF5F7] border border-[#FCE7F3] text-xs text-[#1E1D1A] placeholder-[#7C786E]/50 focus:outline-none focus:border-[#ec4899]"
                 />
                 <button
                   onClick={handleAiFilter}
@@ -690,7 +689,7 @@ export default function Certifications() {
                 {filteredRecommendations.map((cert) => (
                   <div
                     key={cert.id}
-                    className="warm-card p-6 border border-[#EFECE3] hover:border-[#F5C451] transition-all duration-300 flex flex-col justify-between space-y-6 group bg-white shadow-sm"
+                    className="warm-card p-6 border border-[#FDF2F8] hover:border-[#ec4899] transition-all duration-300 flex flex-col justify-between space-y-6 group bg-white shadow-sm"
                   >
                     <div className="space-y-4">
                       {/* Top Header Row with AI Badge */}
@@ -701,7 +700,7 @@ export default function Certifications() {
                             <span>•</span>
                             <span className="text-[#7C786E] truncate">{cert.platform}</span>
                           </div>
-                          <h4 className="font-bold text-[#1E1D1A] text-base leading-snug tracking-tight mt-1.5 group-hover:text-[#7A6218] transition-colors line-clamp-2">
+                          <h4 className="font-bold text-[#1E1D1A] text-base leading-snug tracking-tight mt-1.5 group-hover:text-[#be185d] transition-colors line-clamp-2">
                             {cert.title}
                           </h4>
                         </div>
@@ -718,7 +717,7 @@ export default function Certifications() {
                         {cert.skills.map((skill) => (
                           <span
                             key={skill}
-                            className="text-[9px] font-semibold px-2 py-0.5 rounded-md bg-[#FAF9F5] border border-[#ECE9DF] text-[#4E4B42]"
+                            className="text-[9px] font-semibold px-2 py-0.5 rounded-md bg-[#FFF5F7] border border-[#FCE7F3] text-[#4E4B42]"
                           >
                             {skill}
                           </span>
@@ -727,13 +726,13 @@ export default function Certifications() {
                     </div>
 
                     {/* Metadata Footer and Enroll Button */}
-                    <div className="pt-4 border-t border-[#EFECE3] flex items-center justify-between">
+                    <div className="pt-4 border-t border-[#FDF2F8] flex items-center justify-between">
                       <div className="flex items-center gap-4 text-[10px] text-[#7C786E]">
                         <div>
                           <span className="block text-[#7C786E] uppercase font-semibold">Duration</span>
                           <span className="font-bold text-[#1E1D1A]">{cert.duration}</span>
                         </div>
-                        <div className="px-3 border-l border-[#EFECE3]">
+                        <div className="px-3 border-l border-[#FDF2F8]">
                           <span className="block text-[#7C786E] uppercase font-semibold">Value Score</span>
                           <span className="font-bold text-emerald-700 flex items-center gap-0.5">
                             <TrendingUp className="w-3 h-3" /> {cert.valueScore}%
@@ -746,7 +745,7 @@ export default function Certifications() {
                           href={cert.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="py-2 px-3 rounded-xl bg-white border border-[#ECE9DF] hover:bg-[#FAF9F5] text-[#1E1D1A] text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer shadow-sm"
+                          className="py-2 px-3 rounded-xl bg-white border border-[#FCE7F3] hover:bg-[#FFF5F7] text-[#1E1D1A] text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer shadow-sm"
                         >
                           <span>Info</span>
                           <ExternalLink className="w-3 h-3" />
@@ -773,13 +772,13 @@ export default function Certifications() {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div
-            className="w-full max-w-md bg-[#FAF6EA] border border-[#ECE9DF] rounded-3xl p-6 space-y-6 shadow-2xl relative animate-in zoom-in-95 duration-300"
+            className="w-full max-w-md bg-[#FFF5F7] border border-[#FCE7F3] rounded-3xl p-6 space-y-6 shadow-2xl relative animate-in zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute right-4 top-4 p-1.5 rounded-full bg-[#FAF9F5] hover:bg-[#FAF6EA] border border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] transition-colors"
+              className="absolute right-4 top-4 p-1.5 rounded-full bg-[#FFF5F7] hover:bg-[#FFF5F7] border border-[#FCE7F3] text-[#7C786E] hover:text-[#1E1D1A] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -787,7 +786,7 @@ export default function Certifications() {
             {/* Header */}
             <div>
               <h3 className="text-xl font-bold text-[#1E1D1A] tracking-tight flex items-center gap-2">
-                <Award className="w-5 h-5 text-[#F5C451]" />
+                <Award className="w-5 h-5 text-[#ec4899]" />
                 Add Certificate
               </h3>
               <p className="text-xs text-[#7C786E] mt-1.5">
@@ -807,7 +806,7 @@ export default function Certifications() {
                   placeholder="e.g. Google Cloud Professional Architect"
                   value={newCertTitle}
                   onChange={(e) => setNewCertTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#ec4899] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
                 />
               </div>
 
@@ -821,7 +820,7 @@ export default function Certifications() {
                   placeholder="e.g. Google Cloud, AWS, freeCodeCamp"
                   value={newCertProvider}
                   onChange={(e) => setNewCertProvider(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#ec4899] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
                 />
               </div>
 
@@ -835,7 +834,7 @@ export default function Certifications() {
                     placeholder="e.g. June 2026"
                     value={newCertDate}
                     onChange={(e) => setNewCertDate(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#ec4899] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
                   />
                 </div>
 
@@ -846,7 +845,7 @@ export default function Certifications() {
                   <select
                     value={newCertCategory}
                     onChange={(e) => setNewCertCategory(e.target.value as Certification["category"])}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] transition-colors shadow-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#ec4899] text-xs text-[#1E1D1A] transition-colors shadow-sm"
                   >
                     <option value="Cloud">Cloud</option>
                     <option value="AI">AI & ML</option>
@@ -866,7 +865,7 @@ export default function Certifications() {
                   placeholder="https://aws.amazon.com/verification/..."
                   value={newCertLink}
                   onChange={(e) => setNewCertLink(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#ec4899] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
                 />
               </div>
 
@@ -882,7 +881,7 @@ export default function Certifications() {
                       setCertFile(e.target.files[0]);
                     }
                   }}
-                  className="w-full px-4 py-2 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none text-xs text-[#1E1D1A] transition-colors shadow-sm"
+                  className="w-full px-4 py-2 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none text-xs text-[#1E1D1A] transition-colors shadow-sm"
                 />
               </div>
 
@@ -891,7 +890,7 @@ export default function Certifications() {
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   disabled={isUploadingFile}
-                  className="px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5] text-xs font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FFF5F7] text-xs font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -919,13 +918,13 @@ export default function Certifications() {
       {selectedCert && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={() => { setSelectedCert(null); setIsEditing(false); }}>
           <div
-            className="w-full max-w-lg bg-[#FAF6EA] border border-[#ECE9DF] rounded-3xl p-6 space-y-6 shadow-2xl relative animate-in zoom-in-95 duration-300"
+            className="w-full max-w-lg bg-[#FFF5F7] border border-[#FCE7F3] rounded-3xl p-6 space-y-6 shadow-2xl relative animate-in zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
             <button
               onClick={() => { setSelectedCert(null); setIsEditing(false); }}
-              className="absolute right-4 top-4 p-1.5 rounded-full bg-[#FAF9F5] hover:bg-[#FAF6EA] border border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] transition-colors cursor-pointer"
+              className="absolute right-4 top-4 p-1.5 rounded-full bg-[#FFF5F7] hover:bg-[#FFF5F7] border border-[#FCE7F3] text-[#7C786E] hover:text-[#1E1D1A] transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -943,7 +942,7 @@ export default function Certifications() {
                     required
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#ec4899] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
                   />
                 </div>
 
@@ -956,7 +955,7 @@ export default function Certifications() {
                     required
                     value={editIssuer}
                     onChange={(e) => setEditIssuer(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#ec4899] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
                   />
                 </div>
 
@@ -970,7 +969,7 @@ export default function Certifications() {
                       placeholder="e.g. June 2026"
                       value={editDate}
                       onChange={(e) => setEditDate(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#ec4899] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
                     />
                   </div>
 
@@ -981,7 +980,7 @@ export default function Certifications() {
                     <select
                       value={editCategory}
                       onChange={(e) => setEditCategory(e.target.value as Certification["category"])}
-                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] transition-colors shadow-sm"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#ec4899] text-xs text-[#1E1D1A] transition-colors shadow-sm"
                     >
                       <option value="Cloud">Cloud</option>
                       <option value="AI">AI & ML</option>
@@ -1001,7 +1000,7 @@ export default function Certifications() {
                     placeholder="https://..."
                     value={editLink}
                     onChange={(e) => setEditLink(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none focus:border-[#F5C451] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none focus:border-[#ec4899] text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors shadow-sm"
                   />
                 </div>
 
@@ -1017,7 +1016,7 @@ export default function Certifications() {
                         setEditFile(e.target.files[0]);
                       }
                     }}
-                    className="w-full px-4 py-2 rounded-xl bg-white border border-[#ECE9DF] focus:outline-none text-xs text-[#1E1D1A] transition-colors shadow-sm"
+                    className="w-full px-4 py-2 rounded-xl bg-white border border-[#FCE7F3] focus:outline-none text-xs text-[#1E1D1A] transition-colors shadow-sm"
                   />
                 </div>
 
@@ -1026,7 +1025,7 @@ export default function Certifications() {
                     type="button"
                     onClick={() => setIsEditing(false)}
                     disabled={isSavingEdit}
-                    className="px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5] text-xs font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                    className="px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FFF5F7] text-xs font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -1059,14 +1058,14 @@ export default function Certifications() {
                 </div>
 
                 {/* Details Grid */}
-                <div className="grid grid-cols-2 gap-4 text-xs border-y border-[#EFECE3] py-4">
+                <div className="grid grid-cols-2 gap-4 text-xs border-y border-[#FDF2F8] py-4">
                   <div>
                     <span className="block text-[#7C786E] uppercase font-bold text-[9px] tracking-wider">Completion Date</span>
                     <span className="font-semibold text-[#1E1D1A] mt-1 block">{selectedCert.date || "Active"}</span>
                   </div>
                   <div>
                     <span className="block text-[#7C786E] uppercase font-bold text-[9px] tracking-wider">Category</span>
-                    <span className="px-2 py-0.5 rounded bg-[#FAF9F5] border border-[#ECE9DF] text-[#4E4B42] text-[10px] font-semibold mt-1 inline-block">
+                    <span className="px-2 py-0.5 rounded bg-[#FFF5F7] border border-[#FCE7F3] text-[#4E4B42] text-[10px] font-semibold mt-1 inline-block">
                       {selectedCert.category || "General"}
                     </span>
                   </div>
@@ -1076,7 +1075,7 @@ export default function Certifications() {
                 {selectedCert.cloudinaryImageUrl ? (
                   <div className="space-y-2">
                     <span className="block text-[#7C786E] uppercase font-bold text-[9px] tracking-wider">Certificate Copy</span>
-                    <div className="relative rounded-2xl overflow-hidden border border-[#ECE9DF] bg-white aspect-[4/3] flex items-center justify-center">
+                    <div className="relative rounded-2xl overflow-hidden border border-[#FCE7F3] bg-white aspect-[4/3] flex items-center justify-center">
                       <img
                         src={selectedCert.cloudinaryImageUrl}
                         alt={selectedCert.title}
@@ -1085,11 +1084,11 @@ export default function Certifications() {
                     </div>
                   </div>
                 ) : (
-                  <div className="p-8 text-center border border-dashed border-[#ECE9DF] rounded-2xl bg-white/50 text-[#7C786E] space-y-3">
+                  <div className="p-8 text-center border border-dashed border-[#FCE7F3] rounded-2xl bg-white/50 text-[#7C786E] space-y-3">
                     <p className="text-xs">No certificate image uploaded for this credential.</p>
                     <button
                       onClick={() => startEditing(selectedCert)}
-                      className="px-4 py-2 rounded-xl bg-white border border-[#ECE9DF] text-[#1E1D1A] hover:bg-[#FAF9F5] text-xs font-semibold transition-all cursor-pointer shadow-sm animate-pulse"
+                      className="px-4 py-2 rounded-xl bg-white border border-[#FCE7F3] text-[#1E1D1A] hover:bg-[#FFF5F7] text-xs font-semibold transition-all cursor-pointer shadow-sm animate-pulse"
                     >
                       Upload Photo Now
                     </button>
@@ -1102,7 +1101,7 @@ export default function Certifications() {
                       href={selectedCert.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="py-2.5 px-4 rounded-xl bg-white border border-[#ECE9DF] hover:bg-[#FAF9F5] text-[#1E1D1A] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                      className="py-2.5 px-4 rounded-xl bg-white border border-[#FCE7F3] hover:bg-[#FFF5F7] text-[#1E1D1A] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
                     >
                       <span>Verify Credential</span>
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -1111,7 +1110,7 @@ export default function Certifications() {
                   <div className="flex items-center gap-3 ml-auto">
                     <button
                       onClick={() => startEditing(selectedCert)}
-                      className="px-4 py-2.5 rounded-xl bg-white border border-[#ECE9DF] text-[#1E1D1A] hover:bg-[#FAF9F5] text-xs font-bold transition-all cursor-pointer shadow-sm"
+                      className="px-4 py-2.5 rounded-xl bg-white border border-[#FCE7F3] text-[#1E1D1A] hover:bg-[#FFF5F7] text-xs font-bold transition-all cursor-pointer shadow-sm"
                     >
                       Edit Details
                     </button>

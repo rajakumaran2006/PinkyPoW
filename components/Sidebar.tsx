@@ -112,7 +112,7 @@ export default function Sidebar({ placementScore = 820 }: SidebarProps) {
           className="sidebar-brand-cell"
         >
           <div style={{ width: 32, height: 32, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Image src="/logo.png" alt="PinkyPow" width={32} height={32} style={{ objectFit: "contain" }} />
+            <Image src="/logo-white.png" alt="PinkyPow" width={32} height={32} style={{ objectFit: "contain" }} />
           </div>
           <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2, overflow: "hidden" }}>
             <span style={{ fontWeight: 700, fontSize: 14, color: "#09090b", whiteSpace: "nowrap" }}>PinkyPow</span>
@@ -148,7 +148,7 @@ export default function Sidebar({ placementScore = 820 }: SidebarProps) {
               <Menu size={20} />
             </button>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Image src="/logo.png" alt="PinkyPow" width={22} height={22} style={{ objectFit: "contain" }} />
+              <Image src="/logo-white.png" alt="PinkyPow" width={22} height={22} style={{ objectFit: "contain" }} />
               <span style={{ fontWeight: 700, fontSize: 14, color: "#09090b" }}>PinkyPow</span>
             </div>
           </div>
@@ -221,7 +221,7 @@ export default function Sidebar({ placementScore = 820 }: SidebarProps) {
         {/* Drawer top bar */}
         <div style={{ height: HEADER_H, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 16px", borderBottom: "1px solid #e4e4e7", flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Image src="/logo.png" alt="PinkyPow" width={26} height={26} style={{ objectFit: "contain" }} />
+            <Image src="/logo-white.png" alt="PinkyPow" width={26} height={26} style={{ objectFit: "contain" }} />
             <span style={{ fontWeight: 700, fontSize: 14, color: "#09090b" }}>PinkyPow</span>
           </div>
           <button onClick={() => setDrawer(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#a1a1aa", padding: 6 }}>

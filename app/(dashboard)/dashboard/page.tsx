@@ -131,8 +131,8 @@ export default function Dashboard() {
 
   // Mock Data
   const applications = [
-    { company: "Stripe", role: "Software Engineer Intern", status: "Interviewing", color: "bg-[#FAF9F5] text-[#1E1D1A] border-[#ECE9DF]" },
-    { company: "Vercel", role: "Frontend Engineer Intern", status: "Applied", color: "bg-[#FAF9F5] text-[#1E1D1A] border-[#ECE9DF]" },
+    { company: "Stripe", role: "Software Engineer Intern", status: "Interviewing", color: "bg-[#FFF5F7] text-[#1E1D1A] border-[#FCE7F3]" },
+    { company: "Vercel", role: "Frontend Engineer Intern", status: "Applied", color: "bg-[#FFF5F7] text-[#1E1D1A] border-[#FCE7F3]" },
     { company: "Google", role: "STEP Intern", status: "Shortlisted", color: "bg-[#2C2B27] text-white border-[#2C2B27]" },
   ];
 
@@ -170,7 +170,7 @@ export default function Dashboard() {
     <div className="space-y-8 animate-in fade-in duration-500 max-w-[1360px] mx-auto pb-12 text-[#1E1D1A]">
       
       {/* HEADER SECTION (Title, Progress Pills, Stats Counter) */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-2 border-b border-[#EFECE3]">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-2 border-b border-[#FDF2F8]">
         <div className="space-y-4">
           {/* Welcome Title */}
           <h1 className="text-4xl md:text-5xl font-normal text-[#1E1D1A] tracking-tight">
@@ -180,15 +180,15 @@ export default function Dashboard() {
           {/* Progress bar pills (similar to Interviews 15%, Hired 15%, etc.) */}
           <div className="flex flex-wrap items-center gap-3">
             {/* DSA progress pill (striped progress representation) */}
-            <div className="h-9 px-4 rounded-full flex items-center justify-between text-xs font-medium border border-[#ECE9DF] relative overflow-hidden bg-white/40 text-[#4E4B42] w-[145px] cursor-default">
-              <div className="absolute left-0 top-0 bottom-0 progress-stripe bg-[#ECE9DF] opacity-45" style={{ width: "60%" }} />
+            <div className="h-9 px-4 rounded-full flex items-center justify-between text-xs font-medium border border-[#FCE7F3] relative overflow-hidden bg-white/40 text-[#4E4B42] w-[145px] cursor-default">
+              <div className="absolute left-0 top-0 bottom-0 progress-stripe bg-[#FCE7F3] opacity-45" style={{ width: "60%" }} />
               <span className="relative z-10">DSA Progress</span>
               <span className="relative z-10 font-bold">60%</span>
             </div>
 
             {/* Comm Prep progress pill (yellow progress representation) */}
-            <div className="h-9 px-4 rounded-full flex items-center justify-between text-xs font-semibold relative overflow-hidden bg-[#FAF4D8] border border-[#E8DFB3] text-[#7A6218] w-[125px] cursor-default">
-              <div className="absolute left-0 top-0 bottom-0 bg-[#F5C451]" style={{ width: "15%" }} />
+            <div className="h-9 px-4 rounded-full flex items-center justify-between text-xs font-semibold relative overflow-hidden bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] w-[125px] cursor-default">
+              <div className="absolute left-0 top-0 bottom-0 bg-[#ec4899]" style={{ width: "15%" }} />
               <span className="relative z-10">Comm Prep</span>
               <span className="relative z-10 font-bold">15%</span>
             </div>
@@ -201,7 +201,7 @@ export default function Dashboard() {
             </div>
 
             {/* Output progress pill (hollow progress representation) */}
-            <div className="h-9 px-4 rounded-full flex items-center justify-between text-xs font-medium border border-[#ECE9DF] bg-transparent text-[#7C786E] w-[95px] cursor-default">
+            <div className="h-9 px-4 rounded-full flex items-center justify-between text-xs font-medium border border-[#FCE7F3] bg-transparent text-[#7C786E] w-[95px] cursor-default">
               <span>Roadmap</span>
               <span className="font-bold">10%</span>
             </div>
@@ -213,8 +213,8 @@ export default function Dashboard() {
         <div className="grid grid-cols-3 md:flex md:items-center gap-3 sm:gap-6 md:gap-8 xl:gap-12 shrink-0 w-full md:w-auto">
           {/* Score Counter */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FAF9F5] border border-[#EFECE3] flex items-center justify-center text-[#7C786E] shrink-0">
-              <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-[#F5C451]" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FFF5F7] border border-[#FDF2F8] flex items-center justify-center text-[#7C786E] shrink-0">
+              <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-[#ec4899]" />
             </div>
             <div>
               <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-[#1E1D1A] tracking-tight">{score}</div>
@@ -224,7 +224,7 @@ export default function Dashboard() {
 
           {/* Percentile Counter */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FAF9F5] border border-[#EFECE3] flex items-center justify-center text-[#7C786E] shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FFF5F7] border border-[#FDF2F8] flex items-center justify-center text-[#7C786E] shrink-0">
               <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-[#2C2B27]" />
             </div>
             <div>
@@ -235,7 +235,7 @@ export default function Dashboard() {
 
           {/* Active Streak Counter */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FAF4D8] border border-[#E8DFB3] flex items-center justify-center text-[#7A6218] shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FCE7F3] border border-[#E8DFB3] flex items-center justify-center text-[#be185d] shrink-0">
               <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 fill-orange-500 animate-pulse" />
             </div>
             <div>
@@ -268,7 +268,7 @@ export default function Dashboard() {
                 </div>
                 
                 {/* Diagonal Arrow link button */}
-                <a href="/dsa" className="w-8 h-8 rounded-full bg-white border border-[#ECE9DF] flex items-center justify-center text-[#1E1D1A] hover:bg-[#FAF9F5] transition-all shadow-sm">
+                <a href="/dsa" className="w-8 h-8 rounded-full bg-white border border-[#FCE7F3] flex items-center justify-center text-[#1E1D1A] hover:bg-[#FFF5F7] transition-all shadow-sm">
                   <ArrowUpRight className="w-4 h-4" />
                 </a>
               </div>
@@ -281,7 +281,7 @@ export default function Dashboard() {
                     <div key={index} className="flex flex-col justify-end items-center flex-1 h-full relative group cursor-pointer">
                       {/* Tooltip bubble on active / hovered bar */}
                       {item.active && (
-                        <div className="absolute -top-7 px-2 py-0.5 bg-[#FAF4D8] border border-[#E8DFB3] text-[#7A6218] text-[9px] font-bold rounded-md whitespace-nowrap shadow-sm animate-bounce">
+                        <div className="absolute -top-7 px-2 py-0.5 bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] text-[9px] font-bold rounded-md whitespace-nowrap shadow-sm animate-bounce">
                           {item.label}
                         </div>
                       )}
@@ -289,7 +289,7 @@ export default function Dashboard() {
                       {/* Vertical Pill Bar */}
                       <div 
                         className={`w-2.5 rounded-full transition-all duration-300 ${
-                          item.active ? "bg-[#F5C451]" : "bg-[#2C2B27] group-hover:bg-[#1E1D1A]"
+                          item.active ? "bg-[#ec4899]" : "bg-[#2C2B27] group-hover:bg-[#1E1D1A]"
                         }`}
                         style={{ height: item.height }}
                       />
@@ -315,7 +315,7 @@ export default function Dashboard() {
                 </div>
                 
                 {/* Diagonal Arrow Link */}
-                <a href="/communication" className="w-8 h-8 rounded-full bg-white border border-[#ECE9DF] flex items-center justify-center text-[#1E1D1A] hover:bg-[#FAF9F5] transition-all shadow-sm">
+                <a href="/communication" className="w-8 h-8 rounded-full bg-white border border-[#FCE7F3] flex items-center justify-center text-[#1E1D1A] hover:bg-[#FFF5F7] transition-all shadow-sm">
                   <ArrowUpRight className="w-4 h-4" />
                 </a>
               </div>
@@ -328,7 +328,7 @@ export default function Dashboard() {
                       cx="48" 
                       cy="48" 
                       r="40" 
-                      className="stroke-[#FAF9F5]" 
+                      className="stroke-[#FFF5F7]" 
                       strokeWidth="5.5" 
                       fill="transparent" 
                     />
@@ -336,7 +336,7 @@ export default function Dashboard() {
                       cx="48" 
                       cy="48" 
                       r="40" 
-                      className="stroke-[#F5C451] transition-all duration-1000 ease-out" 
+                      className="stroke-[#ec4899] transition-all duration-1000 ease-out" 
                       strokeWidth="5.5" 
                       fill="transparent" 
                       strokeDasharray={timerCircumference} 
@@ -358,11 +358,11 @@ export default function Dashboard() {
                     onClick={handleSpeechToggle} 
                     className="w-9 h-9 rounded-full bg-[#2C2B27] hover:bg-[#1E1D1A] text-white flex items-center justify-center shadow-sm cursor-pointer transition-colors"
                   >
-                    {isRecording ? <Pause className="w-4 h-4 text-[#F5C451]" /> : <Play className="w-4 h-4 fill-white text-white ml-0.5" />}
+                    {isRecording ? <Pause className="w-4 h-4 text-[#ec4899]" /> : <Play className="w-4 h-4 fill-white text-white ml-0.5" />}
                   </button>
                   
                   <button 
-                    className="w-9 h-9 rounded-full bg-[#FAF9F5] border border-[#ECE9DF] hover:bg-white text-[#2C2B27] flex items-center justify-center shadow-sm"
+                    className="w-9 h-9 rounded-full bg-[#FFF5F7] border border-[#FCE7F3] hover:bg-white text-[#2C2B27] flex items-center justify-center shadow-sm"
                     title={speechPrompt}
                   >
                     <Clock className="w-4 h-4" />
@@ -400,11 +400,11 @@ export default function Dashboard() {
             
             {/* Header with Monthly Navigation slider */}
             <div className="flex items-center justify-between px-1">
-              <button className="px-3 py-1 text-xs font-bold text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5] rounded-full transition-all border border-transparent hover:border-[#ECE9DF]">
+              <button className="px-3 py-1 text-xs font-bold text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FFF5F7] rounded-full transition-all border border-transparent hover:border-[#FCE7F3]">
                 Previous
               </button>
               <h3 className="text-sm font-bold text-[#1E1D1A] tracking-wide">June 2026</h3>
-              <button className="px-3 py-1 text-xs font-bold text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FAF9F5] rounded-full transition-all border border-transparent hover:border-[#ECE9DF]">
+              <button className="px-3 py-1 text-xs font-bold text-[#7C786E] hover:text-[#1E1D1A] hover:bg-[#FFF5F7] rounded-full transition-all border border-transparent hover:border-[#FCE7F3]">
                 October
               </button>
             </div>
@@ -413,7 +413,7 @@ export default function Dashboard() {
             <div className="space-y-4 relative">
               
               {/* Day headers */}
-              <div className="grid grid-cols-[88px_1fr] text-center border-b border-[#EFECE3] pb-3">
+              <div className="grid grid-cols-[88px_1fr] text-center border-b border-[#FDF2F8] pb-3">
                 {/* Spacer to align with calendar grid area (72px time label w + 16px gap = 88px) */}
                 <div />
                 
@@ -428,7 +428,7 @@ export default function Dashboard() {
                   ].map((item, index) => (
                     <div key={index} className="flex flex-col items-center justify-center">
                       <span className="text-[10px] text-[#7C786E] font-semibold uppercase">{item.day}</span>
-                      <span className={`text-sm font-bold mt-1 ${item.date === "23" ? "w-6 h-6 bg-[#F5C451] rounded-full flex items-center justify-center text-[#1E1D1A] shadow-sm" : "text-[#1E1D1A]"}`}>
+                      <span className={`text-sm font-bold mt-1 ${item.date === "23" ? "w-6 h-6 bg-[#ec4899] rounded-full flex items-center justify-center text-[#1E1D1A] shadow-sm" : "text-[#1E1D1A]"}`}>
                         {item.date}
                       </span>
                     </div>
@@ -448,10 +448,10 @@ export default function Dashboard() {
 
                 {/* Right Column: Grid lines + overlaid events */}
                 <div className="flex-1 relative flex flex-col justify-between py-1">
-                  <div className="h-px border-t border-dashed border-[#EFECE3]" />
-                  <div className="h-px border-t border-dashed border-[#EFECE3]" />
-                  <div className="h-px border-t border-dashed border-[#EFECE3]" />
-                  <div className="h-px border-t border-dashed border-[#EFECE3]" />
+                  <div className="h-px border-t border-dashed border-[#FDF2F8]" />
+                  <div className="h-px border-t border-dashed border-[#FDF2F8]" />
+                  <div className="h-px border-t border-dashed border-[#FDF2F8]" />
+                  <div className="h-px border-t border-dashed border-[#FDF2F8]" />
 
                   {/* EVENT 1: Mock Tech Interview */}
                   <div 
@@ -469,14 +469,14 @@ export default function Dashboard() {
                     </div>
                     {/* Overlapping avatars bubbles */}
                     <div className="flex -space-x-2 shrink-0 ml-3">
-                      <div className="w-6 h-6 rounded-full bg-[#F5C451] text-[#1E1D1A] font-extrabold text-[9px] flex items-center justify-center border-2 border-[#2C2B27]">AI</div>
+                      <div className="w-6 h-6 rounded-full bg-[#ec4899] text-[#1E1D1A] font-extrabold text-[9px] flex items-center justify-center border-2 border-[#2C2B27]">AI</div>
                       <div className="w-6 h-6 rounded-full bg-zinc-600 text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-[#2C2B27]">RK</div>
                     </div>
                   </div>
 
                   {/* EVENT 2: Speech Session */}
                   <div 
-                    className="absolute bg-white border border-[#ECE9DF] rounded-2xl p-3 shadow-sm z-20 text-[#1E1D1A] flex items-center justify-between hover:scale-[1.01] transition-transform duration-200"
+                    className="absolute bg-white border border-[#FCE7F3] rounded-2xl p-3 shadow-sm z-20 text-[#1E1D1A] flex items-center justify-between hover:scale-[1.01] transition-transform duration-200"
                     style={{ 
                       top: "60%", 
                       height: "40%", 
@@ -511,7 +511,7 @@ export default function Dashboard() {
 
                     <h3 className="font-extrabold uppercase text-[#1E1D1A] tracking-tight">Placement-Linked Hackathons</h3>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#FAF4D8] border border-[#E8DFB3] text-[#7A6218] font-bold text-[10px] uppercase">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] font-bold text-[10px] uppercase">
                     Hot Opportunities
                   </span>
                 </div>
@@ -519,21 +519,21 @@ export default function Dashboard() {
                 {/* Grid list of Hackathons */}
                 <div className="grid grid-cols-1 gap-4">
                   {hackathons.map((hack) => (
-                    <div key={hack.name} className="p-4 rounded-2xl bg-[#FAF9F5] border border-[#ECE9DF] space-y-3 flex flex-col justify-between shadow-sm hover:border-[#F5C451] transition-all duration-200">
+                    <div key={hack.name} className="p-4 rounded-2xl bg-[#FFF5F7] border border-[#FCE7F3] space-y-3 flex flex-col justify-between shadow-sm hover:border-[#ec4899] transition-all duration-200">
                       <div className="space-y-1">
                         <div className="flex justify-between items-start gap-2">
                           <h4 className="text-xs font-extrabold text-[#1E1D1A] leading-tight">{hack.name}</h4>
-                          <span className="px-2 py-0.5 rounded-md bg-white border border-[#ECE9DF] text-[8px] font-bold text-[#7C786E] whitespace-nowrap">{hack.starts}</span>
+                          <span className="px-2 py-0.5 rounded-md bg-white border border-[#FCE7F3] text-[8px] font-bold text-[#7C786E] whitespace-nowrap">{hack.starts}</span>
                         </div>
                         <p className="text-[10px] text-[#7C786E] font-medium">Host: {hack.hosts}</p>
                       </div>
 
-                      <div className="flex justify-between items-center pt-2.5 border-t border-[#EFECE3]">
+                      <div className="flex justify-between items-center pt-2.5 border-t border-[#FDF2F8]">
                         <div>
                           <span className="block text-[8px] text-[#7C786E] uppercase font-bold tracking-wider">Reward</span>
                           <span className="text-xs font-black text-[#1E1D1A]">{hack.prize}</span>
                         </div>
-                        <button className="p-1.5 rounded-lg bg-[#2C2B27] hover:bg-[#1E1D1A] text-[#F5C451] transition-all shadow-sm cursor-pointer">
+                        <button className="p-1.5 rounded-lg bg-[#2C2B27] hover:bg-[#1E1D1A] text-[#ec4899] transition-all shadow-sm cursor-pointer">
                           <ExternalLink className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -542,9 +542,9 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="mt-4 pt-3.5 border-t border-[#EFECE3] flex items-center justify-between text-[11px] text-[#7C786E] font-semibold">
+              <div className="mt-4 pt-3.5 border-t border-[#FDF2F8] flex items-center justify-between text-[11px] text-[#7C786E] font-semibold">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#F5C451]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#ec4899]" />
                   Participate to secure direct interview pipelines with recruiters
                 </span>
               </div>
@@ -560,10 +560,10 @@ export default function Dashboard() {
 
                   {/* Progress track item 1 */}
                   <div className="space-y-4">
-                    <div className="p-3.5 rounded-2xl bg-[#FAF9F5] border border-[#ECE9DF] space-y-2.5 shadow-sm">
+                    <div className="p-3.5 rounded-2xl bg-[#FFF5F7] border border-[#FCE7F3] space-y-2.5 shadow-sm">
                       <div className="flex justify-between items-center gap-1">
                         <span className="text-xs font-bold text-[#1E1D1A] truncate">AWS Cloud Practitioner</span>
-                        <span className="text-[8px] font-bold text-[#7A6218] bg-[#FAF4D8] px-1.5 py-0.5 rounded border border-[#E8DFB3] whitespace-nowrap">Rec.</span>
+                        <span className="text-[8px] font-bold text-[#be185d] bg-[#FCE7F3] px-1.5 py-0.5 rounded border border-[#E8DFB3] whitespace-nowrap">Rec.</span>
                       </div>
                       <div className="w-full bg-[#E5E2D6] rounded-full h-1.5">
                         <div className="bg-[#2C2B27] h-1.5 rounded-full transition-all duration-500" style={{ width: "40%" }}></div>
@@ -572,10 +572,10 @@ export default function Dashboard() {
                     </div>
 
                     {/* Progress track item 2 */}
-                    <div className="p-3.5 rounded-2xl bg-[#FAF9F5] border border-[#ECE9DF] space-y-2.5 shadow-sm">
+                    <div className="p-3.5 rounded-2xl bg-[#FFF5F7] border border-[#FCE7F3] space-y-2.5 shadow-sm">
                       <div className="flex justify-between items-center gap-1">
                         <span className="text-xs font-bold text-[#1E1D1A] truncate">Google ML Engineer</span>
-                        <span className="text-[8px] font-bold text-[#7C786E] bg-[#FAF4D8] px-1.5 py-0.5 rounded border border-[#E8DFB3] whitespace-nowrap">Adv.</span>
+                        <span className="text-[8px] font-bold text-[#7C786E] bg-[#FCE7F3] px-1.5 py-0.5 rounded border border-[#E8DFB3] whitespace-nowrap">Adv.</span>
                       </div>
                       <div className="w-full bg-[#E5E2D6] rounded-full h-1.5">
                         <div className="bg-[#2C2B27] h-1.5 rounded-full transition-all duration-500" style={{ width: "0%" }}></div>
@@ -595,7 +595,7 @@ export default function Dashboard() {
         <div className="lg:col-span-4 space-y-6">
           
           {/* Profile Card (Lora Piterson style) */}
-          <div className="profile-card relative aspect-[4/3] rounded-[28px] overflow-hidden border border-[#ECE9DF] shadow-md group">
+          <div className="profile-card relative aspect-[4/3] rounded-[28px] overflow-hidden border border-[#FCE7F3] shadow-md group">
             {/* Background profile image */}
             <img 
               src="/profile_avatar.png" 
@@ -632,9 +632,9 @@ export default function Dashboard() {
               {expandedAccordion === "resume" && (
                 <div className="pt-1.5 animate-in fade-in duration-200">
                   {/* Laptop/Mac style device detail layout */}
-                  <div className="bg-[#FAF9F5] border border-[#ECE9DF] p-3.5 rounded-2xl flex items-center justify-between shadow-sm">
+                  <div className="bg-[#FFF5F7] border border-[#FCE7F3] p-3.5 rounded-2xl flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-white border border-[#ECE9DF] text-[#2C2B27]">
+                      <div className="p-2.5 rounded-xl bg-white border border-[#FCE7F3] text-[#2C2B27]">
                         <Laptop className="w-5 h-5" />
                       </div>
                       <div>
@@ -650,7 +650,7 @@ export default function Dashboard() {
               )}
             </div>
 
-            <hr className="border-[#EFECE3]" />
+            <hr className="border-[#FDF2F8]" />
 
             {/* Section 2: Compensation Targets */}
             <div className="space-y-3">
@@ -675,7 +675,7 @@ export default function Dashboard() {
               )}
             </div>
 
-            <hr className="border-[#EFECE3]" />
+            <hr className="border-[#FDF2F8]" />
 
             {/* Section 3: Verified Skill Badges */}
             <div className="space-y-3">
@@ -689,7 +689,7 @@ export default function Dashboard() {
               {expandedAccordion === "skills" && (
                 <div className="flex flex-wrap gap-1.5 pt-1.5 animate-in fade-in duration-200">
                   {["React/Next.js", "TypeScript", "Node.js", "Algorithms", "MongoDB"].map(skill => (
-                    <span key={skill} className="px-2.5 py-1 bg-[#FAF9F5] border border-[#ECE9DF] text-[10px] font-bold text-[#4E4B42] rounded-lg">
+                    <span key={skill} className="px-2.5 py-1 bg-[#FFF5F7] border border-[#FCE7F3] text-[10px] font-bold text-[#4E4B42] rounded-lg">
                       {skill}
                     </span>
                   ))}
@@ -697,7 +697,7 @@ export default function Dashboard() {
               )}
             </div>
 
-            <hr className="border-[#EFECE3]" />
+            <hr className="border-[#FDF2F8]" />
 
             {/* Section 4: Platform Integrations */}
             <div className="space-y-3">
@@ -736,9 +736,9 @@ export default function Dashboard() {
             </div>
 
             {/* Calibration Multi-segment progress bar */}
-            <div className="w-full bg-[#FAF9F5] border border-[#ECE9DF] h-8 rounded-xl flex overflow-hidden p-1 gap-1">
+            <div className="w-full bg-[#FFF5F7] border border-[#FCE7F3] h-8 rounded-xl flex overflow-hidden p-1 gap-1">
               <div 
-                className="bg-[#F5C451] rounded-lg flex items-center justify-center text-[9px] font-bold text-[#7A6218] transition-all hover:opacity-90" 
+                className="bg-[#ec4899] rounded-lg flex items-center justify-center text-[9px] font-bold text-[#be185d] transition-all hover:opacity-90" 
                 style={{ width: "40%" }}
                 title="DSA component calibration completed"
               >
@@ -784,7 +784,7 @@ export default function Dashboard() {
                     {/* Checkbox item */}
                     <div className={`mt-0.5 w-4.5 h-4.5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
                       item.done 
-                        ? "bg-[#F5C451] border-[#F5C451] text-[#1E1D1A]" 
+                        ? "bg-[#ec4899] border-[#ec4899] text-[#1E1D1A]" 
                         : "border-zinc-500 hover:border-white text-transparent"
                     }`}>
                       {item.done && <Check className="w-3 h-3 stroke-[3]" />}

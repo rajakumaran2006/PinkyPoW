@@ -80,7 +80,7 @@ export default function Onboarding() {
     { id: "ai_ml", label: "AI / Machine Learning", icon: Brain, color: "text-purple-400" },
     { id: "datascience", label: "Data Science", icon: Database, color: "text-emerald-400" },
     { id: "cybersecurity", label: "Cyber Security", icon: ShieldCheck, color: "text-red-400" },
-    { id: "cloud", label: "Cloud & DevOps", icon: Cpu, color: "text-amber-400" },
+    { id: "cloud", label: "Cloud & DevOps", icon: Cpu, color: "text-pink-400" },
     { id: "systems", label: "Systems Programming", icon: Terminal, color: "text-pink-400" },
   ];
 
@@ -322,7 +322,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-center items-center px-4 py-16 relative bg-[#0B0A09] text-zinc-100 min-h-screen w-full">
+    <div className="flex-1 flex flex-col justify-center items-center px-4 py-16 relative warm-dashboard-bg min-h-screen w-full text-[#1E1D1A]">
       {/* Dynamic background lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-pink-500/5 blur-[120px] pointer-events-none" />
 
@@ -344,7 +344,7 @@ export default function Onboarding() {
           </div>
 
           {/* Glassmorphic step container */}
-          <div className="bg-zinc-900/40 border border-zinc-800/60 backdrop-blur-md rounded-3xl p-6 md:p-8 relative overflow-hidden shadow-xl">
+          <div className="warm-card p-6 md:p-8 relative overflow-hidden shadow-xl">
             
             {error && (
               <div className="mb-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2 animate-in fade-in duration-300">

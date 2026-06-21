@@ -52,15 +52,15 @@ export default function Profile() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Card */}
-        <div className="warm-card rounded-3xl p-6 md:p-8 space-y-6 lg:col-span-1 bg-white border border-[#EFECE3] shadow-sm">
+        <div className="warm-card rounded-3xl p-6 md:p-8 space-y-6 lg:col-span-1 bg-white border border-[#FDF2F8] shadow-sm">
           <div className="flex flex-col items-center text-center">
             {/* Avatar */}
-            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#7A6218] to-[#2C2B27] flex items-center justify-center font-black text-white text-3xl shadow-lg shadow-[#7A6218]/10 mb-4">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#be185d] to-[#2C2B27] flex items-center justify-center font-black text-white text-3xl shadow-lg shadow-[#be185d]/10 mb-4">
               {profileInfo.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
             </div>
             
             <h2 className="text-xl font-extrabold text-[#1E1D1A] tracking-tight">{profileInfo.name}</h2>
-            <p className="text-xs text-[#7A6218] font-semibold mt-1">{profileInfo.role}</p>
+            <p className="text-xs text-[#be185d] font-semibold mt-1">{profileInfo.role}</p>
             <p className="text-[11px] text-[#7C786E] font-medium mt-1">{profileInfo.college} | {profileInfo.collegeLocation}</p>
             
             <div className="flex items-center gap-1.5 mt-3 text-xs text-[#7C786E]">
@@ -70,18 +70,18 @@ export default function Profile() {
           </div>
 
           {/* Quick Metrics */}
-          <div className="space-y-3 pt-6 border-t border-[#EFECE3]">
-            <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF]">
+          <div className="space-y-3 pt-6 border-t border-[#FDF2F8]">
+            <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#FFF5F7] border border-[#FCE7F3]">
               <span className="text-[#7C786E] font-bold uppercase tracking-wider">Placement Score</span>
               <span className="font-extrabold text-[#1E1D1A]">{profileInfo.score} / 1000</span>
             </div>
 
-            <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF]">
+            <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#FFF5F7] border border-[#FCE7F3]">
               <span className="text-[#7C786E] font-bold uppercase tracking-wider">DSA Solved</span>
               <span className="font-extrabold text-[#1E1D1A]">{profileInfo.solvedCount} problems</span>
             </div>
 
-            <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#FAF9F5] border border-[#ECE9DF]">
+            <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#FFF5F7] border border-[#FCE7F3]">
               <span className="text-[#7C786E] font-bold uppercase tracking-wider">Speech Tasks</span>
               <span className="font-extrabold text-[#1E1D1A]">{profileInfo.speechRecordings} complete</span>
             </div>
@@ -89,16 +89,16 @@ export default function Profile() {
         </div>
 
         {/* Linked Accounts */}
-        <div className="warm-card rounded-3xl p-6 md:p-8 space-y-6 lg:col-span-2 bg-white border border-[#EFECE3] shadow-sm">
-          <div className="flex justify-between items-center pb-4 border-b border-[#EFECE3]">
+        <div className="warm-card rounded-3xl p-6 md:p-8 space-y-6 lg:col-span-2 bg-white border border-[#FDF2F8] shadow-sm">
+          <div className="flex justify-between items-center pb-4 border-b border-[#FDF2F8]">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-[#FAF4D8] border border-[#E8DFB3] text-[#7A6218]">
+              <div className="p-1.5 rounded-lg bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d]">
                 <Target className="w-4 h-4" />
               </div>
               <h3 className="font-bold text-[#1E1D1A] tracking-tight">Linked Coder Profiles</h3>
             </div>
             
-            <button className="flex items-center gap-1.5 text-xs text-[#7A6218] font-bold bg-[#FAF4D8] border border-[#E8DFB3] px-2.5 py-1 rounded-xl cursor-pointer hover:bg-[#FAF2CD] transition-all shadow-sm">
+            <button className="flex items-center gap-1.5 text-xs text-[#be185d] font-bold bg-[#FCE7F3] border border-[#E8DFB3] px-2.5 py-1 rounded-xl cursor-pointer hover:bg-[#FAF2CD] transition-all shadow-sm">
               <RefreshCcw className="w-3.5 h-3.5" />
               <span>Resync All</span>
             </button>
@@ -106,9 +106,9 @@ export default function Profile() {
 
           <div className="space-y-4">
             {profileInfo.linkedAccounts.map((account, idx) => (
-              <div key={idx} className="p-4 rounded-2xl bg-[#FAF9F5] border border-[#ECE9DF] flex items-center justify-between gap-4 hover:border-[#F5C451] transition-all duration-300 shadow-sm">
+              <div key={idx} className="p-4 rounded-2xl bg-[#FFF5F7] border border-[#FCE7F3] flex items-center justify-between gap-4 hover:border-[#ec4899] transition-all duration-300 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white border border-[#ECE9DF] flex items-center justify-center font-bold text-[#1E1D1A] text-xs">
+                  <div className="w-10 h-10 rounded-xl bg-white border border-[#FCE7F3] flex items-center justify-center font-bold text-[#1E1D1A] text-xs">
                     {account.platform[0]}
                   </div>
                   <div>
