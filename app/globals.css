@@ -446,8 +446,8 @@ body {
 .warm-dashboard-bg .bg-black\/80 *,
 .warm-dashboard-bg div[style*="rgba(9,9,11"],
 .warm-dashboard-bg div[style*="rgba(9,9,11"] *,
-.warm-dashboard-bg .fixed.inset-0.bg-black\/70 *,
-.warm-dashboard-bg .fixed.inset-0.bg-black\/80 * {
+.warm-dashboard-bg .fixed.inset-0.bg-black\/70 *:not(.bg-\[\#FFF5F7\] *):not(.bg-white *),
+.warm-dashboard-bg .fixed.inset-0.bg-black\/80 *:not(.bg-\[\#FFF5F7\] *):not(.bg-white *) {
   color: #ffffff !important;
 }
 
@@ -503,10 +503,10 @@ body {
 
 
 /* Fix: Communication Coach glass-panel sections that contain dark waveform area */
-.warm-dashboard-bg .fixed.inset-0.bg-black\/70,
-.warm-dashboard-bg .fixed.inset-0.bg-black\/70 *,
-.warm-dashboard-bg .fixed.inset-0.bg-black\/80,
-.warm-dashboard-bg .fixed.inset-0.bg-black\/80 * {
+.warm-dashboard-bg .fixed.inset-0.bg-black\/70:not(.bg-\[\#FFF5F7\]):not(.bg-white),
+.warm-dashboard-bg .fixed.inset-0.bg-black\/70 *:not(.bg-\[\#FFF5F7\] *):not(.bg-white *),
+.warm-dashboard-bg .fixed.inset-0.bg-black\/80:not(.bg-\[\#FFF5F7\]):not(.bg-white),
+.warm-dashboard-bg .fixed.inset-0.bg-black\/80 *:not(.bg-\[\#FFF5F7\] *):not(.bg-white *) {
   color: #ffffff !important;
 }
 

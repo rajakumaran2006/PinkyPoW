@@ -41,14 +41,6 @@ export default function Profile() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto pb-12">
-      <div>
-        <h1 className="text-3xl font-extrabold text-[#1E1D1A] tracking-tight flex items-center gap-2">
-          Candidate Profile
-        </h1>
-        <p className="text-[#7C786E] text-sm mt-1">
-          Review your credentials, linked platform profiles, and cumulative placement readiness calibration.
-        </p>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Card */}
@@ -92,13 +84,11 @@ export default function Profile() {
         <div className="warm-card rounded-3xl p-6 md:p-8 space-y-6 lg:col-span-2 bg-white border border-[#FDF2F8] shadow-sm">
           <div className="flex justify-between items-center pb-4 border-b border-[#FDF2F8]">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d]">
-                <Target className="w-4 h-4" />
-              </div>
+  
               <h3 className="font-bold text-[#1E1D1A] tracking-tight">Linked Coder Profiles</h3>
             </div>
             
-            <button className="flex items-center gap-1.5 text-xs text-[#be185d] font-bold bg-[#FCE7F3] border border-[#E8DFB3] px-2.5 py-1 rounded-xl cursor-pointer hover:bg-[#FAF2CD] transition-all shadow-sm">
+            <button className="flex items-center gap-1.5 text-xs text-[#be185d] font-bold bg-white border border-[#E8DFB3] px-2.5 py-1 rounded-xl cursor-pointer hover:bg-[#FAF2CD] transition-all shadow-sm">
               <RefreshCcw className="w-3.5 h-3.5" />
               <span>Resync All</span>
             </button>
@@ -106,7 +96,7 @@ export default function Profile() {
 
           <div className="space-y-4">
             {profileInfo.linkedAccounts.map((account, idx) => (
-              <div key={idx} className="p-4 rounded-2xl bg-[#FFF5F7] border border-[#FCE7F3] flex items-center justify-between gap-4 hover:border-[#ec4899] transition-all duration-300 shadow-sm">
+              <div key={idx} className="p-4 rounded-2xl bg-white border border-[#FCE7F3] flex items-center justify-between gap-4 hover:border-[#ec4899] transition-all duration-300 shadow-sm">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-white border border-[#FCE7F3] flex items-center justify-center font-bold text-[#1E1D1A] text-xs">
                     {account.platform[0]}
@@ -118,7 +108,7 @@ export default function Profile() {
                 </div>
 
                 <div className="text-right">
-                  <span className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-250 text-emerald-700 font-bold text-[10px] uppercase flex items-center gap-1.5 shadow-sm">
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-500 border border-emerald-250 text-white font-bold text-[10px] uppercase flex items-center gap-1.5 shadow-sm">
                     <ShieldCheck className="w-3 h-3 text-emerald-650" />
                     {account.status}
                   </span>

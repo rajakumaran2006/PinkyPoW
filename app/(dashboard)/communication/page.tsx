@@ -410,7 +410,7 @@ export default function CommunicationCoach() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-4xl font-normal text-[#1E1D1A] tracking-tight">AI Communication Coach</h1>
-            <span className="px-3 py-1 rounded-full bg-[#FCE7F3] border border-[#E8DFB3] text-xs font-bold text-[#be185d] flex items-center gap-1 shrink-0">
+            <span className="px-3 py-1 rounded-full bg-white border border-[#E8DFB3] text-xs font-bold text-[#be185d] flex items-center gap-1 shrink-0">
               <Flame className="w-4 h-4 fill-[#ec4899] text-[#ec4899]" />
               Streak: Day {streakDays} of 30
             </span>

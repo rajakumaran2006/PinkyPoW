@@ -568,9 +568,6 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
       {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-[#FDF2F8] pb-8">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] text-xs font-semibold">
-            <FolderGit className="w-3.5 h-3.5" /> Resume Compiler
-          </div>
           <h1 className="text-4xl font-normal text-[#1E1D1A] tracking-tight">
             The Portfolio Engine
           </h1>
@@ -795,12 +792,8 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
 
             <div className="border-b border-[#FDF2F8] pb-3 flex items-center justify-between">
               <h3 className="text-sm font-bold text-[#1E1D1A] flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-[#ec4899]" />
                 AI Project Planner
               </h3>
-              <span className="px-2 py-0.5 rounded bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] text-[9px] font-bold uppercase">
-                Interactive
-              </span>
             </div>
 
             {/* STEP 1: PREFERENCES */}
@@ -1065,7 +1058,6 @@ ${activeCourse} \\hfill GPA: ${activeGPA}
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 text-pink-200" />
                     <span>Generate ATS-Friendly Resume</span>
                   </>
                 )}

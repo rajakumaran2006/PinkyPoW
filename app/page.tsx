@@ -204,13 +204,18 @@ export default function Home() {
   };
 
   return (
-    <main className="flex-1 flex flex-col justify-center items-center px-4 py-16 relative warm-dashboard-bg min-h-screen text-[#1E1D1A]">
+    <main className="flex-1 flex flex-col justify-center items-center px-4 py-16 relative warm-dashboard-bg min-h-screen text-[#1E1D1A] overflow-hidden">
+      {/* Premium ambient backdrop glows like the dashboard */}
+      <div className="absolute top-[-10%] left-[-10%] w-[350px] h-[350px] rounded-full bg-pink-500/10 blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[450px] h-[450px] rounded-full bg-purple-500/10 blur-[100px] pointer-events-none" />
+      <div className="absolute top-[30%] right-[10%] w-[300px] h-[300px] rounded-full bg-sky-500/5 blur-[90px] pointer-events-none" />
+
       {/* Main landing container */}
       <div className="max-w-xl w-full text-center space-y-8 animate-in zoom-in-95 duration-500 z-10">
         
         {/* Logo and Tag */}
         <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/40 border border-[#FCE7F3] text-[#4E4B42] text-xs font-bold tracking-wide uppercase">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/40 border border-gray-200 text-[#4E4B42] text-xs font-bold tracking-wide uppercase">
             <span>Next-Gen Placement Platform</span>
           </div>
 
@@ -246,7 +251,7 @@ export default function Home() {
               <Sparkles className="w-3.5 h-3.5 animate-spin" /> PinkyPow AI Calibrating
             </p>
 
-            <div className="w-full bg-[#FFF5F7] border border-[#FCE7F3] rounded-full h-2 mb-4 overflow-hidden relative">
+            <div className="w-full bg-gray-100 border border-gray-200 rounded-full h-2 mb-4 overflow-hidden relative">
               <div 
                 className="bg-[#2C2B27] h-full rounded-full transition-all duration-300"
                 style={{ width: `${analysisProgress}%` }}
@@ -258,7 +263,7 @@ export default function Home() {
               <span>{analysisProgress}% COMPLETED</span>
             </div>
 
-            <div className="p-4 rounded-xl bg-[#FFF5F7] border border-[#FCE7F3] min-h-[64px] flex items-center justify-center w-full">
+            <div className="p-4 rounded-xl bg-gray-100 border border-gray-200 min-h-[64px] flex items-center justify-center w-full">
               <p className="text-xs text-[#4E4B42] animate-pulse italic leading-relaxed">
                 {analysisStatus}
               </p>
@@ -281,7 +286,7 @@ export default function Home() {
                     placeholder="e.g. Najla1208"
                     value={loginForm.username}
                     onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })}
-                    className="w-full bg-[#FFF5F7] border border-[#FCE7F3] focus:border-[#2C2B27] focus:outline-none rounded-xl pl-11 pr-4 py-3 text-sm text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
+                    className="w-full bg-gray-100 border border-gray-200 focus:border-[#2C2B27] focus:outline-none rounded-xl pl-11 pr-4 py-3 text-sm text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
                   />
                 </div>
               </div>
@@ -296,7 +301,7 @@ export default function Home() {
                     placeholder="••••••••"
                     value={loginForm.password}
                     onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                    className="w-full bg-[#FFF5F7] border border-[#FCE7F3] focus:border-[#2C2B27] focus:outline-none rounded-xl pl-11 pr-11 py-3 text-sm text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
+                    className="w-full bg-gray-100 border border-gray-200 focus:border-[#2C2B27] focus:outline-none rounded-xl pl-11 pr-11 py-3 text-sm text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
                   />
                   <button
                     type="button"
@@ -318,7 +323,7 @@ export default function Home() {
               </button>
             </form>
 
-            <div className="mt-6 pt-5 border-t border-[#FDF2F8] text-center text-xs text-[#7C786E] font-medium">
+            <div className="mt-6 pt-5 border-t border-gray-200 text-center text-xs text-[#7C786E] font-medium">
               New to PinkyPow?{" "}
               <button 
                 onClick={() => { setMode("signup"); setSignUpStep(1); setError(""); }}
@@ -333,14 +338,14 @@ export default function Home() {
           <div className="warm-card p-6 md:p-8 text-left max-w-lg mx-auto relative">
             
             {/* Step Indicators */}
-            <div className="flex items-center justify-between mb-8 pb-5 border-b border-[#FDF2F8]">
+            <div className="flex items-center justify-between mb-8 pb-5 border-b border-gray-200">
               {[1, 2, 3, 4].map((s) => (
                 <div key={s} className="flex items-center flex-1 last:flex-none">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
                       signUpStep >= s
                         ? "bg-[#2C2B27] text-white shadow-sm"
-                        : "bg-[#FFF5F7] text-[#7C786E] border border-[#FCE7F3]"
+                        : "bg-gray-100 text-[#7C786E] border border-gray-200"
                     }`}
                   >
                     {signUpStep > s ? <Check className="w-3.5 h-3.5" /> : s}
@@ -348,7 +353,7 @@ export default function Home() {
                   {s < 4 && (
                     <div
                       className={`h-0.5 flex-1 mx-2.5 rounded-full transition-all duration-500 ${
-                        signUpStep > s ? "bg-[#2C2B27]" : "bg-[#FCE7F3]"
+                        signUpStep > s ? "bg-[#2C2B27]" : "bg-gray-200"
                       }`}
                     />
                   )}
@@ -377,7 +382,7 @@ export default function Home() {
                           placeholder="e.g. Najla"
                           value={signUpForm.name}
                           onChange={(e) => setSignUpForm({ ...signUpForm, name: e.target.value })}
-                          className="w-full bg-[#FFF5F7] border border-[#FCE7F3] focus:border-[#2C2B27] focus:outline-none rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
+                          className="w-full bg-gray-100 border border-gray-200 focus:border-[#2C2B27] focus:outline-none rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
                         />
                       </div>
                     </div>
@@ -392,7 +397,7 @@ export default function Home() {
                           placeholder="najla@example.com"
                           value={signUpForm.email}
                           onChange={(e) => setSignUpForm({ ...signUpForm, email: e.target.value })}
-                          className="w-full bg-[#FFF5F7] border border-[#FCE7F3] focus:border-[#2C2B27] focus:outline-none rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
+                          className="w-full bg-gray-100 border border-gray-200 focus:border-[#2C2B27] focus:outline-none rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
                         />
                       </div>
                     </div>
@@ -409,7 +414,7 @@ export default function Home() {
                           placeholder="e.g. Najla1208"
                           value={signUpForm.username}
                           onChange={(e) => setSignUpForm({ ...signUpForm, username: e.target.value })}
-                          className="w-full bg-[#FFF5F7] border border-[#FCE7F3] focus:border-[#2C2B27] focus:outline-none rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
+                          className="w-full bg-gray-100 border border-gray-200 focus:border-[#2C2B27] focus:outline-none rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
                         />
                       </div>
                     </div>
@@ -424,7 +429,7 @@ export default function Home() {
                           placeholder="••••••••"
                           value={signUpForm.password}
                           onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })}
-                          className="w-full bg-[#FFF5F7] border border-[#FCE7F3] focus:border-[#2C2B27] focus:outline-none rounded-xl pl-9 pr-9 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
+                          className="w-full bg-gray-100 border border-gray-200 focus:border-[#2C2B27] focus:outline-none rounded-xl pl-9 pr-9 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
                         />
                         <button
                           type="button"
@@ -445,7 +450,7 @@ export default function Home() {
                         placeholder="e.g. MIT"
                         value={signUpForm.college}
                         onChange={(e) => setSignUpForm({ ...signUpForm, college: e.target.value })}
-                        className="w-full bg-[#FFF5F7] border border-[#FCE7F3] focus:border-[#2C2B27] focus:outline-none rounded-xl px-3 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
+                        className="w-full bg-gray-100 border border-gray-200 focus:border-[#2C2B27] focus:outline-none rounded-xl px-3 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
                       />
                     </div>
                     <div>
@@ -455,7 +460,7 @@ export default function Home() {
                         placeholder="e.g. B.Tech CSE"
                         value={signUpForm.course}
                         onChange={(e) => setSignUpForm({ ...signUpForm, course: e.target.value })}
-                        className="w-full bg-[#FFF5F7] border border-[#FCE7F3] focus:border-[#2C2B27] focus:outline-none rounded-xl px-3 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
+                        className="w-full bg-gray-100 border border-gray-200 focus:border-[#2C2B27] focus:outline-none rounded-xl px-3 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
                       />
                     </div>
                     <div>
@@ -465,7 +470,7 @@ export default function Home() {
                         placeholder="e.g. 3rd Year"
                         value={signUpForm.yearOfStudy}
                         onChange={(e) => setSignUpForm({ ...signUpForm, yearOfStudy: e.target.value })}
-                        className="w-full bg-[#FFF5F7] border border-[#FCE7F3] focus:border-[#2C2B27] focus:outline-none rounded-xl px-3 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
+                        className="w-full bg-gray-100 border border-gray-200 focus:border-[#2C2B27] focus:outline-none rounded-xl px-3 py-2.5 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
                       />
                     </div>
                   </div>
@@ -493,8 +498,8 @@ export default function Home() {
                           onClick={() => handleTechToggle(option.id)}
                           className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-300 cursor-pointer ${
                             isSelected
-                              ? "bg-[#FCE7F3] border-[#E8DFB3] shadow-sm text-[#be185d] font-semibold"
-                              : "bg-[#FFF5F7] border-[#FCE7F3] text-[#7C786E] hover:bg-white hover:text-[#1E1D1A]"
+                              ? "bg-pink-50 border-pink-200 shadow-sm text-pink-700 font-semibold"
+                              : "bg-gray-100 border-gray-200 text-[#7C786E] hover:bg-white hover:text-[#1E1D1A]"
                           }`}
                         >
                           <Icon className={`w-4 h-4 ${option.color}`} />
@@ -532,7 +537,7 @@ export default function Home() {
                         max="10"
                         value={skillLevel}
                         onChange={(e) => setSkillLevel(Number(e.target.value))}
-                        className="w-full h-1.5 bg-[#FFF5F7] border border-[#FCE7F3] rounded-lg appearance-none cursor-pointer accent-[#2C2B27] outline-none"
+                        className="w-full h-1.5 bg-gray-100 border border-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2C2B27] outline-none"
                       />
                       <div className="flex justify-between text-[9px] text-[#7C786E] font-bold px-0.5 mt-1.5">
                         <span>Beginner</span>
@@ -541,7 +546,7 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-[#FFF5F7] border border-[#FCE7F3] text-center transition-all duration-300">
+                    <div className="p-3.5 rounded-xl bg-gray-100 border border-gray-200 text-center transition-all duration-300">
                       <p className="text-xs font-bold text-[#1E1D1A]">
                         {getSkillDescriptor(skillLevel)}
                       </p>
@@ -571,7 +576,7 @@ export default function Home() {
                         placeholder="e.g. rajakumaran_dev"
                         value={usernames.leetcode}
                         onChange={(e) => setUsernames({ ...usernames, leetcode: e.target.value })}
-                        className="w-full bg-[#FFF5F7] border border-[#FCE7F3] focus:border-[#2C2B27] focus:outline-none rounded-xl px-3 py-2 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
+                        className="w-full bg-gray-100 border border-gray-200 focus:border-[#2C2B27] focus:outline-none rounded-xl px-3 py-2 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
                       />
                     </div>
 
@@ -584,7 +589,7 @@ export default function Home() {
                         placeholder="e.g. rajakumaran2006"
                         value={usernames.codechef}
                         onChange={(e) => setUsernames({ ...usernames, codechef: e.target.value })}
-                        className="w-full bg-[#FFF5F7] border border-[#FCE7F3] focus:border-[#2C2B27] focus:outline-none rounded-xl px-3 py-2 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
+                        className="w-full bg-gray-100 border border-gray-200 focus:border-[#2C2B27] focus:outline-none rounded-xl px-3 py-2 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
                       />
                     </div>
 
@@ -597,7 +602,7 @@ export default function Home() {
                         placeholder="e.g. raja_poW"
                         value={usernames.hackerrank}
                         onChange={(e) => setUsernames({ ...usernames, hackerrank: e.target.value })}
-                        className="w-full bg-[#FFF5F7] border border-[#FCE7F3] focus:border-[#2C2B27] focus:outline-none rounded-xl px-3 py-2 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
+                        className="w-full bg-gray-100 border border-gray-200 focus:border-[#2C2B27] focus:outline-none rounded-xl px-3 py-2 text-xs text-[#1E1D1A] placeholder-[#7C786E] transition-colors"
                       />
                     </div>
                   </div>
@@ -605,11 +610,11 @@ export default function Home() {
               )}
 
               {/* Navigation buttons */}
-              <div className="flex gap-4 mt-6 pt-5 border-t border-[#FDF2F8]">
+              <div className="flex gap-4 mt-6 pt-5 border-t border-gray-200">
                 {signUpStep > 1 ? (
                   <button
                     onClick={handleSignUpBack}
-                    className="flex-1 py-2.5 px-4 rounded-xl border border-[#FCE7F3] bg-white text-[#1E1D1A] font-semibold hover:bg-[#FFF5F7] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer text-xs shadow-sm"
+                    className="flex-1 py-2.5 px-4 rounded-xl border border-gray-200 bg-white text-[#1E1D1A] font-semibold hover:bg-gray-100 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer text-xs shadow-sm"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
                     Back
@@ -617,7 +622,7 @@ export default function Home() {
                 ) : (
                   <button
                     onClick={() => { setMode("login"); setError(""); }}
-                    className="flex-1 py-2.5 px-4 rounded-xl border border-[#FCE7F3] bg-white text-[#1E1D1A] font-semibold hover:bg-[#FFF5F7] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer text-xs shadow-sm"
+                    className="flex-1 py-2.5 px-4 rounded-xl border border-gray-200 bg-white text-[#1E1D1A] font-semibold hover:bg-gray-100 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer text-xs shadow-sm"
                   >
                     Back to Login
                   </button>
@@ -628,7 +633,7 @@ export default function Home() {
                   disabled={signUpStep === 2 && techStack.length === 0}
                   className={`flex-1 py-2.5 px-4 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer text-xs ${
                     signUpStep === 2 && techStack.length === 0
-                      ? "bg-[#FFF5F7] text-zinc-400 cursor-not-allowed border border-[#FCE7F3]"
+                      ? "bg-gray-100 text-zinc-400 cursor-not-allowed border border-gray-200"
                       : "bg-[#2C2B27] hover:bg-[#1E1D1A] text-white shadow-sm active:scale-95"
                   }`}
                 >

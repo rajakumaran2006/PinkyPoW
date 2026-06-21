@@ -400,9 +400,6 @@ export default function Certifications() {
       {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-[#FDF2F8] pb-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] text-xs font-semibold">
-            <ShieldCheck className="w-3.5 h-3.5" /> Credentials & discovery
-          </div>
           <h1 className="text-4xl font-normal text-[#1E1D1A] tracking-tight flex items-center gap-3">
             <Award className="w-10 h-10 text-[#ec4899] shrink-0" />
             Verified Credentials
@@ -542,7 +539,6 @@ export default function Certifications() {
         <div className="warm-card p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-white">
           <div className="space-y-2">
             <h3 className="text-xl font-bold text-[#1E1D1A] tracking-tight flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[#ec4899]" />
               AI Discovery Engine
             </h3>
             <p className="text-xs text-[#7C786E] max-w-xl leading-relaxed">
