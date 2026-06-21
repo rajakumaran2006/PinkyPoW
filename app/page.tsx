@@ -220,7 +220,7 @@ export default function Home() {
           </div>
 
           <h1 className="text-4xl md:text-6xl font-black tracking-tight text-[#1E1D1A] leading-none">
-            Pinky<span className="bg-gradient-to-r from-[#be185d] via-[#6b21a8] to-[#0369a1] bg-clip-text text-transparent">Pow</span>
+            Pinky<span className="bg-pink-400 bg-clip-text text-transparent">Pow</span>
           </h1>
 
           <p className="text-[#7C786E] text-xs md:text-sm max-w-sm mx-auto leading-relaxed font-medium">
