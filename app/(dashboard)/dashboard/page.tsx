@@ -187,7 +187,7 @@ export default function Dashboard() {
             </div>
 
             {/* Comm Prep progress pill (yellow progress representation) */}
-            <div className="h-9 px-4 rounded-full flex items-center justify-between text-xs font-semibold relative overflow-hidden bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] w-[125px] cursor-default">
+            <div className="h-9 px-4 rounded-full flex items-center justify-between text-xs font-semibold relative overflow-hidden bg-gray-100 border border-[#E8DFB3] text-[#be185d] w-[125px] cursor-default">
               <div className="absolute left-0 top-0 bottom-0 bg-[#ec4899]" style={{ width: "15%" }} />
               <span className="relative z-10">Comm Prep</span>
               <span className="relative z-10 font-bold">15%</span>
@@ -511,7 +511,7 @@ export default function Dashboard() {
 
                     <h3 className="font-extrabold uppercase text-[#1E1D1A] tracking-tight">Placement-Linked Hackathons</h3>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] font-bold text-[10px] uppercase">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#d84196] border border-[#E8DFB3] text-white font-bold text-[10px] uppercase">
                     Hot Opportunities
                   </span>
                 </div>
@@ -519,7 +519,7 @@ export default function Dashboard() {
                 {/* Grid list of Hackathons */}
                 <div className="grid grid-cols-1 gap-4">
                   {hackathons.map((hack) => (
-                    <div key={hack.name} className="p-4 rounded-2xl bg-[#FFF5F7] border border-[#FCE7F3] space-y-3 flex flex-col justify-between shadow-sm hover:border-[#ec4899] transition-all duration-200">
+                    <div key={hack.name} className="p-4 rounded-2xl bg-gray-100 border border-[#FCE7F3] space-y-3 flex flex-col justify-between shadow-sm hover:border-[#ec4899] transition-all duration-200">
                       <div className="space-y-1">
                         <div className="flex justify-between items-start gap-2">
                           <h4 className="text-xs font-extrabold text-[#1E1D1A] leading-tight">{hack.name}</h4>
@@ -560,10 +560,9 @@ export default function Dashboard() {
 
                   {/* Progress track item 1 */}
                   <div className="space-y-4">
-                    <div className="p-3.5 rounded-2xl bg-[#FFF5F7] border border-[#FCE7F3] space-y-2.5 shadow-sm">
+                    <div className="p-3.5 rounded-2xl bg-gray-100 border border-[#FCE7F3] space-y-2.5 shadow-sm">
                       <div className="flex justify-between items-center gap-1">
                         <span className="text-xs font-bold text-[#1E1D1A] truncate">AWS Cloud Practitioner</span>
-                        <span className="text-[8px] font-bold text-[#be185d] bg-[#FCE7F3] px-1.5 py-0.5 rounded border border-[#E8DFB3] whitespace-nowrap">Rec.</span>
                       </div>
                       <div className="w-full bg-[#E5E2D6] rounded-full h-1.5">
                         <div className="bg-[#2C2B27] h-1.5 rounded-full transition-all duration-500" style={{ width: "40%" }}></div>
@@ -572,10 +571,9 @@ export default function Dashboard() {
                     </div>
 
                     {/* Progress track item 2 */}
-                    <div className="p-3.5 rounded-2xl bg-[#FFF5F7] border border-[#FCE7F3] space-y-2.5 shadow-sm">
+                    <div className="p-3.5 rounded-2xl bg-gray-100 border border-[#FCE7F3] space-y-2.5 shadow-sm">
                       <div className="flex justify-between items-center gap-1">
                         <span className="text-xs font-bold text-[#1E1D1A] truncate">Google ML Engineer</span>
-                        <span className="text-[8px] font-bold text-[#7C786E] bg-[#FCE7F3] px-1.5 py-0.5 rounded border border-[#E8DFB3] whitespace-nowrap">Adv.</span>
                       </div>
                       <div className="w-full bg-[#E5E2D6] rounded-full h-1.5">
                         <div className="bg-[#2C2B27] h-1.5 rounded-full transition-all duration-500" style={{ width: "0%" }}></div>

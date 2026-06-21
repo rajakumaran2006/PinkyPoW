@@ -282,10 +282,7 @@ body {
 .warm-dashboard-bg h3,
 .warm-dashboard-bg h4,
 .warm-dashboard-bg h5,
-.warm-dashboard-bg h6,
-.warm-dashboard-bg .text-white,
-.warm-dashboard-bg .text-zinc-50,
-.warm-dashboard-bg .text-zinc-100 {
+.warm-dashboard-bg h6 {
   color: #1e1b18 !important;
 }
 
