@@ -1,1 +1,1 @@
-// skills assessment comparison
+// glassmorphic cards and gradients
