@@ -213,9 +213,6 @@ export default function Dashboard() {
         <div className="grid grid-cols-3 md:flex md:items-center gap-3 sm:gap-6 md:gap-8 xl:gap-12 shrink-0 w-full md:w-auto">
           {/* Score Counter */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FFF5F7] border border-[#FDF2F8] flex items-center justify-center text-[#7C786E] shrink-0">
-              <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-[#ec4899]" />
-            </div>
             <div>
               <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-[#1E1D1A] tracking-tight">{score}</div>
               <div className="text-[8px] sm:text-[10px] uppercase font-bold tracking-wider text-[#7C786E] mt-0.5">Placement Score</div>
@@ -224,9 +221,6 @@ export default function Dashboard() {
 
           {/* Percentile Counter */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FFF5F7] border border-[#FDF2F8] flex items-center justify-center text-[#7C786E] shrink-0">
-              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-[#2C2B27]" />
-            </div>
             <div>
               <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-[#1E1D1A] tracking-tight">18%</div>
               <div className="text-[8px] sm:text-[10px] uppercase font-bold tracking-wider text-[#7C786E] mt-0.5">Percentile Rank</div>
@@ -235,9 +229,6 @@ export default function Dashboard() {
 
           {/* Active Streak Counter */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FCE7F3] border border-[#E8DFB3] flex items-center justify-center text-[#be185d] shrink-0">
-              <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 fill-orange-500 animate-pulse" />
-            </div>
             <div>
               <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-[#1E1D1A] tracking-tight">12</div>
               <div className="text-[8px] sm:text-[10px] uppercase font-bold tracking-wider text-[#7C786E] mt-0.5">Active Streak</div>
@@ -596,7 +587,7 @@ export default function Dashboard() {
           <div className="profile-card relative aspect-[4/3] rounded-[28px] overflow-hidden border border-[#FCE7F3] shadow-md group">
             {/* Background profile image */}
             <img 
-              src="/profile_avatar.png" 
+              src="/profileAvatar.png" 
               alt="Raja Kumaran" 
               className="absolute inset-0 w-full h-full object-cover grayscale-[10%] group-hover:scale-105 transition-transform duration-500" 
             />
@@ -604,7 +595,7 @@ export default function Dashboard() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
             
             {/* Floating glass pill ($1200 badge style) */}
-            <div className="absolute bottom-5 right-5 px-3.5 py-1.5 rounded-full border border-white/20 bg-white/10 text-white text-xs font-semibold backdrop-blur-md shadow-sm">
+            <div className="absolute bottom-5 right-5 px-3.5 py-1.5 rounded-full border border-white/20 bg-[#e] text-white text-xs font-semibold backdrop-blur-md shadow-sm">
               Score: {score}
             </div>
 

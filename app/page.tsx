@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { 
   Sparkles, 
   Brain, 
@@ -214,14 +215,21 @@ export default function Home() {
       <div className="max-w-xl w-full text-center space-y-8 animate-in zoom-in-95 duration-500 z-10">
         
         {/* Logo and Tag */}
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/40 border border-gray-200 text-[#4E4B42] text-xs font-bold tracking-wide uppercase">
-            <span>Next-Gen Placement Platform</span>
+        <div className="flex flex-col items-center space-y-3">
+          <div className="flex items-center justify-center gap-3 md:gap-4">
+            <div className="relative w-12 h-12 md:w-16 md:h-16 flex-shrink-0 transition-transform duration-300 hover:scale-105">
+              <Image 
+                src="/logoWhite.png" 
+                alt="PinkyPow Logo" 
+                fill
+                priority
+                className="object-contain"
+              />
+            </div>
+            <h1 className="text-4xl md:text-6xl font-black tracking-tight text-[#1E1D1A] leading-none">
+              Pinky<span className="bg-pink-400 bg-clip-text text-transparent">Pow</span>
+            </h1>
           </div>
-
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-[#1E1D1A] leading-none">
-            Pinky<span className="bg-pink-400 bg-clip-text text-transparent">Pow</span>
-          </h1>
 
           <p className="text-[#7C786E] text-xs md:text-sm max-w-sm mx-auto leading-relaxed font-medium">
             Calibrate your technical skills, master DSA problem patterns, track speech clarity, and fast-track your placement preparation.

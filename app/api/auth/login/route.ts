@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import { User } from '@/models/User';
 import { DSA } from '@/models/DSA';
 import { Portfolio } from '@/models/Portfolio';
+import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
   try {
@@ -11,9 +12,16 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { username, password } = body;
     
-    if (!username || !password) {
+    if (typeof username !== 'string' || typeof password !== 'string') {
       return NextResponse.json(
-        { error: 'Username and password are required' },
+        { error: 'Invalid input types. Credentials must be strings.' },
+        { status: 400 }
+      );
+    }
+
+    if (!username.trim() || !password.trim()) {
+      return NextResponse.json(
+        { error: 'Username and password cannot be empty.' },
         { status: 400 }
       );
     }
@@ -30,12 +38,15 @@ export async function POST(req: Request) {
       let user = await User.findOne({ username: targetUsername });
       
       if (!user) {
+        // Hash password for default seeded accounts
+        const hashedDefaultPassword = await bcrypt.hash(targetUsername, 10);
+        
         // Auto-seed this default account
         user = await User.create({
           name: targetName,
           email: targetEmail,
           username: targetUsername,
-          password: targetUsername,
+          password: hashedDefaultPassword,
           clerkId: targetUsername, // for compatibility with old dashboard query fields
           techStack: ['fullstack', 'systems'],
           placementScore: 820,
@@ -95,7 +106,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Custom User Login flow
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username: username.trim() });
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -103,8 +114,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Compare passwords (plain text check as requested by user)
-    if (user.password !== password) {
+    // Compare passwords: check hashed password match OR legacy plaintext fallback
+    const dbPassword = user.password || '';
+    const isPasswordMatch = (user.password ? await bcrypt.compare(password, user.password) : false) || dbPassword === password;
+    if (!isPasswordMatch) {
       return NextResponse.json(
         { error: 'Incorrect password' },
         { status: 401 }

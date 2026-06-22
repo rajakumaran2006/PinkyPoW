@@ -651,7 +651,7 @@ export default function InternshipRadar() {
     }
     setIsAiFiltering(true);
     try {
-      const res = await fetch("/api/ai/filter-internships", {
+      const res = await fetch("/api/ai/filterInternships", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { User } from "@/models/User";
 import { DSA } from "@/models/DSA";
-import { generateJSON } from "@/lib/ai-service";
+import { generateJSON } from "@/lib/aiService";
 import fs from "fs/promises";
 import path from "path";
 
@@ -65,6 +65,13 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { action, clerkId } = body;
+
+    if (clerkId && typeof clerkId !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
+    if (action && typeof action !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
     
     await connectDB();
     const user = await getOrCreateUser(clerkId);

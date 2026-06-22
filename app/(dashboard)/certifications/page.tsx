@@ -332,7 +332,7 @@ export default function Certifications() {
     }
     setIsAiFiltering(true);
     try {
-      const res = await fetch("/api/ai/filter-certifications", {
+      const res = await fetch("/api/ai/filterCertifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

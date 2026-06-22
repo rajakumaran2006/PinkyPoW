@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { User } from "@/models/User";
 import { Portfolio } from "@/models/Portfolio";
-import { generateJSON } from "@/lib/ai-service";
+import { generateJSON } from "@/lib/aiService";
 
 // Helper to get or create user and portfolio
 async function getOrCreatePortfolio(clerkIdParam?: string | null) {
@@ -79,6 +79,14 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { action, clerkId } = body;
+
+    if (clerkId && typeof clerkId !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
+    if (action && typeof action !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
+    
     const { portfolio, user } = await getOrCreatePortfolio(clerkId);
 
     if (action === "scan") {
@@ -201,6 +209,13 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const { clerkId, certId, title, issuer, date, link, category, cloudinaryImageUrl } = body;
     
+    if (clerkId && typeof clerkId !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
+    if (certId && typeof certId !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
+
     if (!certId) {
       return NextResponse.json({ error: "Certification ID is required" }, { status: 400 });
     }

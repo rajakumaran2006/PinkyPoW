@@ -74,6 +74,19 @@ export async function POST(req: Request) {
 
     const userIdentifier = username || clerkId;
 
+    if (username && typeof username !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
+    if (clerkId && typeof clerkId !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
+    if (company && typeof company !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
+    if (role && typeof role !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
+
     if (!userIdentifier || !company || !role) {
       return NextResponse.json(
         { error: 'User identifier, company, and role are required' },
@@ -126,6 +139,10 @@ export async function PUT(req: Request) {
     await connectDB();
     const body = await req.json();
     const { id, ...updateFields } = body;
+
+    if (id && typeof id !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
 
     if (!id) {
       return NextResponse.json(

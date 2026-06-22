@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import { User } from '@/models/User';
 import { DSA } from '@/models/DSA';
 import { Portfolio } from '@/models/Portfolio';
+import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
   try {
@@ -29,15 +30,27 @@ export async function POST(req: Request) {
       fullStackBuiltApps
     } = body;
     
-    if (!username || !password || !email || !name) {
+    if (
+      typeof name !== 'string' ||
+      typeof email !== 'string' ||
+      typeof username !== 'string' ||
+      typeof password !== 'string'
+    ) {
       return NextResponse.json(
-        { error: 'Missing required fields (name, email, username, password)' },
+        { error: 'Invalid input types. Required fields must be strings.' },
+        { status: 400 }
+      );
+    }
+
+    if (!username.trim() || !password.trim() || !email.trim() || !name.trim()) {
+      return NextResponse.json(
+        { error: 'Required fields cannot be empty.' },
         { status: 400 }
       );
     }
 
     // Check if username already exists
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ username: username.trim() });
     if (existingUser) {
       return NextResponse.json(
         { error: 'Username already exists' },
@@ -46,7 +59,7 @@ export async function POST(req: Request) {
     }
 
     // Check if email already exists
-    const existingEmail = await User.findOne({ email });
+    const existingEmail = await User.findOne({ email: email.trim() });
     if (existingEmail) {
       return NextResponse.json(
         { error: 'Email already exists' },
@@ -57,13 +70,16 @@ export async function POST(req: Request) {
     // Calculate placement score out of 1000 from skillLevel (1-10)
     const scoreVal = skillLevel ? Math.min(Math.max(skillLevel * 82, 100), 1000) : 400;
 
+    // Hash user password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // Create new User
     const user = await User.create({
-      name,
-      email,
-      username,
-      password, // plaintext check as requested
-      clerkId: username, // For frontend query compatibility
+      name: name.trim(),
+      email: email.trim(),
+      username: username.trim(),
+      password: hashedPassword,
+      clerkId: username.trim(), // For frontend query compatibility
       techStack: techStack || [],
       placementScore: scoreVal,
       platformUsernames: platformUsernames || { leetcode: '', hackerrank: '', codechef: '' },

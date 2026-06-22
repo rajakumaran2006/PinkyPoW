@@ -112,7 +112,7 @@ export default function Sidebar({ placementScore = 820 }: SidebarProps) {
           className="sidebar-brand-cell"
         >
           <div style={{ width: 32, height: 32, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Image src="/logo-white.png" alt="PinkyPow" width={32} height={32} style={{ objectFit: "contain" }} />
+            <Image src="/logoWhite.png" alt="PinkyPow" width={32} height={32} style={{ objectFit: "contain" }} />
           </div>
           <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2, overflow: "hidden" }}>
             <span style={{ fontWeight: 700, fontSize: 14, color: "#09090b", whiteSpace: "nowrap" }}>PinkyPow</span>
@@ -148,7 +148,7 @@ export default function Sidebar({ placementScore = 820 }: SidebarProps) {
               <Menu size={20} />
             </button>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Image src="/logo-white.png" alt="PinkyPow" width={22} height={22} style={{ objectFit: "contain" }} />
+              <Image src="/logoWhite.png" alt="PinkyPow" width={22} height={22} style={{ objectFit: "contain" }} />
               <span style={{ fontWeight: 700, fontSize: 14, color: "#09090b" }}>PinkyPow</span>
             </div>
           </div>
@@ -221,7 +221,7 @@ export default function Sidebar({ placementScore = 820 }: SidebarProps) {
         {/* Drawer top bar */}
         <div style={{ height: HEADER_H, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 16px", borderBottom: "1px solid #e4e4e7", flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Image src="/logo-white.png" alt="PinkyPow" width={26} height={26} style={{ objectFit: "contain" }} />
+            <Image src="/logoWhite.png" alt="PinkyPow" width={26} height={26} style={{ objectFit: "contain" }} />
             <span style={{ fontWeight: 700, fontSize: 14, color: "#09090b" }}>PinkyPow</span>
           </div>
           <button onClick={() => setDrawer(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#a1a1aa", padding: 6 }}>
@@ -358,13 +358,18 @@ function NavContent({
         {items.length === 0 && (
           <span style={{ fontSize: 11, color: "#a1a1aa", fontStyle: "italic", padding: "8px 12px" }}>No items found</span>
         )}
+      </nav>
 
-        {/* Logout Button */}
+      {/* Score footer */}
+      <div style={{ marginTop: "auto", paddingTop: 12, borderTop: "1px solid rgba(228,228,231,0.6)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 4px 0" }}>
+        <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <span style={{ fontSize: 8, textTransform: "uppercase", letterSpacing: "0.14em", color: "#a1a1aa", fontWeight: 700 }}>Learner</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#27272a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</span>
+        </div>
+              {/* Logout Button */}
         <button 
           onClick={onLogout}
           style={{
-            display: "flex",
-            alignItems: "center",
             gap: 10,
             padding: "8px 12px",
             borderRadius: 8,
@@ -374,27 +379,15 @@ function NavContent({
             fontSize: 13,
             color: "#ef4444",
             marginTop: "auto",
-            width: "100%",
-            textAlign: "left",
             transition: "background 0.15s"
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)"; }}
+          onMouseEnter={e => { e.currentTarget.style.background = "bg-gray-700"; }}
           onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
         >
-          <LogOut size={15} style={{ flexShrink: 0, color: "#ef4444" }} />
-          <span style={{ fontWeight: 500 }}>Sign Out</span>
+            <LogOut size={15} style={{ flexShrink: 0, color: "#ef4444" }} />
         </button>
-      </nav>
 
-      {/* Score footer */}
-      <div style={{ marginTop: "auto", paddingTop: 12, borderTop: "1px solid rgba(228,228,231,0.6)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 4px 0" }}>
-        <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-          <span style={{ fontSize: 8, textTransform: "uppercase", letterSpacing: "0.14em", color: "#a1a1aa", fontWeight: 700 }}>Placement Score</span>
-          <span style={{ fontSize: 12, fontWeight: 600, color: "#27272a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</span>
-        </div>
-        <span style={{ background: "#fffbeb", color: "#b45309", fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 8, border: "1px solid rgba(180,130,0,0.2)", flexShrink: 0 }}>
-          {score}
-        </span>
+
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { User } from "@/models/User";
 import { Portfolio } from "@/models/Portfolio";
-import { generateJSON } from "@/lib/ai-service";
+import { generateJSON } from "@/lib/aiService";
 
 // Helper to get or create portfolio
 async function getOrCreatePortfolio(clerkIdParam?: string | null) {
@@ -96,6 +96,14 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { action, clerkId } = body;
+
+    if (clerkId && typeof clerkId !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
+    if (action && typeof action !== 'string') {
+      return NextResponse.json({ error: 'Invalid parameter types' }, { status: 400 });
+    }
+    
     const { portfolio } = await getOrCreatePortfolio(clerkId);
 
     if (action === "ask-followup") {

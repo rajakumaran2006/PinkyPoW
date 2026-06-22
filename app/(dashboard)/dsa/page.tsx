@@ -10,6 +10,7 @@ import {
   Lock,
   Unlock,
   Play,
+  Pause,
   Check,
   X,
   Award,
@@ -23,7 +24,10 @@ import {
   Bot,
   Send,
   User as UserIcon,
-  ArrowLeft
+  ArrowLeft,
+  Search,
+  Layers,
+  Volume2
 } from "lucide-react";
 
 interface Problem {
@@ -143,6 +147,51 @@ export default function DynamicCodingEngine() {
   const [editorCode, setEditorCode] = useState("");
   const [testOutput, setTestOutput] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Audio Player Widget Simulation States
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [audioTime, setAudioTime] = useState(0);
+
+  // Practice Stopwatch/Countdown Timer States (2 hours = 7200 seconds)
+  const [practiceTimerSec, setPracticeTimerSec] = useState(7200);
+  const [isTimerActive, setIsTimerActive] = useState(false);
+
+  // Cheatsheet stack state
+  const [expandedCheatCard, setExpandedCheatCard] = useState<string | null>(null);
+
+  // Concept Search query state
+  const [conceptSearchQuery, setConceptSearchQuery] = useState("");
+
+  // Audio timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isAudioPlaying) {
+      interval = setInterval(() => {
+        setAudioTime((prev) => {
+          if (prev >= 19) {
+            setIsAudioPlaying(false);
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isAudioPlaying]);
+
+  // Practice countdown timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isTimerActive && practiceTimerSec > 0) {
+      interval = setInterval(() => {
+        setPracticeTimerSec((prev) => prev - 1);
+      }, 1000);
+    } else if (practiceTimerSec === 0) {
+      setIsTimerActive(false);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerActive, practiceTimerSec]);
+
 
   const topicOptions = [
     "Arrays",
@@ -952,286 +1001,558 @@ export default function DynamicCodingEngine() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 relative text-[#1E1D1A] max-w-[1360px] mx-auto pb-12">
       
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-2 border-b border-[#FDF2F8]">
+      {/* Page Header (Styled like the May 2025 calendar view header) */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 pb-4 border-b border-[#E5E2D6]/60">
         <div>
-          <h1 className="text-4xl font-normal text-[#1E1D1A] tracking-tight">
-            Dynamic Coding Engine
+          <span className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider block">
+            June 2026
+          </span>
+          <h1 className="text-3xl font-black text-[#1E1D1A] tracking-tighter mt-1 flex items-center gap-2">
+            <span className="uppercase">Dynamic Coding Engine</span>
+            <span className="text-sm text-justify font-semibold px-2 py-0.5 rounded-full bg-white border uppercase border-[#FCE7F3] text-[#be185d] tracking-widest">
+              {planData.level}
+            </span>
           </h1>
-          <p className="text-[#7C786E] text-sm mt-2 max-w-xl">
-            Prepare with a custom AI roadmap tailored to your target focus areas and difficulty level.
-          </p>
         </div>
 
-        {/* Streak & Score Widget */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FCE7F3] border border-[#E8DFB3] text-[#be185d] font-bold text-xs">
-            <Flame className="w-4 h-4 text-[#ec4899] fill-current" />
+        {/* Calendar stats & Pill style actions */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E8DFB3] text-[#be185d] font-bold text-[11px] shadow-sm">
+            <Flame className="w-3.5 h-3.5 text-[#ec4899] fill-current" />
             <span>Streak: {dailyStreak} Days</span>
           </div>
 
-          <div className="px-3.5 py-1.5 rounded-xl bg-white border border-[#FCE7F3] font-bold text-xs text-[#1E1D1A] shadow-sm">
+          <div className="px-3.5 py-1.5 rounded-full bg-white border border-[#FCE7F3] font-bold text-[11px] text-[#1E1D1A] shadow-sm">
             Points: <span className="text-[#be185d]">{streakPoints}</span>
           </div>
 
           <button
             onClick={handleResetPlan}
-            className="p-2 rounded-xl bg-white border border-[#FCE7F3] hover:bg-[#FFF5F7] text-[#7C786E] hover:text-[#1E1D1A] transition-all cursor-pointer shadow-sm"
+            className="px-4 py-1.5 rounded-full bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-extrabold text-[11px] flex items-center gap-1 shadow-sm transition-all cursor-pointer"
             title="Reset Plan"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3 h-3 text-[#ec4899] stroke-[3]" />
+            <span>Reset Path</span>
           </button>
         </div>
       </div>
 
+      {/* Bento Grid Layout (Timeline + Widgets Panels) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Left Column: Plan Timeline / Schedule (4 cols) */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="warm-card p-6 bg-white space-y-5">
-            <div>
-              <h3 className="text-xs font-bold text-[#7C786E] uppercase tracking-widest">
-                Plan Overview
-              </h3>
-              <div className="mt-3 space-y-2 text-xs font-semibold text-[#1E1D1A]">
-                <div className="flex justify-between py-1.5 border-b border-[#FFF5F7]">
-                  <span className="text-[#7C786E]">Intensity Level</span>
-                  <span>{planData.level}</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-[#FFF5F7]">
-                  <span className="text-[#7C786E]">Roadmap Duration</span>
-                  <span>{planData.totalDays} Days</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-[#FFF5F7]">
-                  <span className="text-[#7C786E]">Target Pace</span>
-                  <span>{planData.problemsPerDay} Problems / Day</span>
-                </div>
-              </div>
-            </div>
+        {/* Left/Center Panel: Main Timeline Days View (col-span-8) */}
+        <div className="lg:col-span-8 space-y-8">
+          {planData.planRoadmap?.map((dayItem: any) => {
+            const isCompleted = dayItem.day < planData.currentDayIndex;
+            const isActive = dayItem.day === planData.currentDayIndex;
+            const isLocked = dayItem.day > planData.currentDayIndex;
 
-            <div>
-              <h3 className="text-xs font-bold text-[#7C786E] uppercase tracking-widest mb-3">
-                Syllabus Roadmap
-              </h3>
-              
-              {/* Timeline Track */}
-              <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
-                {planData.planRoadmap?.map((dayItem: any) => {
-                  const isCompleted = dayItem.day < planData.currentDayIndex;
-                  const isActive = dayItem.day === planData.currentDayIndex;
-                  const isLocked = dayItem.day > planData.currentDayIndex;
+            return (
+              <div 
+                key={dayItem.day} 
+                className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 md:gap-6 border-b border-[#E5E2D6]/30 pb-8 last:border-0 last:pb-0"
+              >
+                {/* Left Column: Big Date/Day display */}
+                <div className="flex md:flex-col items-baseline md:items-start gap-2 pt-1">
+                  <span className={`text-6xl md:text-7xl font-black tracking-tighter leading-none ${
+                    isActive ? "text-[#be185d]" : "text-[#2C2B27]/85"
+                  }`}>
+                    {dayItem.day < 10 ? `0${dayItem.day}` : dayItem.day}
+                  </span>
+                  <span className={`text-[10px] font-extrabold uppercase tracking-widest block md:mt-1 ${
+                    isActive ? "text-[#be185d]" : "text-[#7C786E]"
+                  }`}>
+                    {isActive ? "Active" : isCompleted ? "Solved ✓" : "Locked"}
+                  </span>
+                </div>
 
-                  return (
-                    <div
-                      key={dayItem.day}
-                      className={`p-3.5 rounded-2xl border transition-all flex items-start gap-3 ${
-                        isActive
-                          ? "bg-[#FCE7F3] border-[#E8DFB3] shadow-sm"
-                          : isCompleted
-                          ? "bg-[#FFF5F7] border-[#FCE7F3] opacity-75"
-                          : "bg-[#FFF5F7]/40 border-[#FCE7F3] opacity-50"
-                      }`}
-                    >
-                      <div className="shrink-0 mt-0.5">
-                        {isCompleted ? (
-                          <div className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center">
-                            <Check className="w-3.5 h-3.5 stroke-[3]" />
-                          </div>
-                        ) : isActive ? (
-                          <div className="w-5 h-5 rounded-full bg-[#2C2B27] text-white flex items-center justify-center text-[10px] font-bold animate-pulse">
-                            {dayItem.day}
-                          </div>
-                        ) : (
-                          <div className="w-5 h-5 rounded-full bg-zinc-200 text-zinc-500 flex items-center justify-center">
-                            <Lock className="w-3 h-3" />
-                          </div>
-                        )}
+                {/* Right Column: Cards representing syllabus items / challenges */}
+                <div className="space-y-4">
+                  {isActive ? (
+                    /* Dotted border wrapper mimicking the active slot in reference mockup */
+                    <div className="border-2 border-dashed border-[#FCE7F3] rounded-[28px] p-5 md:p-6 bg-white/45 relative space-y-4">
+                      {/* Red bar highlighting active day */}
+                      <div className="absolute top-0 left-0 h-[3px] bg-[#be185d] rounded-full" />
+
+                      {/* Header containing topic summary */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#FDF2F8]">
+                        <div>
+                          <span className="text-[9px] text-[#7C786E] font-bold uppercase tracking-widest block">
+                            Active  • Day {dayItem.day}
+                          </span>
+                          <h2 className="text-xl font-bold text-[#1E1D1A] tracking-tight mt-0.5">
+                            {dayItem.topic}
+                          </h2>
+                          <p className="text-xs text-[#7C786E] leading-relaxed mt-1 max-w-xl">
+                            {dayItem.description}
+                          </p>
+                        </div>
+                        <div className="px-3.5 py-1 uppercase rounded-xl bg-white border border-[#FCE7F3] font-bold text-xs text-[#be185d] self-start sm:self-auto shadow-sm">
+                          Target: {planData.problemsPerDay} Solves
+                        </div>
                       </div>
 
-                      <div className="min-w-0">
-                        <h4 className={`text-xs font-bold leading-tight ${isActive ? "text-[#be185d]" : "text-[#1E1D1A]"}`}>
-                          Day {dayItem.day}: {dayItem.topic}
-                        </h4>
-                        <p className="text-[10px] text-[#7C786E] leading-normal mt-0.5 line-clamp-1">
-                          {dayItem.description}
-                        </p>
-                      </div>
+                      {/* Problem lists for active day */}
+                      {generatingProblems ? (
+                        <div className="py-8 flex flex-col items-center justify-center space-y-3 text-center">
+                          <Loader2 className="w-8 h-8 text-[#be185d] animate-spin" />
+                          <div>
+                            <p className="text-xs font-bold text-[#1E1D1A]">AI Coach Customizing Problems...</p>
+                            <p className="text-[10px] text-[#7C786E] mt-1">Reviewing completed history to select unique tasks.</p>
+                          </div>
+                        </div>
+                      ) : currentProblems.length === 0 ? (
+                        /* State: problems not generated yet */
+                        <div className="p-6 border-2 border-dashed border-[#FCE7F3] rounded-2xl text-center space-y-4 bg-[#FFF5F7]/30">
+                          <div className="w-10 h-10 rounded-xl bg-[#FCE7F3] border border-[#E8DFB3] flex items-center justify-center text-[#be185d] mx-auto">
+                            <BookOpen className="w-5 h-5" />
+                          </div>
+                          <div className="space-y-1">
+                            <h4 className="font-bold text-xs text-[#1E1D1A]">Syllabus challenges are ready to initialize</h4>
+                            <p className="text-[10px] text-[#7C786E] max-w-xs mx-auto leading-relaxed">
+                              Select from active LeetCode, GeeksforGeeks, or CodeChef matching links.
+                            </p>
+                          </div>
+                          <button
+                            onClick={handleGenerateTodayProblems}
+                            className="py-2 px-5 rounded-full bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-bold text-xs transition-all shadow-sm cursor-pointer inline-flex items-center gap-1.5"
+                          >
+                            <Play className="w-3.5 h-3.5 fill-current" />
+                            <span>Load Today's Problems</span>
+                          </button>
+                        </div>
+                      ) : (
+                        /* State: problems generated and listed */
+                        <div className="space-y-3">
+                          {currentProblems.map((problem) => (
+                            <div
+                              key={problem.id}
+                              className={`p-4 rounded-[20px] border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white ${
+                                problem.completed
+                                  ? "border-[#FCE7F3] bg-[#FFF5F7]/20 opacity-75"
+                                  : "border-[#FCE7F3] hover:border-[#be185d] hover:shadow-sm"
+                              }`}
+                            >
+                              <div className="flex items-start gap-3.5 min-w-0">
+                                {/* Interactive Checkbox */}
+                                <div
+                                  className="shrink-0 mt-1 cursor-pointer select-none"
+                                  onClick={() => handleToggleProblemCheckbox(problem.id, !problem.completed)}
+                                  title={problem.completed ? "Mark incomplete" : "Mark completed"}
+                                >
+                                  {problem.completed ? (
+                                    <div className="w-5 h-5 rounded-md bg-emerald-600 border border-emerald-700 text-white flex items-center justify-center shadow-sm hover:scale-105 transition-all">
+                                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                    </div>
+                                  ) : (
+                                    <div className="w-5 h-5 rounded-md border border-[#FCE7F3] bg-white hover:border-[#be185d] flex items-center justify-center" />
+                                  )}
+                                </div>
+
+                                <div className="min-w-0 space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    {/* Small indicator bar */}
+                                    <div className={`w-1 h-3.5 rounded-full ${
+                                      problem.difficulty === "Easy" ? "bg-emerald-500" :
+                                      problem.difficulty === "Medium" ? "bg-[#be185d]" : "bg-red-500"
+                                    }`} />
+                                    <h4 className={`text-xs md:text-sm font-extrabold tracking-tight ${
+                                      problem.completed ? "text-[#7C786E] line-through" : "text-[#1E1D1A]"
+                                    }`}>
+                                      {problem.title}
+                                    </h4>
+                                  </div>
+                                  <p className="text-[10px] md:text-[11px] text-[#7C786E] leading-relaxed line-clamp-1 pl-3">
+                                    {problem.description}
+                                  </p>
+                                  
+                                  <div className="flex items-center gap-2.5 pt-0.5 pl-3 text-[9px] font-bold text-[#7C786E]">
+                                    <span className="uppercase tracking-wider">{problem.category}</span>
+                                    <span>•</span>
+                                    <a
+                                      href={problem.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-[#be185d] hover:underline uppercase flex items-center gap-0.5"
+                                    >
+                                      <span>{problem.platform} Link</span>
+                                      <ExternalLink className="w-2.5 h-2.5" />
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Difficulty tag & Solve actions */}
+                              <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                                <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide border ${
+                                  problem.difficulty === "Easy"
+                                    ? "text-emerald-700 bg-white border-black"
+                                    : problem.difficulty === "Medium"
+                                    ? "text-[#be185d] bg-[#FCE7F3] border-[#E8DFB3]"
+                                    : "text-red-700 bg-red-50 border-red-200"
+                                }`}>
+                                  {problem.difficulty}
+                                </span>
+
+                                <button
+                                  onClick={() => handleOpenSolveModal(problem)}
+                                  disabled={problem.completed}
+                                  className={`py-1.5 px-3.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm ${
+                                    problem.completed
+                                      ? "bg-zinc-100 text-zinc-400 border border-transparent cursor-not-allowed"
+                                      : "bg-[#2C2B27] text-white hover:bg-[#1E1D1A]"
+                                  }`}
+                                >
+                                  <Play className="w-2.5 h-2.5 fill-current shrink-0" />
+                                  <span>{problem.completed ? "Solved" : "Solve"}</span>
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Day Completed & Advance Day button */}
+                      {allCompletedToday && (
+                        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in zoom-in-95 mt-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                              <Award className="w-4.5 h-4.5" />
+                            </div>
+                            <div>
+                              <h4 className="text-xs font-bold text-emerald-800">Day {dayItem.day} Completed!</h4>
+                              <p className="text-[9px] text-emerald-600 leading-normal mt-0.5">
+                                You solved all daily targets. Unlock tomorrow's syllabus area.
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={handleAdvanceDay}
+                            className="py-1.5 px-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all cursor-pointer shadow-sm flex items-center gap-1"
+                          >
+                            <span>Unlock Next Day</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
+                  ) : isCompleted ? (
+                    /* Completed Day details card (compact) */
+                    <div className="p-4 rounded-[20px] border border-[#FCE7F3] bg-[#FFF5F7]/30 flex items-center justify-between gap-4 opacity-80 shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-emerald-600/10 border border-emerald-500/20 text-emerald-700 flex items-center justify-center shrink-0">
+                          <Check className="w-4 h-4 stroke-[3]" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-[#7C786E] leading-none">
+                            Day {dayItem.day}: {dayItem.topic}
+                          </h4>
+                          <p className="text-[10px] text-[#7C786E]/80 mt-1 line-clamp-1">
+                            {dayItem.description}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-bold uppercase text-[#7C786E] tracking-wider px-2 py-0.5 rounded-md bg-white border border-[#FCE7F3]">
+                        Completed
+                      </span>
+                    </div>
+                  ) : (
+                    /* Locked Day details card (Empty meeting calendar look) */
+                    <div className="p-5 rounded-[24px] border border-[#FCE7F3] bg-[#FFF5F7]/10 flex flex-col justify-center items-center text-center space-y-2 opacity-60">
+                      <div className="w-8 h-8 rounded-full bg-zinc-200/50 flex items-center justify-center text-zinc-500">
+                        <Lock className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <h4 className="text-xs font-bold text-[#1E1D1A]">Day {dayItem.day}: {dayItem.topic}</h4>
+                        <p className="text-[10px] text-[#7C786E] leading-normal">{dayItem.description}</p>
+                      </div>
+                      <span className="text-[9px] font-bold text-[#7C786E] uppercase tracking-wide">
+                        Locked until previous days are solved
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
 
-        {/* Right Column: Today's Focus Arena (8 cols) */}
-        <div className="lg:col-span-8 space-y-6">
-          <div className="warm-card p-6 bg-white space-y-6">
-            
-            {/* Header info */}
-            <div className="border-b border-[#FDF2F8] pb-4 flex justify-between items-start gap-4">
-              <div className="space-y-1">
-                <span className="text-[10px] text-[#7C786E] font-bold uppercase tracking-wider">
-                  Active Challenge • Day {planData.currentDayIndex} of {planData.totalDays}
-                </span>
-                <h2 className="text-xl font-bold text-[#1E1D1A] tracking-tight">
-                  {activeDayPlan?.topic || "Focus Area"}
-                </h2>
-                <p className="text-xs text-[#7C786E] leading-relaxed max-w-xl">
-                  {activeDayPlan?.description || "Master the scheduled data structures and patterns for today."}
-                </p>
+        {/* Right Panel: AI Assistant & Widgets Column (col-span-4) */}
+        <div className="lg:col-span-4 space-y-6">
+          
+          {/* Widget 1: Ai Sumari (AI Summary with Soundwaves) */}
+          <div className="warm-card p-6 bg-white space-y-4">
+            <div className="flex items-center justify-between pb-1 border-b border-[#FDF2F8]">
+              <div>
+                <h3 className="text-xs font-bold text-[#7C786E] uppercase tracking-widest">
+                  Ai Sumarry
+                </h3>
+                <span className="text-[9px] text-[#be185d] font-semibold">Active Coach Guidance</span>
               </div>
-
-              <div className="px-3.5 py-1.5 rounded-xl bg-[#FFF5F7] border border-[#FCE7F3] font-bold text-xs text-[#7C786E]">
-                Target: {planData.problemsPerDay} Solves
+              <div className="w-7 h-7 rounded-full bg-[#FCE7F3] border border-[#E8DFB3] flex items-center justify-center text-[#be185d]">
+                <Bot className="w-4 h-4" />
               </div>
             </div>
 
-            {/* Content states */}
-            {generatingProblems ? (
-              <div className="py-12 flex flex-col items-center justify-center space-y-4 text-center">
-                <Loader2 className="w-8 h-8 text-[#2C2B27] animate-spin" />
-                <div>
-                  <p className="text-xs font-bold text-[#1E1D1A]">AI Coach Customizing Problems...</p>
-                  <p className="text-[10px] text-[#7C786E] mt-1">Reviewing completed history to select unique tasks.</p>
+            {/* Simulated sound waves visual */}
+            <div className="flex items-center justify-between bg-gray-100 p-3 rounded-2xl border border-[#FCE7F3]">
+              <button
+                onClick={() => setIsAudioPlaying(!isAudioPlaying)}
+                className="w-8 h-8 rounded-full bg-[#2C2B27] hover:bg-[#1E1D1A] text-white flex items-center justify-center shadow-sm shrink-0 transition-all cursor-pointer"
+              >
+                {isAudioPlaying ? (
+                  <Pause className="w-3.5 h-3.5 text-[#ec4899] fill-current" />
+                ) : (
+                  <Play className="w-3.5 h-3.5 text-[#ec4899] fill-current ml-0.5" />
+                )}
+              </button>
+
+              {/* Waves animated when active */}
+              <div className="flex-1 flex items-center justify-center gap-0.5 px-4 h-6">
+                {[...Array(14)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-0.5 rounded-full transition-all duration-300 ${
+                      isAudioPlaying ? "bg-[#be185d] animate-wave-bar" : "bg-[#7C786E]/40"
+                    }`}
+                    style={{
+                      height: isAudioPlaying 
+                        ? `${Math.floor(Math.random() * 16) + 4}px` 
+                        : "4px",
+                      animationDelay: `${i * 0.06}s`,
+                      animationDuration: "0.8s"
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Time display */}
+              <span className="text-[10px] font-mono font-bold text-[#7C786E] w-[26px]">
+                {audioTime < 10 ? `0:${audioTime}` : `0:${audioTime}`}
+              </span>
+            </div>
+
+            {/* Dialogue bubble */}
+            <div className="bg-[#FAF9F6] border border-[#FCE7F3]/70 p-4 rounded-2xl relative shadow-inner">
+              <p className="text-[11px] text-[#1E1D1A] leading-relaxed italic">
+                {generatingProblems 
+                  ? "Calibrating targets... Keep your focus high, placement prep is a marathon, not a sprint!"
+                  : currentProblems.length === 0 
+                  ? "Click 'Load Problems' to fetch today's syllabus tasks. We are targeting " + (activeDayPlan?.topic || "your custom schedule") + "!"
+                  : allCompletedToday 
+                  ? "Magnificent progress! You cleared all challenges for Day " + planData.currentDayIndex + ". Unlock the next day to keep the streak hot."
+                  : "Great! Today is Day " + planData.currentDayIndex + " of your " + planData.totalDays + "-day sprint. We are practicing " + (activeDayPlan?.topic || "DSA") + ". Solve the problem targets to gain Points!"
+                }
+              </p>
+              <div className="absolute -top-1.5 left-6 w-3 h-3 bg-[#FAF9F6] border-t border-l border-[#FCE7F3]/70 rotate-45" />
+            </div>
+          </div>
+
+          {/* Widget 2: Practice Stopwatch Timer */}
+          <div className="warm-card p-6 bg-white space-y-4">
+            <div className="flex justify-between items-center pb-1 border-b border-[#FDF2F8]">
+              <div>
+                <h3 className="text-xs font-bold text-[#7C786E] uppercase tracking-widest">
+                  Practice Clock
+                </h3>
+                <span className="text-[9px] text-[#be185d] font-semibold">Daily Prep Target</span>
+              </div>
+              <Clock className="w-4.5 h-4.5 text-[#7C786E]" />
+            </div>
+
+            {/* Circular stopwatch layout */}
+            <div className="flex items-center justify-center gap-6 py-2">
+              <div className="relative w-24 h-24 flex items-center justify-center">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="40"
+                    className="stroke-[#FFF5F7]"
+                    strokeWidth="5"
+                    fill="transparent"
+                  />
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="40"
+                    className="stroke-[#be185d] transition-all duration-1000 ease-out"
+                    strokeWidth="5"
+                    fill="transparent"
+                    strokeDasharray="251.3"
+                    strokeDashoffset={251.3 - (251.3 * (practiceTimerSec / 7200))}
+                    strokeLinecap="round"
+                  />
+                </svg>
+
+                <div className="absolute flex flex-col items-center justify-center">
+                  <span className="text-[11px] font-black text-[#1E1D1A] tracking-tight">
+                    {Math.floor(practiceTimerSec / 3600) < 10 ? `0${Math.floor(practiceTimerSec / 3600)}` : Math.floor(practiceTimerSec / 3600)}:
+                    {Math.floor((practiceTimerSec % 3600) / 60) < 10 ? `0${Math.floor((practiceTimerSec % 3600) / 60)}` : Math.floor((practiceTimerSec % 3600) / 60)}:
+                    {practiceTimerSec % 60 < 10 ? `0${practiceTimerSec % 60}` : practiceTimerSec % 60}
+                  </span>
+                  <span className="text-[8px] uppercase font-bold text-[#7C786E] tracking-wider -mt-0.5">Focus</span>
                 </div>
               </div>
-            ) : currentProblems.length === 0 ? (
-              /* State A: Problems not generated yet */
-              <div className="p-8 border-2 border-dashed border-[#FCE7F3] rounded-3xl text-center space-y-5 bg-[#FFF5F7]/50">
-                <div className="w-12 h-12 rounded-2xl bg-[#FCE7F3] border border-[#E8DFB3] flex items-center justify-center text-[#be185d] mx-auto">
-                  <BookOpen className="w-6 h-6" />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="font-bold text-sm text-[#1E1D1A]">Problems are ready to calibrate</h4>
-                  <p className="text-xs text-[#7C786E] max-w-sm mx-auto leading-relaxed">
-                    Our AI scans databases to locate appropriate target tasks with active LeetCode, GeeksforGeeks, or CodeChef matching links.
-                  </p>
-                </div>
+
+              {/* Controls */}
+              <div className="flex flex-col gap-2">
                 <button
-                  onClick={handleGenerateTodayProblems}
-                  className="py-2.5 px-6 rounded-xl bg-[#2C2B27] hover:bg-[#1E1D1A] text-white font-bold text-xs transition-all shadow-sm cursor-pointer inline-flex items-center gap-2"
+                  onClick={() => setIsTimerActive(!isTimerActive)}
+                  className="w-9 h-9 rounded-full bg-[#2C2B27] hover:bg-[#1E1D1A] text-white flex items-center justify-center shadow-sm cursor-pointer transition-colors"
                 >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  Give Today's Problems
+                  {isTimerActive ? (
+                    <Pause className="w-4 h-4 text-[#ec4899]" />
+                  ) : (
+                    <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsTimerActive(false);
+                    setPracticeTimerSec(7200);
+                  }}
+                  className="w-9 h-9 rounded-full bg-[#FFF5F7] border border-[#FCE7F3] hover:bg-white text-[#2C2B27] flex items-center justify-center shadow-sm cursor-pointer"
+                  title="Reset Timer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
                 </button>
               </div>
-            ) : (
-              /* State B: Problems list */
-              <div className="space-y-4">
-                <div className="space-y-3.5">
-                  {currentProblems.map((problem) => (
-                    <div
-                      key={problem.id}
-                      className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                        problem.completed
-                          ? "bg-[#FFF5F7] border-[#FCE7F3] opacity-75"
-                          : "bg-[#FFF5F7] border border-[#FCE7F3] hover:border-[#ec4899] hover:bg-white shadow-sm"
-                      }`}
-                    >
-                      <div className="flex items-start gap-3.5 min-w-0">
-                        {/* Interactive Checkbox */}
-                        <div
-                          className="shrink-0 mt-1 cursor-pointer select-none"
-                          onClick={() => handleToggleProblemCheckbox(problem.id, !problem.completed)}
-                          title={problem.completed ? "Mark incomplete" : "Mark completed"}
-                        >
-                          {problem.completed ? (
-                            <div className="w-5 h-5 rounded-md bg-emerald-600 border border-emerald-700 text-white flex items-center justify-center shadow-sm hover:scale-105 transition-all">
-                              <Check className="w-3.5 h-3.5 stroke-[3]" />
-                            </div>
-                          ) : (
-                            <div className="w-5 h-5 rounded-md border border-[#FCE7F3] bg-white hover:border-[#be185d] flex items-center justify-center text-transparent hover:text-[#7C786E]/40 transition-colors">
-                              <Check className="w-3 h-3 stroke-[2]" />
-                            </div>
-                          )}
-                        </div>
+            </div>
 
-                        <div className="min-w-0 space-y-1">
-                          <h4 className={`text-sm font-bold tracking-tight ${problem.completed ? "text-[#7C786E] line-through" : "text-[#1E1D1A]"}`}>
-                            {problem.title}
-                          </h4>
-                          <p className="text-[11px] text-[#7C786E] leading-relaxed line-clamp-2">
-                            {problem.description}
-                          </p>
-                          
-                          <div className="flex items-center gap-3 pt-1">
-                            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">
-                              {problem.category}
-                            </span>
-                            <span className="text-zinc-300">•</span>
-                            <a
-                              href={problem.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[9px] text-[#be185d] hover:underline font-bold uppercase flex items-center gap-1"
-                            >
-                              <span>{problem.platform} Link</span>
-                              <ExternalLink className="w-2.5 h-2.5" />
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Difficulty, Points, Solve CTAs */}
-                      <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                        <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide border ${
-                          problem.difficulty === "Easy"
-                            ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-                            : problem.difficulty === "Medium"
-                            ? "text-[#be185d] bg-[#FCE7F3] border-[#E8DFB3]"
-                            : "text-red-700 bg-red-50 border-red-200"
-                        }`}>
-                          {problem.difficulty}
-                        </span>
-
-                        <button
-                          onClick={() => handleOpenSolveModal(problem)}
-                          disabled={problem.completed}
-                          className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shadow-sm ${
-                            problem.completed
-                              ? "bg-zinc-100 text-zinc-400 border border-transparent cursor-not-allowed"
-                              : "bg-[#2C2B27] text-white hover:bg-[#1E1D1A]"
-                          }`}
-                        >
-                          <Play className="w-3.5 h-3.5 fill-current shrink-0" />
-                          <span>{problem.completed ? "Solved" : "Solve"}</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Day Completed & Advance trigger */}
-                {allCompletedToday && (
-                  <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in zoom-in-95">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center">
-                        <Award className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-emerald-800">Day {planData.currentDayIndex} Completed!</h4>
-                        <p className="text-[10px] text-emerald-600 leading-relaxed mt-0.5">
-                          You solved all scheduled challenges. Advance to unlock tomorrow's focus.
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={handleAdvanceDay}
-                      className="py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all cursor-pointer shadow-sm flex items-center gap-1"
-                    >
-                      <span>Unlock Next Day</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
+            {/* Yellow card block mimicking meeting reminder in mockup */}
+            <div className="p-3.5 rounded-2xl bg-[#FEF08A] border border-[#FEF08A] shadow-sm text-zinc-900 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-white/60 flex items-center justify-center text-amber-700">
+                <Award className="w-4 h-4" />
               </div>
-            )}
+              <div>
+                <h4 className="text-xs font-black text-amber-900 leading-tight">Daily Target Session</h4>
+                <p className="text-[9px] font-semibold text-amber-800 mt-0.5">Solve problems within 2 hours to earn +150 Points.</p>
+              </div>
+            </div>
           </div>
+
+          {/* Widget 3: Cheatsheet Deck (stacked cards) */}
+          <div className="warm-card p-6 bg-white space-y-4">
+            <div className="flex items-center justify-between pb-1 border-b border-[#FDF2F8]">
+              <div>
+                <h3 className="text-xs font-bold text-[#7C786E] uppercase tracking-widest">
+                  Docs & Cheatsheets
+                </h3>
+                <span className="text-[9px] text-[#be185d] font-semibold">Quick Concept Reference</span>
+              </div>
+              <Layers className="w-4.5 h-4.5 text-[#7C786E]" />
+            </div>
+
+            {/* Overlay card deck */}
+            <div className="relative h-44 mt-2">
+              {[
+                {
+                  id: "arrays",
+                  title: "Arrays Cheat Sheet",
+                  bg: "bg-[#FFF5F7] border-[#FCE7F3]",
+                  text: "text-[#be185d]",
+                  content: "Search: O(N)\nAccess: O(1)\nInsert/Delete: O(N)\nCommon patterns: Two Pointers, Sliding Window."
+                },
+                {
+                  id: "recursion",
+                  title: "Recursion & Trees",
+                  bg: "bg-white border-[#FCE7F3]",
+                  text: "text-[#1E1D1A]",
+                  content: "Base Case verification is crucial.\nPreorder: Root -> L -> R\nInorder: L -> Root -> R\nPostorder: L -> R -> Root"
+                },
+                {
+                  id: "complexity",
+                  title: "Complexity Matrix",
+                  bg: "bg-[#2C2B27] border-[#1E1D1A] text-white",
+                  text: "text-emerald-400",
+                  content: "N <= 10^5: O(N) or O(N log N) expected.\nN <= 100: O(N^3) accepted.\nN <= 20: O(2^N) backtracking."
+                }
+              ].map((card, index) => {
+                const isExpanded = expandedCheatCard === card.id;
+                const offset = index * 10;
+                return (
+                  <div
+                    key={card.id}
+                    onClick={() => setExpandedCheatCard(isExpanded ? null : card.id)}
+                    className={`absolute left-0 right-0 p-4 border rounded-2xl cursor-pointer transition-all duration-300 shadow-sm ${
+                      card.bg
+                    }`}
+                    style={{
+                      top: isExpanded ? "-15px" : `${offset}px`,
+                      zIndex: isExpanded ? 30 : index + 10,
+                      transform: isExpanded ? "scale(1.02)" : "scale(1)",
+                    }}
+                  >
+                    <div className="flex justify-between items-center pb-1.5 border-b border-dashed border-[#FCE7F3]/40">
+                      <span className="text-xs font-black truncate">{card.title}</span>
+                      <span className={`text-[8px] font-bold uppercase tracking-wider ${card.text}`}>
+                        {isExpanded ? "Collapse" : "Click to Read"}
+                      </span>
+                    </div>
+                    {isExpanded ? (
+                      <p className="text-[10px] leading-relaxed mt-2 whitespace-pre-line font-mono font-semibold">
+                        {card.content}
+                      </p>
+                    ) : (
+                      <p className="text-[10px] leading-relaxed mt-2 line-clamp-2 opacity-60">
+                        {card.content}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Widget 4: Concept Search / Patterns */}
+          <div className="warm-card p-6 bg-white space-y-4">
+            <div className="flex items-center justify-between pb-1 border-b border-[#FDF2F8]">
+              <div>
+                <h3 className="text-xs font-bold text-[#7C786E] uppercase tracking-widest">
+                  Search Patterns
+                </h3>
+                <span className="text-[9px] text-[#be185d] font-semibold">Explore DSA Recipes</span>
+              </div>
+              <Search className="w-4.5 h-4.5 text-[#7C786E]" />
+            </div>
+
+            {/* Input */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search dp, sliding window..."
+                value={conceptSearchQuery}
+                onChange={(e) => setConceptSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-[#FCE7F3] text-xs focus:outline-none focus:border-[#be185d] bg-[#FFF5F7]/30 text-zinc-900"
+              />
+              <Search className="w-3.5 h-3.5 text-[#7C786E] absolute left-2.5 top-2.5" />
+            </div>
+
+            {/* Filtered Concept Results */}
+            <div className="space-y-2 max-h-[140px] overflow-y-auto pr-1">
+              {[
+                { name: "Sliding Window", desc: "For contiguous subarrays/substrings. Time: O(N)." },
+                { name: "Two Pointers", desc: "For sorted arrays. Meets in the middle or slow/fast. Time: O(N)." },
+                { name: "Binary Search", desc: "For sorted bounds / search space. Time: O(log N)." },
+                { name: "Dynamic Programming", desc: "Subproblem optimal structure + overlap memoization." },
+                { name: "Backtracking", desc: "DFS search space exploration. Time: Exponential O(2^N)." }
+              ]
+                .filter(c => c.name.toLowerCase().includes(conceptSearchQuery.toLowerCase()) || c.desc.toLowerCase().includes(conceptSearchQuery.toLowerCase()))
+                .map((concept, index) => (
+                  <div key={index} className="p-2.5 rounded-xl bg-[#FFF5F7]/40 border border-[#FCE7F3] space-y-0.5 hover:bg-white transition-colors text-xs">
+                    <span className="font-extrabold text-[#be185d] block text-[11px]">{concept.name}</span>
+                    <span className="text-[10px] text-[#7C786E] leading-normal block">{concept.desc}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+
         </div>
 
       </div>
+
 
       {/* Simulated Code Workspace Modal */}
       {activeSolveProblem && (

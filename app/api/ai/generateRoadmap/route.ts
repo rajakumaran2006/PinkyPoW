@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateJSON } from "@/lib/ai-service";
+import { generateJSON } from "@/lib/aiService";
 
 export async function POST(req: Request) {
   try {

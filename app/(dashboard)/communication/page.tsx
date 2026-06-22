@@ -262,7 +262,7 @@ export default function CommunicationCoach() {
     const fluencyMetrics = calculateFluencyMetrics(finalTranscript);
 
     try {
-      const response = await fetch("/api/ai/evaluate-speech", {
+      const response = await fetch("/api/ai/evaluateSpeech", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -330,7 +330,7 @@ export default function CommunicationCoach() {
     const fluencyMetrics = calculateFluencyMetrics(finalTranscript);
 
     try {
-      const response = await fetch("/api/ai/evaluate-speech", {
+      const response = await fetch("/api/ai/evaluateSpeech", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

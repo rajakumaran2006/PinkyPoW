@@ -625,7 +625,7 @@ export default function HackathonRadar() {
     }
     setIsAiFiltering(true);
     try {
-      const res = await fetch("/api/ai/filter-hackathons", {
+      const res = await fetch("/api/ai/filterHackathons", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
