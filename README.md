@@ -2,6 +2,8 @@
 
 PinkyPoW is a serverless, stateful placement acceleration platform designed for developers. It combines multi-model AI routing, real-time voice fluency diagnostics, and structured DSA coding sandboxes with dynamic database integration.
 
+Demo Link:pinky-pow.vercel.app
+
 ---
 
 ## Technical Architecture
